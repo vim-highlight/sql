@@ -12,55 +12,78 @@ endif
 runtime! syntax/html.vim
 unlet b:current_syntax
 
-" Initialize options {{{1
+" Initialize options {{{
 function! s:DefineOption (name, value)
-	if exists('g:php_'.a:name)
+	if exists('b:php_'.a:name)
+		return b:{'php_'.a:name}
+	elseif exists('g:php_'.a:name)
 		return g:{'php_'.a:name}
 	else
 		return a:value
 	endif
 endfunction
 
-	" Fold {{{2
+	" Fold {{{
 let s:fold_root     = s:DefineOption('fold_root', 0)
 let s:fold_comments = s:DefineOption('fold_comments', 1)
+	" }}}
 
-" }}}1
+" }}}
 
 delfunction s:DefineOption
 
 syntax case ignore
 
-" ROOT: <?php ... ?> {{{1
+" ROOT: <?php ... ?> {{{
 if s:fold_root
 	syntax region phpRoot fold contains=@phpClRoot,phpError matchgroup=phpBounds keepend extend start=/<?\(php\)\?/ end=/?>/
 else
 	syntax region phpRoot      contains=@phpClRoot,phpError matchgroup=phpBounds keepend extend start=/<?\(php\)\?/ end=/?>/
 endif
-" }}}1
+" }}}
 
-" COMMENTS:	// ou /* ... */ {{{1
+" COMMENTS:	// ou /* ... */ {{{
 syntax match phpCommentOne contained extend #//.*#
 
 if s:fold_comments
-	syntax region phpCommentMulti fold contained containedin=ALL keepend extend start=#/*# end=#*/#
+	syntax region phpCommentMulti fold contained containedin=ALL keepend extend start=#/\*# end=#\*/#
 else
-	syntax region phpCommentMulti      contained containedin=ALL keepend extend start=#/*# end=#*/#
+	syntax region phpCommentMulti      contained containedin=ALL keepend extend start=#/\*# end=#\*/#
 endif
-" }}}1
 
-" NAMESPACE: namespace foo\bar {{{1
-	" Definition {{{2
-syntax keyword phpStructure contained nextgroup=phpNamespaceName,phpError skipwhite skipempty namespace
+syntax cluster phpClComment contains=phpCommentOne,phpCommentMulti
+syntax cluster phpClRoot add=@phpClComment
+" }}}
 
-syntax match phpNamespaceName contained nextgroup=phpEndInstruction,phpError skipwhite skipempty /\(\\\|\h\w*\)*\h\w*/
-" }}}1
+" NAMESPACE: namespace foo\bar {{{
+	" Definition {{{
+syntax keyword phpStructure contained nextgroup=phpNamespaceName skipwhite skipempty namespace
+syntax match phpNamespaceName contained nextgroup=phpSemicolon skipwhite skipempty /\(\\\|\h\w*\)*\h\w*/
 
-" ENDS: {{{1
-	" END OF INSTRUCTION: {{{2
-syntax match phpEndInstruction contained nextgroup=@phpClComments skipwhite /;/
+syntax cluster phpClRoot add=phpStructure,phpNamespaceName
+	" }}}
+" }}}
 
-	" ERROR: {{{2
-syntax match phpError contained /.+/
-" }}}1
+" ENDS: {{{
+	" END OF INSTRUCTION: {{{
+syntax match phpSemicolon contained nextgroup=@phpClComments skipwhite /;/
+	" }}}
+	" ERROR: {{{
+syntax match phpError contained /.\+$/
+	" }}}
+" }}}
+
+
+" COLORS {{{
+highlight link phpBounds		Debug
+highlight link phpError			Error
+highlight link phpSemicolon		Operator
+
+highlight link phpCommentOne	phpComment
+highlight link phpCommentMulti	phpComment
+highlight link phpComment		Comment
+
+highlight link phpStructure		Structure
+highlight link phpNamespaceName	Normal
+" }}}
 
