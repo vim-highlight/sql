@@ -41,7 +41,7 @@ foreach($extensions as $extension)
 		$group = 'phpExtension'.$type.'_'.$name;
 		$groups[$type][] = $group;
 
-		$vim_end .= 'syntax keyword '.$group.' contained '.implode(' ', array_keys($elements))."\n";
+		$vim_end .= 'syntax keyword '.$group.' contained '.implode(' ', array_keys($elements))."\n".'highlight link '.$group.' phpExtension'.$type."\n\n";
 	}
 
 	unset($reflex);

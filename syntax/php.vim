@@ -1,9 +1,9 @@
 " Vim syntax file for PHP
-" Language:	PHP 4 / 5
+" Language:		PHP 4 / 5
 " Maintainer:	Julien Rosset <jul.rosset@gmail.com>
 "
-" URL:
-" Version:	0.0.1
+" URL:			https://github.com/darkelfe/vim-php
+" Version:		0.0.1
 
 if version < 600 || exists("b:current_syntax")
 	finish
@@ -32,7 +32,9 @@ let s:fold_comments = s:DefineOption('fold_comments', 1)
 
 delfunction s:DefineOption
 
-syntax case ignore
+syntax case match
+
+runtime! syntax/php_contents.vim
 
 " ROOT: <?php ... ?> {{{
 if s:fold_root
@@ -43,16 +45,15 @@ endif
 " }}}
 
 " COMMENTS:	// ou /* ... */ {{{
-syntax match phpCommentOne contained extend #//.*#
+syntax match phpComment contained extend #//.*#
 
 if s:fold_comments
-	syntax region phpCommentMulti fold contained containedin=ALL keepend extend start=#/\*# end=#\*/#
+	syntax region phpComment fold contained containedin=ALL keepend extend start=#/\*# end=#\*/#
 else
-	syntax region phpCommentMulti      contained containedin=ALL keepend extend start=#/\*# end=#\*/#
+	syntax region phpComment      contained containedin=ALL keepend extend start=#/\*# end=#\*/#
 endif
 
-syntax cluster phpClComment contains=phpCommentOne,phpCommentMulti
-syntax cluster phpClRoot add=@phpClComment
+syntax cluster phpClRoot add=phpComment
 " }}}
 
 " NAMESPACE: namespace foo\bar {{{
@@ -66,7 +67,7 @@ syntax cluster phpClRoot add=phpStructure,phpNamespaceName
 
 " ENDS: {{{
 	" END OF INSTRUCTION: {{{
-syntax match phpSemicolon contained nextgroup=@phpClComments skipwhite /;/
+syntax match phpSemicolon contained nextgroup=phpComments skipwhite /;/
 	" }}}
 	" ERROR: {{{
 syntax match phpError contained /.\+$/
@@ -79,11 +80,12 @@ highlight link phpBounds		Debug
 highlight link phpError			Error
 highlight link phpSemicolon		Operator
 
-highlight link phpCommentOne	phpComment
-highlight link phpCommentMulti	phpComment
 highlight link phpComment		Comment
 
 highlight link phpStructure		Structure
-highlight link phpNamespaceName	Normal
+
+highlight link phpExtensionConstants	Constant
+highlight link phpExtensionFunctions	Function
+highlight link phpExtensionClasses		Function
 " }}}
 
