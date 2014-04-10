@@ -57,17 +57,46 @@ syntax cluster phpClRoot add=phpComment
 " }}}
 
 " NAMESPACE: namespace foo\bar {{{
-	" Definition {{{
-syntax keyword phpStructure contained nextgroup=phpNamespaceName skipwhite skipempty namespace
+	" {{{
+syntax keyword phpNamespace contained nextgroup=phpNamespaceName skipwhite skipempty namespace
 syntax match phpNamespaceName contained nextgroup=phpSemicolon skipwhite skipempty /\(\\\|\h\w*\)*\h\w*/
 
-syntax cluster phpClRoot add=phpStructure,phpNamespaceName
+syntax cluster phpClRoot add=phpNamespace
+highlight link phpNamespace phpStructure
+	" }}}
+
+	" USE: {{{
+syntax keyword phpNamespaceUse contained nextgroup=phpNamespaceUseName skipwhite skipempty use
+syntax match phpNamespaceUseName contained contains=@phpClExtensionClasses nextgroup=@phpClNamespaceUse skipwhite skipempty /\(\\\|\h\w*\)*\h\w*/
+" TODO phpNamespaceUseName match @phpClExtensionClasses only as root class
+
+		" use Foo\Bar {{{
+syntax cluster phpClNamespaceUse contains=phpSemicolon
+		" }}}
+		" use Foo\Bar as FooBar {{{
+syntax keyword phpNamespaceUseAs contained nextgroup=phpNamespaceUseAsName skipwhite skipempty as
+syntax match phpNamespaceUseAsName contained nextgroup=@phpClNamespaceUse skipwhite skipempty /\h\w*/
+
+syntax cluster phpClNamespaceUse add=phpNamespaceUseAs
+highlight link phpNamespaceUseAs phpStructure
+		" }}}
+		" use Foo\Bar, ... {{{
+syntax match phpNamespaceUseComma contained nextgroup=phpNamespaceUseName skipwhite skipempty /,/
+
+syntax cluster phpClNamespaceUse add=phpNamespaceUseComma
+highlight link phpNamespaceUseComma phpOperator
+		" }}}
+
+syntax cluster phpClRoot add=phpNamespaceUse
+highlight link phpNamespaceUse phpStructure
 	" }}}
 " }}}
 
 " ENDS: {{{
 	" END OF INSTRUCTION: {{{
 syntax match phpSemicolon contained nextgroup=phpComments skipwhite /;/
+
+highlight link phpSemicolon phpOperator
 	" }}}
 	" ERROR: {{{
 syntax match phpError contained /.\+$/
@@ -78,7 +107,7 @@ syntax match phpError contained /.\+$/
 " COLORS {{{
 highlight link phpBounds		Debug
 highlight link phpError			Error
-highlight link phpSemicolon		Operator
+highlight link phpOperator		Operator
 
 highlight link phpComment		Comment
 
