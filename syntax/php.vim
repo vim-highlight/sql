@@ -72,6 +72,17 @@ function! s:DefineCustomComment (name, next)
 endfunction
 " }}}
 
+" ENDS: {{{
+	" END OF INSTRUCTION: {{{
+call s:DefineCustomComment('phpSemicolonComment', 'phpSemicolon')
+
+syntax match phpSemicolon contained nextgroup=phpComments skipwhite /;/
+highlight link phpSemicolon phpOperator
+
+syntax cluster phpClSemicolon contains=phpSemicolonComment,phpSemicolon
+	" }}}
+" }}}
+
 " NAMESPACE: namespace foo\bar {{{
 	" {{{
 syntax keyword phpNamespace contained nextgroup=phpNamespaceName,phpNamespaceComment skipwhite skipempty namespace
@@ -84,26 +95,33 @@ highlight link phpNamespace phpStructure
 	" }}}
 
 	" USE: {{{
-syntax keyword phpNamespaceUse contained nextgroup=phpNamespaceUseName skipwhite skipempty use
-syntax match phpNamespaceUseName contained contains=@phpClExtensionClasses nextgroup=@phpClNamespaceUse skipwhite skipempty /\(\\\|\h\w*\)*\h\w*/
+syntax keyword phpNamespaceUse contained nextgroup=phpNamespaceUseName,phpNamespaceUseComment skipwhite skipempty use
+syntax match phpNamespaceUseName contained contains=@phpClExtensionClasses nextgroup=phpNamespaceUseAs,phpNamespaceUseComma,phpNamespaceUseNameComment,@phpClSemicolon skipwhite skipempty /\(\\\|\h\w*\)*\h\w*/
 " TODO phpNamespaceUseName match @phpClExtensionClasses only as root class
 
 		" use Foo\Bar {{{
-syntax cluster phpClNamespaceUse contains=phpSemicolon
+syntax cluster phpClNamespaceUse contains=@phpClSemicolon
 		" }}}
 		" use Foo\Bar as FooBar {{{
-syntax keyword phpNamespaceUseAs contained nextgroup=phpNamespaceUseAsName skipwhite skipempty as
+syntax keyword phpNamespaceUseAs contained nextgroup=phpNamespaceUseAsName,phpNamespaceUseAsComment skipwhite skipempty as
 syntax match phpNamespaceUseAsName contained nextgroup=@phpClNamespaceUse skipwhite skipempty /\h\w*/
 
 syntax cluster phpClNamespaceUse add=phpNamespaceUseAs
 highlight link phpNamespaceUseAs phpStructure
 		" }}}
 		" use Foo\Bar, ... {{{
-syntax match phpNamespaceUseComma contained nextgroup=phpNamespaceUseName skipwhite skipempty /,/
+syntax match phpNamespaceUseComma contained nextgroup=phpNamespaceUseName,phpNamespaceUseCommaComment skipwhite skipempty /,/
 
 syntax cluster phpClNamespaceUse add=phpNamespaceUseComma
 highlight link phpNamespaceUseComma phpOperator
 		" }}}
+
+syntax cluster phpClNamespaceUse add=phpNamespaceUseNameComment
+
+call s:DefineCustomComment('phpNamespaceUseComment', 		'phpNamespaceUseName')
+call s:DefineCustomComment('phpNamespaceUseNameComment', 	'@phpClNamespaceUse')
+call s:DefineCustomComment('phpNamespaceUseAsComment', 		'phpNamespaceUseAsName')
+call s:DefineCustomComment('phpNamespaceUseCommaComment', 	'phpNamespaceUseName')
 
 syntax cluster phpClRoot add=phpNamespaceUse
 highlight link phpNamespaceUse phpStructure
@@ -147,17 +165,6 @@ else
 endif
 
 highlight link phpClassBlockBounds	phpOperator
-	" }}}
-" }}}
-
-" ENDS: {{{
-	" END OF INSTRUCTION: {{{
-call s:DefineCustomComment('phpSemicolonComment', 'phpSemicolon')
-
-syntax match phpSemicolon contained nextgroup=phpComments skipwhite /;/
-highlight link phpSemicolon phpOperator
-
-syntax cluster phpClSemicolon contains=phpSemicolonComment,phpSemicolon
 	" }}}
 " }}}
 
