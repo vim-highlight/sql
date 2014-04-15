@@ -96,7 +96,7 @@ highlight link phpNamespace phpStructure
 
 	" USE: {{{
 syntax keyword phpNamespaceUse contained nextgroup=phpNamespaceUseName,phpNamespaceUseComment skipwhite skipempty use
-syntax match phpNamespaceUseName contained contains=@phpClExtensionClasses nextgroup=phpNamespaceUseAs,phpNamespaceUseComma,phpNamespaceUseNameComment,@phpClSemicolon skipwhite skipempty /\(\\\|\h\w*\)*\h\w*/
+syntax match phpNamespaceUseName contained contains=@phpClExtensionClasses nextgroup=@phpClNamespaceUse skipwhite skipempty /\(\\\|\h\w*\)*\h\w*/
 " TODO phpNamespaceUseName match @phpClExtensionClasses only as root class
 
 		" use Foo\Bar {{{
