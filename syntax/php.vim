@@ -130,32 +130,40 @@ highlight link phpNamespaceUse phpStructure
 
 " CLASS: {{{
 	" [abstract] class myFoo {{{
-syntax keyword phpClassAbstract contained nextgroup=phpClass skipwhite skipempty abstract
-syntax keyword phpClass contained nextgroup=phpClassName skipwhite skipempty class
+syntax keyword phpClassAbstract contained nextgroup=phpClass,phpClassAbstractComment skipwhite skipempty abstract
+syntax keyword phpClass contained nextgroup=phpClassName,phpClassComment skipwhite skipempty class
 
-syntax match phpClassName contained nextgroup=phpClassExtends,phpClassImplements,phpClassBlock skipwhite skipempty /\h\w*/
+syntax match phpClassName contained nextgroup=@phpClClass skipwhite skipempty /\h\w*/
 
-syntax cluster phpClRoot add=phpClass,phpClassAbstract
 highlight link phpClass			phpStructure
 highlight link phpClassAbstract	phpStructure
+
+syntax cluster phpClRoot add=phpClass,phpClassAbstract
 	" }}}
 	" extends Foo\Bar {{{
-syntax keyword phpClassExtends contained nextgroup=phpClassExtendsName skipwhite skipempty extends
-syntax match phpClassExtendsName contained contains=@phpClExtensionClasses nextgroup=phpClassImplements,phpClassBlock skipwhite skipempty /\(\\\|\h\w*\)*\h\w*/
+syntax keyword phpClassExtends contained nextgroup=phpClassExtendsName,phpClassExtendsName skipwhite skipempty extends
+syntax match phpClassExtendsName contained contains=@phpClExtensionClasses nextgroup=@phpClClassExtends skipwhite skipempty /\(\\\|\h\w*\)*\h\w*/
 
 highlight link phpClassExtends	phpStructure
+
+syntax cluster phpClClass add=phpClassExtends
 	" }}}
 	" implements \Foo\Bar {{{
 		" implements + <class name>
-syntax keyword phpClassImplements contained nextgroup=phpClassImplementsName skipwhite skipempty implements
-syntax match phpClassImplementsName contained contains=@phpClExtensionClasses nextgroup=phpClassImplementsComma,phpClassBlock skipwhite skipempty /\(\\\|\h\w*\)*\h\w*/
+syntax keyword phpClassImplements contained nextgroup=phpClassImplementsName,phpClassImplementsComment skipwhite skipempty implements
+syntax match phpClassImplementsName contained contains=@phpClExtensionClasses nextgroup=@phpClClassImplements skipwhite skipempty /\(\\\|\h\w*\)*\h\w*/
 
 highlight link phpClassImplements	phpStructure
 
+syntax cluster phpClClass	add=phpClassImplements
+syntax cluster phpClExtends	add=phpClassImplements
+
 		" , XXX if present
-syntax match phpClassImplementsComma contained nextgroup=phpClassImplementsName skipwhite skipempty /,/
+syntax match phpClassImplementsComma contained nextgroup=phpClassImplementsName,phpClassImplementsCommaComment skipwhite skipempty /,/
 
 highlight link phpNamespaceUseComma phpOperator
+
+syntax cluster phpClClassImplements add=phpClassImplementsComma
 	" }}}
 	" <class block> {{{
 if s:fold_classes
@@ -165,7 +173,24 @@ else
 endif
 
 highlight link phpClassBlockBounds	phpOperator
+
+syntax cluster phpClClass		add=phpClassBlock
+syntax cluster phpClClassExtends	add=phpClassBlock
+syntax cluster phpClClassImplements	add=phpClassBlock
 	" }}}
+
+syntax cluster phpClClass		add=phpClassNameComment
+syntax cluster phpClClassExtends	add=phpClassExtendsNameComment
+syntax cluster phpClClassImplements	add=phpClassImplementsNameComment
+
+call s:DefineCustomComment('phpClassAbstractComment',		'phpClass')
+call s:DefineCustomComment('phpClassComment',			'phpClassName')
+call s:DefineCustomComment('phpClassNameComment',		'@phpClClass')
+call s:DefineCustomComment('phpClassExtendsComment',		'phpClassExtendsName')
+call s:DefineCustomComment('phpClassExtendsNameComment',	'@phpClClassExtends')
+call s:DefineCustomComment('phpClassImplementsComment',		'phpClassImplementsName')
+call s:DefineCustomComment('phpClassImplementsNameComment',	'@phpClClassImplements')
+call s:DefineCustomComment('phpClassImplementsCommaComment',	'phpClassImplementsName')
 " }}}
 
 
