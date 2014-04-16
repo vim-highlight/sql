@@ -141,7 +141,7 @@ highlight link phpClassAbstract	phpStructure
 syntax cluster phpClRoot add=phpClass,phpClassAbstract
 	" }}}
 	" extends Foo\Bar {{{
-syntax keyword phpClassExtends contained nextgroup=phpClassExtendsName,phpClassExtendsName skipwhite skipempty extends
+syntax keyword phpClassExtends contained nextgroup=phpClassExtendsName,phpClassExtendsComment skipwhite skipempty extends
 syntax match phpClassExtendsName contained contains=@phpClExtensionClasses nextgroup=@phpClClassExtends skipwhite skipempty /\(\\\|\h\w*\)*\h\w*/
 
 highlight link phpClassExtends	phpStructure
