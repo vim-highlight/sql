@@ -200,7 +200,7 @@ syntax cluster phpClClassContent add=phpComment
 syntax keyword phpClassConst contained nextgroup=phpClassConstName,phpClassConstComment skipwhite skipempty const
 syntax match phpClassConstName contained nextgroup=@phpClAffectationSimple skipwhite skipempty /\(\h\|_\)\w*/
 
-call s:DefineCustomCommentBlock
+call s:DefineCustomCommentBlock('phpClassConstComment','phpClassConstName')
 
 highlight link phpClassConst	phpStructure
 
@@ -214,7 +214,8 @@ syntax cluster phpClClassContent add=phpClassConst
 call s:DefineCustomCommentBlock('phpAffectationSimpleComment',	'phpAffectationSimple')
 call s:DefineCustomCommentBlock('phpAffectationComment',		'phpAffectation')
 
-syntax match phpAffectationSimple contained nextgroup=@phpClAffectionValueSimple skipwhite skipempty /=/
+"syntax match phpAffectationSimple contained nextgroup=@phpClAffectionValueSimple skipwhite skipempty /=/
+syntax match phpAffectationSimple contained nextgroup=phpNumberSign skipwhite skipempty /=/
 syntax match phpAffectation       contained nextgroup=@phpClAffectionValue       skipwhite skipempty /=/
 
 highlight link phpAffectationSimple	phpOperator
@@ -224,18 +225,51 @@ syntax cluster phpClAffectationSimple add=phpAffectationSimple,phpAffectationSim
 syntax cluster phpClAffectation       add=phpAffectation,phpAffectationComment
 	" }}}
 	" XXX {{{
-syntax cluster phpClAffectationValueSimple contains=@phpClNumber
+syntax cluster phpClAffectationValueSimple add=phpNumberSign
 
 syntax cluster phpClAffectationValue contains=@phpClAffectationValueSimple
 	" }}}
 " }}}
 
+" NUMBER: {{{
+	" SIGN: +- {{{
+syntax match phpNumberSign contained nextgroup=@phpClNumberValue skipwhite skipempty /[+-]/
+
+call s:DefineCustomCommentBlock('phpNumberSignComment','@phpClNumberValue')
+syntax cluster phpClNumberValue add=phpNumberSignComment
+
+highlight link phpNumberSign phpOperator
+	" }}}
+
+	" INTEGER: {{{
+"syntax match phpNumberIntegerBinary contained nextgroup=@phpClSemicolon skipwhite skipempty /0[bB][0-1]\+/
+"syntax match phpNumberIntegerOctal  contained nextgroup=@phpClSemicolon skipwhite skipempty /0[0-7]\+/
+"syntax match phpNumberIntegerCommon contained nextgroup=@phpClSemicolon skipwhite skipempty /[0-9]\+\(e[+-]\?[0-9]\+\)\?/
+syntax match phpNumberIntegerCommon contained nextgroup=@phpClSemicolon skipwhite skipempty /[0-9]\+/
+"syntax match phpNumberIntegerHexa   contained nextgroup=@phpClSemicolon skipwhite skipempty /0[xX][0-9a-fA-F]\+/
+
+"highlight link phpNumberIntegerBinary	phpNumberInteger
+"highlight link phpNumberIntegerOctal	phpNumberInteger
+highlight link phpNumberIntegerCommon	Number
+"highlight link phpNumberIntegerHexa	phpNumberInteger
+
+syntax cluster phpClNumberInteger add=phpNumberIntegerBinay,phpNumberIntegerOctal,phpNumberIntegerCommon,phpNumberIntegerHexa
+		
+syntax cluster phpClNumberInteger contains=phpNumberIntegerSign,@phpClNumberIntegerValue
+	" }}}
+
+highlight link phpNumberInteger	phpNumber
+
+syntax cluster phpClNumberValue contains=@phpClNumberInteger
+syntax cluster phpClNumber contains=phpNumberSign
+" }}}
+
 " COLORS {{{
 highlight link phpBounds		Debug
 highlight link phpError			Error
-highlight link phpOperator		Operator
-
 highlight link phpComment		Comment
+highlight link phpOperator		Operator
+highlight link phpNumber		Number
 
 highlight link phpStructure		Structure
 
