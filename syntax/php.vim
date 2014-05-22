@@ -183,11 +183,11 @@ syntax cluster phpClClass			add=phpClassNameComment
 syntax cluster phpClClassExtends	add=phpClassExtendsNameComment
 syntax cluster phpClClassImplements	add=phpClassImplementsNameComment
 
-call s:DefineCustomCommentBlock('phpClassAbstractComment',		'phpClass')
-call s:DefineCustomCommentBlock('phpClassComment',			'phpClassName')
-call s:DefineCustomCommentBlock('phpClassNameComment',		'@phpClClass')
-call s:DefineCustomCommentBlock('phpClassExtendsComment',		'phpClassExtendsName')
-call s:DefineCustomCommentBlock('phpClassExtendsNameComment',	'@phpClClassExtends')
+call s:DefineCustomCommentBlock('phpClassAbstractComment',			'phpClass')
+call s:DefineCustomCommentBlock('phpClassComment',					'phpClassName')
+call s:DefineCustomCommentBlock('phpClassNameComment',				'@phpClClass')
+call s:DefineCustomCommentBlock('phpClassExtendsComment',			'phpClassExtendsName')
+call s:DefineCustomCommentBlock('phpClassExtendsNameComment',		'@phpClClassExtends')
 call s:DefineCustomCommentBlock('phpClassImplementsComment',		'phpClassImplementsName')
 call s:DefineCustomCommentBlock('phpClassImplementsNameComment',	'@phpClClassImplements')
 call s:DefineCustomCommentBlock('phpClassImplementsCommaComment',	'phpClassImplementsName')
@@ -224,9 +224,8 @@ syntax cluster phpClAffectationSimple add=phpAffectationSimple,phpAffectationSim
 syntax cluster phpClAffectation       add=phpAffectation,phpAffectationComment
 	" }}}
 	" XXX {{{
-syntax cluster phpClAffectationValueSimple add=@phpClNumber
-
-syntax cluster phpClAffectationValue contains=@phpClAffectationValueSimple
+syntax cluster phpClAffectationValueSimple	add=@phpClNumber,@phpString
+syntax cluster phpClAffectationValue		contains=@phpClAffectationValueSimple
 	" }}}
 " }}}
 
@@ -263,6 +262,9 @@ highlight link phpNumberInteger	phpNumber
 
 syntax cluster phpClNumberValue	add=@phpClNumberInteger,phpNumberDecimal
 syntax cluster phpClNumber		contains=phpNumberSign,@phpClNumberValue
+" }}}
+" STRING: {{{
+syntax region phpStringSingle contains=phpStringSingleEscape matchgroup=phpStringSingleBound keepend extend start=/'/ end=/'/
 " }}}
 
 " COLORS {{{
