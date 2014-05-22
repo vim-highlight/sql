@@ -120,7 +120,7 @@ syntax cluster phpClNamespaceUse add=phpNamespaceUseNameComment
 
 call s:DefineCustomCommentBlock('phpNamespaceUseComment', 		'phpNamespaceUseName')
 call s:DefineCustomCommentBlock('phpNamespaceUseNameComment', 	'@phpClNamespaceUse')
-call s:DefineCustomCommentBlock('phpNamespaceUseAsComment', 		'phpNamespaceUseAsName')
+call s:DefineCustomCommentBlock('phpNamespaceUseAsComment', 	'phpNamespaceUseAsName')
 call s:DefineCustomCommentBlock('phpNamespaceUseCommaComment', 	'phpNamespaceUseName')
 
 syntax cluster phpClRoot add=phpNamespaceUse
@@ -204,7 +204,7 @@ call s:DefineCustomCommentBlock('phpClassConstComment','phpClassConstName')
 
 highlight link phpClassConst	phpStructure
 
-syntax cluster phpClClassContent add=phpClassConst
+syntax cluster phpClClassContent add=phpClassConst,phpError
 		" }}}
 	" }}}
 " }}}
@@ -214,9 +214,8 @@ syntax cluster phpClClassContent add=phpClassConst
 call s:DefineCustomCommentBlock('phpAffectationSimpleComment',	'phpAffectationSimple')
 call s:DefineCustomCommentBlock('phpAffectationComment',		'phpAffectation')
 
-"syntax match phpAffectationSimple contained nextgroup=@phpClAffectionValueSimple skipwhite skipempty /=/
-syntax match phpAffectationSimple contained nextgroup=phpNumberSign skipwhite skipempty /=/
-syntax match phpAffectation       contained nextgroup=@phpClAffectionValue       skipwhite skipempty /=/
+syntax match phpAffectationSimple contained nextgroup=@phpClAffectationValueSimple skipwhite skipempty /=/
+syntax match phpAffectation       contained nextgroup=@phpClAffectationValue       skipwhite skipempty /=/
 
 highlight link phpAffectationSimple	phpOperator
 highlight link phpAffectation		phpOperator
@@ -225,7 +224,7 @@ syntax cluster phpClAffectationSimple add=phpAffectationSimple,phpAffectationSim
 syntax cluster phpClAffectation       add=phpAffectation,phpAffectationComment
 	" }}}
 	" XXX {{{
-syntax cluster phpClAffectationValueSimple add=phpNumberSign
+syntax cluster phpClAffectationValueSimple add=@phpClNumber
 
 syntax cluster phpClAffectationValue contains=@phpClAffectationValueSimple
 	" }}}
@@ -233,6 +232,7 @@ syntax cluster phpClAffectationValue contains=@phpClAffectationValueSimple
 
 " NUMBER: {{{
 	" SIGN: +- {{{
+"syntax match phpNumberSign contained nextgroup=phpNumberIntegerCommon skipwhite skipempty /[+-]/
 syntax match phpNumberSign contained nextgroup=@phpClNumberValue skipwhite skipempty /[+-]/
 
 call s:DefineCustomCommentBlock('phpNumberSignComment','@phpClNumberValue')
@@ -242,26 +242,23 @@ highlight link phpNumberSign phpOperator
 	" }}}
 
 	" INTEGER: {{{
-"syntax match phpNumberIntegerBinary contained nextgroup=@phpClSemicolon skipwhite skipempty /0[bB][0-1]\+/
-"syntax match phpNumberIntegerOctal  contained nextgroup=@phpClSemicolon skipwhite skipempty /0[0-7]\+/
-"syntax match phpNumberIntegerCommon contained nextgroup=@phpClSemicolon skipwhite skipempty /[0-9]\+\(e[+-]\?[0-9]\+\)\?/
-syntax match phpNumberIntegerCommon contained nextgroup=@phpClSemicolon skipwhite skipempty /[0-9]\+/
-"syntax match phpNumberIntegerHexa   contained nextgroup=@phpClSemicolon skipwhite skipempty /0[xX][0-9a-fA-F]\+/
+syntax match phpNumberIntegerCommon contained nextgroup=@phpClSemicolon skipwhite skipempty /[0-9]\+\(e[+-]\?[0-9]\+\)\?/
+syntax match phpNumberIntegerBinary contained nextgroup=@phpClSemicolon skipwhite skipempty /0[bB][0-1]\+/
+syntax match phpNumberIntegerOctal  contained nextgroup=@phpClSemicolon skipwhite skipempty /0[0-7]\+/
+syntax match phpNumberIntegerHexa   contained nextgroup=@phpClSemicolon skipwhite skipempty /0[xX][0-9a-fA-F]\+/
 
-"highlight link phpNumberIntegerBinary	phpNumberInteger
-"highlight link phpNumberIntegerOctal	phpNumberInteger
-highlight link phpNumberIntegerCommon	Number
-"highlight link phpNumberIntegerHexa	phpNumberInteger
+highlight link phpNumberIntegerCommon	phpNumberInteger
+highlight link phpNumberIntegerBinary	phpNumberInteger
+highlight link phpNumberIntegerOctal	phpNumberInteger
+highlight link phpNumberIntegerHexa		phpNumberInteger
 
-syntax cluster phpClNumberInteger add=phpNumberIntegerBinay,phpNumberIntegerOctal,phpNumberIntegerCommon,phpNumberIntegerHexa
-		
-syntax cluster phpClNumberInteger contains=phpNumberIntegerSign,@phpClNumberIntegerValue
+syntax cluster phpClNumberInteger contains=phpNumberIntegerCommon,phpNumberIntegerBinary,phpNumberIntegerOctal,phpNumberIntegerHexa
 	" }}}
 
 highlight link phpNumberInteger	phpNumber
 
-syntax cluster phpClNumberValue contains=@phpClNumberInteger
-syntax cluster phpClNumber contains=phpNumberSign
+syntax cluster phpClNumberValue	contains=@phpClNumberInteger
+syntax cluster phpClNumber		contains=phpNumberSign,@phpClNumberValue
 " }}}
 
 " COLORS {{{
