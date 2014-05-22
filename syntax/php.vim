@@ -232,7 +232,6 @@ syntax cluster phpClAffectationValue contains=@phpClAffectationValueSimple
 
 " NUMBER: {{{
 	" SIGN: +- {{{
-"syntax match phpNumberSign contained nextgroup=phpNumberIntegerCommon skipwhite skipempty /[+-]/
 syntax match phpNumberSign contained nextgroup=@phpClNumberValue skipwhite skipempty /[+-]/
 
 call s:DefineCustomCommentBlock('phpNumberSignComment','@phpClNumberValue')
@@ -254,10 +253,15 @@ highlight link phpNumberIntegerHexa		phpNumberInteger
 
 syntax cluster phpClNumberInteger contains=phpNumberIntegerCommon,phpNumberIntegerBinary,phpNumberIntegerOctal,phpNumberIntegerHexa
 	" }}}
+	" DECIMAL: {{{
+syntax match phpNumberDecimal contained nextgroup=@phpClSemicolon skipwhite skipempty /[0-9]\+\.[0-9]\+/
+
+highlight link phpNumberDecimal phpNumber
+	" }}}
 
 highlight link phpNumberInteger	phpNumber
 
-syntax cluster phpClNumberValue	contains=@phpClNumberInteger
+syntax cluster phpClNumberValue	add=@phpClNumberInteger,phpNumberDecimal
 syntax cluster phpClNumber		contains=phpNumberSign,@phpClNumberValue
 " }}}
 
