@@ -4,6 +4,7 @@
 "
 " URL:			https://github.com/darkelfe/vim-php
 " Version:		0.0.1
+"
 
 if version < 600 || exists("b:current_syntax")
 	finish
@@ -14,10 +15,10 @@ unlet b:current_syntax
 
 " Initialize options {{{
 function! s:DefineOption (name, value)
-	if exists('b:php_'.a:name)
-		return b:{'php_'.a:name}
-	elseif exists('g:php_'.a:name)
-		return g:{'php_'.a:name}
+	if exists('b:vim_php_'.a:name)
+		return b:{'vim_php_'.a:name}
+	elseif exists('g:vim_php_'.a:name)
+		return g:{'vim_php_'.a:name}
 	else
 		return a:value
 	endif
@@ -26,7 +27,7 @@ endfunction
 	" Fold {{{
 let s:fold_root     = s:DefineOption('fold_root', 0)
 let s:fold_comments = s:DefineOption('fold_comments', 1)
-let s:fold_classes = s:DefineOption('fold_classes', 1)
+let s:fold_classes  = s:DefineOption('fold_classes', 1)
 	" }}}
 
 delfunction s:DefineOption
