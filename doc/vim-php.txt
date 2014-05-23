@@ -4,9 +4,10 @@
 ===============================================================================
 CONTENTS                                                     *vim-php-contents*
 
-    1.Introduction......................................|vim-php-introduction|
-    2.Options...........................................|vim-php-options|
-        2.1.Folding options.............................|vim-php-options-fold|
+    1.Introduction....................................|vim-php-introduction|
+    2.Options.........................................|vim-php-options|
+        2.1.Folding options...........................|vim-php-options-fold|
+	2.2.String options............................|vim-php-options-string|
 
 ===============================================================================
 1. Introduction                                          *vim-php-introduction*
@@ -42,3 +43,13 @@ Default: 1
 Can fold classes ? >
     let g:vim_php_fold_classes = 0
 >
+
+-------------------------------------------------------------------------------
+2.2. String options                                    *vim-php-options-string*
+
+                                      *'vim_php_string_allow_single_backslash'*
+Default: 1
+Allow single backslash `\` in strings when not used to escape character ? >
+    let g:vim_php_string_allow_single_character = 0
+>
+

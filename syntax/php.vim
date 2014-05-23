@@ -29,6 +29,10 @@ let s:fold_comments = s:DefineOption('fold_comments', 1)
 let s:fold_classes  = s:DefineOption('fold_classes', 1)
 	" }}}
 
+	" String {{{
+let s:string_allow_single_backslash = s:DefineOption('string_allow_single_backslash', 1)
+	" }}}
+
 delfunction s:DefineOption
 " }}}
 
@@ -224,7 +228,7 @@ syntax cluster phpClAffectationSimple add=phpAffectationSimple,phpAffectationSim
 syntax cluster phpClAffectation       add=phpAffectation,phpAffectationComment
 	" }}}
 	" XXX {{{
-syntax cluster phpClAffectationValueSimple	add=@phpClNumber,@phpString
+syntax cluster phpClAffectationValueSimple	add=@phpClNumber,@phpClString
 syntax cluster phpClAffectationValue		contains=@phpClAffectationValueSimple
 	" }}}
 " }}}
@@ -264,7 +268,30 @@ syntax cluster phpClNumberValue	add=@phpClNumberInteger,phpNumberDecimal
 syntax cluster phpClNumber		contains=phpNumberSign,@phpClNumberValue
 " }}}
 " STRING: {{{
-syntax region phpStringSingle contains=phpStringSingleEscape matchgroup=phpStringSingleBound keepend extend start=/'/ end=/'/
+	" SINGLE: {{{
+"syntax region phpStringSingle contains=@phpClStringSingleEscape matchgroup=phpStringSingleBound keepend extend start=/'/ end=/'/
+syntax region phpStringSingle contains=@phpClStringSingleEscape matchgroup=phpStringSingleBound nextgroup=@phpClStringFollower keepend extend start=/'/ end=/'/ skip=/\\\(\\\|'\)/
+
+syntax match phpStringSingleEscape 			contained /\\\(\\\|'\)/
+syntax match phpStringSingleEscapeBackslash contained /\\/
+
+highlight link phpStringSingleEscape 				phpStringEscape
+if s:string_allow_single_backslash
+	highlight link phpStringSingleEscapeBackslash	phpStringSingle
+else
+	highlight link phpStringSingleEscapeBackslash	phpError
+endif
+
+syntax cluster phpClStringSingleEscape contains=phpStringSingleEscape,phpStringSingleEspaceBackslash
+	" }}}
+
+highlight link phpStringSingle phpString
+
+	" FOLLOW: {{{
+syntax cluster phpClStringFollower contains=@phpClSemicolon
+	" }}}
+
+syntax cluster phpClString contains=phpStringSingle
 " }}}
 
 " COLORS {{{
@@ -273,6 +300,9 @@ highlight link phpError			Error
 highlight link phpComment		Comment
 highlight link phpOperator		Operator
 highlight link phpNumber		Number
+
+highlight link phpString		String
+highlight link phpStringEscape	Operator
 
 highlight link phpStructure		Structure
 
