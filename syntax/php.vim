@@ -133,6 +133,7 @@ highlight link phpNamespaceUse phpStructure
 " }}}
 " CLASS: {{{
 	" Definition {{{
+" TODO phpClassDefinition must match `static`
 		" [abstract] class myFoo {{{
 syntax keyword phpClassAbstract contained nextgroup=phpClass,phpClassAbstractComment skipwhite skipempty abstract
 syntax keyword phpClass contained nextgroup=phpClassName,phpClassComment skipwhite skipempty class
@@ -140,7 +141,7 @@ syntax keyword phpClass contained nextgroup=phpClassName,phpClassComment skipwhi
 syntax match phpClassName contained nextgroup=@phpClClass skipwhite skipempty /\h\w*/
 
 highlight link phpClass			phpStructure
-highlight link phpClassAbstract	phpStructure
+highlight link phpClassAbstract	phpModifier
 
 syntax cluster phpClRoot add=phpClass,phpClassAbstract
 		" }}}
@@ -209,6 +210,34 @@ call s:DefineCustomCommentBlock('phpClassConstComment','phpClassConstName')
 highlight link phpClassConst	phpStructure
 
 syntax cluster phpClClassContent add=phpClassConst,phpError
+		" }}}
+		
+		" VARIABLE: {{{
+			" var: {{{
+syntax keyword phpVarDeclarationVar contained nextgroup=@phpClVarName skipwhite skipempty var
+
+highlight link phpVarDeclarationVar phpVarDeclaration
+
+syntax cluster phpClVarDeclaration add=phpVarDeclarationVar
+			" }}}
+			" static: {{{
+syntax keyword phpVarDeclarationStatic contained nextgroup=phpVarDeclarationAccess,@phpClVarName skipwhite skipempty static
+
+highlight link phpVarDeclarationStatic phpVarDeclaration
+
+syntax cluster phpClVarDeclaration add=phpVarDeclarationStatic
+			" }}}
+			" access: private protected public {{{
+syntax keyword phpVarDeclarationAccess contained nextgroup=phpVarDeclarationStatic,@phpClVarName skipwhite skipempty private protected public
+
+highlight link phpVarDeclarationAccess phpVarDeclaration
+
+syntax cluster phpClVarDeclaration add=phpVarDeclarationAccess
+			" }}}
+
+highlight link phpVarDeclaration phpModifier
+
+syntax cluster phpClClassContent add=@phpClVarDeclaration
 		" }}}
 	" }}}
 " }}}
@@ -325,6 +354,7 @@ highlight link phpNumber		Number
 highlight link phpString		String
 highlight link phpStringEscape	Operator
 
+highlight link phpModifier		StorageClass
 highlight link phpStructure		Structure
 
 highlight link phpExtensionConstants	Constant
