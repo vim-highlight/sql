@@ -212,29 +212,34 @@ syntax cluster phpClClassContent add=phpClassConst,phpError
 		" }}}
 		
 		" VARIABLE: {{{
-			" var: {{{
+			" Modifiers: {{{
+				" var: {{{
 syntax keyword phpVarDeclarationVar contained nextgroup=@phpClVarName skipwhite skipempty var
 
 highlight link phpVarDeclarationVar phpVarDeclaration
 
 syntax cluster phpClVarDeclaration add=phpVarDeclarationVar
-			" }}}
-			" static: {{{
+				" }}}
+				" static: {{{
 syntax keyword phpVarDeclarationStatic contained nextgroup=phpVarDeclarationAccess,@phpClVarName skipwhite skipempty static
 
 highlight link phpVarDeclarationStatic phpVarDeclaration
 
 syntax cluster phpClVarDeclaration add=phpVarDeclarationStatic
-			" }}}
-			" access: private protected public {{{
+				" }}}
+				" access: private protected public {{{
 syntax keyword phpVarDeclarationAccess contained nextgroup=phpVarDeclarationStatic,@phpClVarName skipwhite skipempty private protected public
 
 highlight link phpVarDeclarationAccess phpVarDeclaration
 
 syntax cluster phpClVarDeclaration add=phpVarDeclarationAccess
-			" }}}
+				" }}}
 
 highlight link phpVarDeclaration phpModifier
+			" }}}
+			" Var Name: $XXX {{{
+
+			" }}}
 
 syntax cluster phpClClassContent add=@phpClVarDeclaration
 		" }}}
