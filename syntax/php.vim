@@ -133,17 +133,16 @@ highlight link phpNamespaceUse phpStructure
 " }}}
 " CLASS: {{{
 	" Definition {{{
-" TODO phpClassDefinition must match `static`
 		" [abstract] class myFoo {{{
-syntax keyword phpClassAbstract contained nextgroup=phpClass,phpClassAbstractComment skipwhite skipempty abstract
+syntax keyword phpClassModifier contained nextgroup=phpClass,phpClassAbstractComment skipwhite skipempty abstract static
 syntax keyword phpClass contained nextgroup=phpClassName,phpClassComment skipwhite skipempty class
 
 syntax match phpClassName contained nextgroup=@phpClClass skipwhite skipempty /\h\w*/
 
 highlight link phpClass			phpStructure
-highlight link phpClassAbstract	phpModifier
+highlight link phpClassModifier	phpModifier
 
-syntax cluster phpClRoot add=phpClass,phpClassAbstract
+syntax cluster phpClRoot add=phpClass,phpClassModifier
 		" }}}
 		" extends Foo\Bar {{{
 syntax keyword phpClassExtends contained nextgroup=phpClassExtendsName,phpClassExtendsComment skipwhite skipempty extends
@@ -188,7 +187,7 @@ syntax cluster phpClClass			add=phpClassNameComment
 syntax cluster phpClClassExtends	add=phpClassExtendsNameComment
 syntax cluster phpClClassImplements	add=phpClassImplementsNameComment
 
-call s:DefineCustomCommentBlock('phpClassAbstractComment',			'phpClass')
+call s:DefineCustomCommentBlock('phpClassModifierComment',			'phpClass')
 call s:DefineCustomCommentBlock('phpClassComment',					'phpClassName')
 call s:DefineCustomCommentBlock('phpClassNameComment',				'@phpClClass')
 call s:DefineCustomCommentBlock('phpClassExtendsComment',			'phpClassExtendsName')
