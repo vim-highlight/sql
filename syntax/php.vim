@@ -268,8 +268,9 @@ syntax cluster phpClNumberValue	add=@phpClNumberInteger,phpNumberDecimal
 syntax cluster phpClNumber		contains=phpNumberSign,@phpClNumberValue
 " }}}
 " STRING: {{{
+call s:DefineCustomCommentBlock('phpStringComment', '@phpClString')
+
 	" SINGLE: {{{
-"syntax region phpStringSingle contains=@phpClStringSingleEscape matchgroup=phpStringSingleBound keepend extend start=/'/ end=/'/
 syntax region phpStringSingle contains=@phpClStringSingleEscape matchgroup=phpStringSingleBound nextgroup=@phpClStringFollower keepend extend start=/'/ end=/'/ skip=/\\\(\\\|'\)/
 
 syntax match phpStringSingleEscape 			contained /\\\(\\\|'\)/
@@ -282,16 +283,36 @@ else
 	highlight link phpStringSingleEscapeBackslash	phpError
 endif
 
-syntax cluster phpClStringSingleEscape contains=phpStringSingleEscape,phpStringSingleEspaceBackslash
+syntax cluster phpClStringSingleEscape	contains=phpStringSingleEscape,phpStringSingleEspaceBackslash
+	" }}}
+	" DOUBLE: {{{
+syntax region phpStringDouble contains=@phpClStringDoubleContent matchgroup=phpStringDoubleBound nextgroup=@phpClStringFollower keepend extend start=/"/ end=/"/ skip=/\\\(\\\|"\|[nt]\)/
+
+		" Escape characters: {{{
+syntax match phpStringDoubleEscape 			contained /\\\(\\\|"\|[nt]\)/
+syntax match phpStringDoubleEscapeBackslash contained /\\/
+
+highlight link phpStringDoubleEscape 				phpStringEscape
+if s:string_allow_single_backslash
+	highlight link phpStringDoubleEscapeBackslash	phpStringDouble
+else
+	highlight link phpStringDoubleEscapeBackslash	phpError
+endif
+
+syntax cluster phpClStringDoubleEscape	contains=phpStringDoubleEscape,phpStringDoubleEspaceBackslash
+syntax cluster phpClStringDoubleContent	add=@phpClStringDoubleEscape
+		" }}}
 	" }}}
 
 highlight link phpStringSingle phpString
+highlight link phpStringDouble phpString
 
 	" FOLLOW: {{{
 syntax cluster phpClStringFollower contains=@phpClSemicolon
 	" }}}
 
-syntax cluster phpClString contains=phpStringSingle
+syntax cluster phpClString contains=@phpClStringSingle,@phpClStringDouble
+syntax cluster phpClString contains=phpStringComment,phpStringSingle,phpStringDouble
 " }}}
 
 " COLORS {{{
