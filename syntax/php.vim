@@ -2,7 +2,7 @@
 " Language:		PHP 4 / 5
 " Maintainer:	Julien Rosset <jul.rosset@gmail.com>
 "
-" URL:			https://github.com/darkelfe/vim-php
+" URL:			https://github.com/darkelfe/vim-highlight
 " Version:		0.0.1
 
 if version < 600 || exists("b:current_syntax")
