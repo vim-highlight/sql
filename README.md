@@ -1,4 +1,5 @@
-vim-php
+vim-highlight
 =======
 
-A Vim syntax file for PHP
+A collection of Vim syntax / highlight file for various languages like PHP or SQL.
+They are based on real-time typo detection.
