@@ -40,6 +40,10 @@ endif
 "endif
 " }}}
 
+" ERROR: {{{
+syntax match sqlError /\S.\+$/
+" }}}
+
 " SELECT: {{{
 syntax keyword sqlSelect nextgroup=@sqlClSelectContentGeneral skipwhite skipempty SELECT
 
@@ -94,6 +98,7 @@ highlight link sqlSelect sqlStructure
 " }}}
 
 " COLORS: {{{
+highlight link sqlError			Error
 highlight link sqlFunction		Function
 highlight link sqlNumber		Number
 highlight link sqlString		String
