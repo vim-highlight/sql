@@ -1,0 +1,53 @@
+*vim-sql.txt*	Syntax highlight for SQL standards & drivers-specifics
+*vim-sql*
+
+===============================================================================
+CONTENTS                                                     *vim-sql-contents*
+
+    1.Introduction..................................|vim-sql-introduction|
+    2.Options.......................................|vim-sql-options|
+		2.1.General options.........................|vim-sql-options-general|
+		2.2.Case match options......................|vim-sql-options-caseMatch|
+
+===============================================================================
+1. Introduction                                          *vim-sql-introduction*
+
+Disapointed by multiple SQL syntax file, each not completly highlight SQL
+standards, I decide to create an unified SQL syntax file.
+
+The syntax is design with a main hightight file for SQL standards, that include
+sub-highlight files for a configurable driver (MySQL, Oracle, ...).
+
+The highlight is also design in order to detect typo and SQL errors in
+real-time.
+
+===============================================================================
+2. Options                                                    *vim-sql-options*
+
+This section will describe all options to customize the SQL operating
+/ highlight.
+
+-------------------------------------------------------------------------------
+2.1. General options                                  *vim-sql-options-general*
+
+                                                             *'vim_sql_driver'*
+Default: ''
+SQL sub-highlight to use. Must be `syntax/sql/XXX.vim` file >
+    let g:vim_sql_driver = 'MySQL'
+<
+
+-------------------------------------------------------------------------------
+2.2. Case match options                             *vim-sql-options-caseMatch*
+
+                                            *'vim_sql_case_sensitive_keywords'*
+Default: 0
+Is SQL keywords case sensitive ? >
+    let g:vim_sql_sensistive_keywords = 0
+<
+
+                                           *'vim_sql_case_sensitive_functions'*
+Default: 0
+Is SQL functions case sensitive ? >
+    let g:vim_sql_sensistive_functions = 0
+<
+

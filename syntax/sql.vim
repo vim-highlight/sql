@@ -21,36 +21,50 @@ function! s:DefineOption (name, value)
 endfunction
 
 let s:driver = s:DefineOption('driver', '')
+
 let s:case_sensitive = s:DefineOption('case_sensitive', 0)
 
 delfunction s:DefineOption
 " }}}
 
+" Case matching {{{
 if s:case_sensitive
 	syntax case match
 else
 	syntax case ignore
 endif
+" }}}
+" Driver specifics include {{{
+"if s:driver != ''
+"	source! sql/s:driver.vim
+"endif
+" }}}
 
-if s:driver != ''
-	source! sql/s:driver.vim
-endif
+" SELECT: {{{
+syntax keyword sqlSelect nextgroup=@sqlClSelectContent skipwhite skipempty SELECT
+
+	" DISTINCT: {{{
+syntax keyword sqlSelectDistinct nextgroup=@sqlClSelectContent skipwhite skipempty DISTINCT
+syntax cluster sqlClSelectContent add=sqlSelectDistinct
+
+highlight link sqlSelectDistinct sqlFunction
+	" }}}
+	
+	" Column Name: {{{
+syntax region sqlSelectColumnEscaped nextgroup=sqlSelectColumnAlias,sqlSelectColumnSeparator transparent oneline contains=sqlSelectColumnName matchgroup=sqlEscape start=/`/ end=/`/
+syntax cluster sqlClSelectContent add=sqlSelectColumnEscaped
+
+syntax match sqlSelectColumnName nextgroup=sqlSelectColumnAlias,sqlSelectColumnSeparator /[a-zA-Z0-9_]\+/
+syntax cluster sqlClSelectContent add=sqlSelectColumnName
+
+highlight link sqlSelectColumnName sqlColumnName
+	" }}}
+
+highlight link sqlSelect sqlStructure
+" }}}
 
 " COLORS: {{{
-highlight link phpBounds		Debug
-highlight link phpError			Error
-highlight link phpComment		Comment
-highlight link phpOperator		Operator
-highlight link phpNumber		Number
-
-highlight link phpString		String
-highlight link phpStringEscape	Operator
-
-highlight link phpModifier		StorageClass
-highlight link phpStructure		Structure
-
-highlight link phpExtensionConstants	Constant
-highlight link phpExtensionFunctions	Function
-highlight link phpExtensionClasses		Function
+highlight link sqlFunction		Function
+highlight link sqlStructure		Structure
 " }}}
 
