@@ -55,53 +55,63 @@ highlight link sqlSelectDistinct sqlFunction
 	" }}}
 
 	" Values: {{{
-		" Column: {{{
-syntax region sqlSelectColumnEscaped nextgroup=@sqlClSelectContentNext transparent oneline contains=sqlSelectColumnName matchgroup=sqlEscape start=/`/ end=/`/
-syntax cluster sqlClSelectContent add=sqlSelectColumnEscaped
-
-syntax match sqlSelectColumnName nextgroup=@sqlClSelectContentNext /[a-zA-Z0-9_]\+/
-syntax cluster sqlClSelectContent add=sqlSelectColumnName
-
-highlight link sqlSelectColumnName sqlColumnName
-		" }}}
 		" Constant: {{{
 			" Number: {{{
-syntax match sqlSelectNumber nextgroup=@sqlClSelectContentNext /[0-9]\+\(\.[0-9]\+\)\?/
+syntax match sqlSelectNumber nextgroup=@sqlClSelectContentNex skipwhite skipempty /[0-9]\+\(\.[0-9]\+\)\?/
 syntax cluster sqlSelectContent add=sqlSelectNumber
 
 highlight link sqlSelectNumber sqlNumber
 			" }}}
 			" String: {{{
 				" Single Quote: {{{
-syntax region sqlSelectStringSingle nextgroup=@sqlClSelectContentNext start=/'/ skip=/\\'/ end=/'/
+syntax region sqlSelectStringSingle nextgroup=@sqlClSelectContentNext skipwhite skipempty matchgroup=sqlSelectStringSingleDelimiter start=/'/ skip=/\\'/ end=/'/
 syntax cluster sqlClSelectString add=sqlSelectStringSingle
 
-highlight link sqlSelectStringSingle sqlSelectString
+highlight link sqlSelectStringSingle          sqlSelectString
+highlight link sqlSelectStringSingleDelimiter sqlSelectStringDelimiter
 				" }}}
 				" Double Quote: {{{
-syntax region sqlSelectStringDouble nextgroup=@sqlClSelectContentNext start=/"/ skip=/\\"/ end=/"/
+syntax region sqlSelectStringDouble nextgroup=@sqlClSelectContentNext skipwhite skipempty matchgroup=sqlSelectStringDoubleDelimiter start=/"/ skip=/\\"/ end=/"/
 syntax cluster sqlClSelectString add=sqlSelectStringDouble
 
-highlight link sqlSelectStringDouble sqlSelectString
+highlight link sqlSelectStringDouble          sqlSelectString
+highlight link sqlSelectStringDoubleDelimiter sqlSelectStringDelimiter
 				" }}}
 
 syntax cluster sqlSelectContent add=@sqlSelectString
 
-highlight link sqlSelectString sqlString
-			"" }}}
+highlight link sqlSelectString          sqlString
+highlight link sqlSelectStringDelimiter sqlStringDelimiter
+			" }}}
+		" }}}
+		" Column: {{{
+syntax region sqlSelectColumnEscaped nextgroup=@sqlClSelectContentNext skipwhite skipempty transparent oneline contains=sqlSelectColumnName matchgroup=sqlEscape start=/`/ end=/`/
+syntax cluster sqlClSelectContent add=sqlSelectColumnEscaped
+
+syntax match sqlSelectColumnName nextgroup=@sqlClSelectContentNext contained /\h\w*/
+syntax cluster sqlClSelectContent add=sqlSelectColumnName
+
+highlight link sqlSelectColumnName sqlColumnName
 		"" }}}
-	"" }}}
+	" }}}
+	" Values Separator: {{{
+"syntax match sqlSelectContentComma nextgroup= /,/
+	" }}}
 
 syntax cluster sqlClSelectContentGeneral add=@sqlClSelectContent
 
 highlight link sqlSelect sqlStructure
-"" }}}
+" }}}
 
 " COLORS: {{{
-highlight link sqlError			Error
-highlight link sqlFunction		Function
-highlight link sqlNumber		Number
-highlight link sqlString		String
-highlight link sqlStructure		Structure
+highlight link sqlError				Error
+highlight link sqlEscape			Special
+highlight link sqlFunction			Function
+highlight link sqlNumber			Number
+highlight link sqlString			String
+highlight link sqlStringDelimiter	sqlString
+highlight link sqlStructure			Structure
+
+highlight link sqlColumnName		Todo
 " }}}
 
