@@ -95,7 +95,10 @@ highlight link sqlSelectColumnName sqlColumnName
 		"" }}}
 	" }}}
 	" Values Separator: {{{
-"syntax match sqlSelectContentComma nextgroup= /,/
+syntax match sqlSelectContentComma nextgroup=@sqlClSelectContent skipwhite skipempty /,/
+syntax cluster sqlClSelectContentNext add=sqlSelectContentComma
+
+highlight link sqlSelectContentComma sqlComma
 	" }}}
 
 syntax cluster sqlClSelectContentGeneral add=@sqlClSelectContent
@@ -104,6 +107,7 @@ highlight link sqlSelect sqlStructure
 " }}}
 
 " COLORS: {{{
+highlight link sqlComma				Operator
 highlight link sqlError				Error
 highlight link sqlEscape			Special
 highlight link sqlFunction			Function
