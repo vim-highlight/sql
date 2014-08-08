@@ -41,67 +41,67 @@ endif
 " }}}
 
 " ERROR: {{{
-syntax match sqlError /\S.\+$/
+syntax match sqlError /.\+/
 " }}}
 
-"" SELECT: {{{
-"syntax keyword sqlSelect nextgroup=@sqlClSelectContentGeneral skipwhite skipempty SELECT
+" SELECT: {{{
+syntax keyword sqlSelect nextgroup=@sqlClSelectContentGeneral skipwhite skipempty SELECT
 
-	"" DISTINCT: {{{
-"syntax keyword sqlSelectDistinct nextgroup=@sqlClSelectContent skipwhite skipempty DISTINCT
-"syntax cluster sqlClSelectContentGeneral add=sqlSelectDistinct
+	" DISTINCT: {{{
+syntax keyword sqlSelectDistinct nextgroup=@sqlClSelectContent skipwhite skipempty DISTINCT
+syntax cluster sqlClSelectContentGeneral add=sqlSelectDistinct
 
-"highlight link sqlSelectDistinct sqlFunction
+highlight link sqlSelectDistinct sqlFunction
+	" }}}
+
+	" Values: {{{
+		" Column: {{{
+syntax region sqlSelectColumnEscaped nextgroup=@sqlClSelectContentNext transparent oneline contains=sqlSelectColumnName matchgroup=sqlEscape start=/`/ end=/`/
+syntax cluster sqlClSelectContent add=sqlSelectColumnEscaped
+
+syntax match sqlSelectColumnName nextgroup=@sqlClSelectContentNext /[a-zA-Z0-9_]\+/
+syntax cluster sqlClSelectContent add=sqlSelectColumnName
+
+highlight link sqlSelectColumnName sqlColumnName
+		" }}}
+		" Constant: {{{
+			" Number: {{{
+syntax match sqlSelectNumber nextgroup=@sqlClSelectContentNext /[0-9]\+\(\.[0-9]\+\)\?/
+syntax cluster sqlSelectContent add=sqlSelectNumber
+
+highlight link sqlSelectNumber sqlNumber
+			" }}}
+			" String: {{{
+				" Single Quote: {{{
+syntax region sqlSelectStringSingle nextgroup=@sqlClSelectContentNext start=/'/ skip=/\\'/ end=/'/
+syntax cluster sqlClSelectString add=sqlSelectStringSingle
+
+highlight link sqlSelectStringSingle sqlSelectString
+				" }}}
+				" Double Quote: {{{
+syntax region sqlSelectStringDouble nextgroup=@sqlClSelectContentNext start=/"/ skip=/\\"/ end=/"/
+syntax cluster sqlClSelectString add=sqlSelectStringDouble
+
+highlight link sqlSelectStringDouble sqlSelectString
+				" }}}
+
+syntax cluster sqlSelectContent add=@sqlSelectString
+
+highlight link sqlSelectString sqlString
+			"" }}}
+		"" }}}
 	"" }}}
 
-	"" Values: {{{
-		"" Column: {{{
-"syntax region sqlSelectColumnEscaped nextgroup=@sqlClSelectContentNext transparent oneline contains=sqlSelectColumnName matchgroup=sqlEscape start=/`/ end=/`/
-"syntax cluster sqlClSelectContent add=sqlSelectColumnEscaped
+syntax cluster sqlClSelectContentGeneral add=@sqlClSelectContent
 
-"syntax match sqlSelectColumnName nextgroup=@sqlClSelectContentNext /[a-zA-Z0-9_]\+/
-"syntax cluster sqlClSelectContent add=sqlSelectColumnName
-
-"highlight link sqlSelectColumnName sqlColumnName
-		"" }}}
-		"" Constant: {{{
-			"" Number: {{{
-"syntax match sqlSelectNumber nextgroup=@sqlClSelectContentNext /[0-9]\+\(\.[0-9]\+\)\?/
-"syntax cluster sqlSelectContent add=sqlSelectNumber
-
-"highlight link sqlSelectNumber sqlNumber
-			"" }}}
-			"" String: {{{
-				"" Single Quote: {{{
-"syntax region sqlSelectStringSingle nextgroup=@sqlClSelectContentNext start=/'/ skip=/\\'/ end=/'/
-"syntax cluster sqlClSelectString add=sqlSelectStringSingle
-
-"highlight link sqlSelectStringSingle sqlSelectString
-				"" }}}
-				"" Double Quote: {{{
-"syntax region sqlSelectStringDouble nextgroup=@sqlClSelectContentNext start=/"/ skip=/\\"/ end=/"/
-"syntax cluster sqlClSelectString add=sqlSelectStringDouble
-
-"highlight link sqlSelectStringDouble sqlSelectString
-				"" }}}
-
-"syntax cluster sqlSelectContent add=@sqlSelectString
-
-"highlight link sqlSelectString sqlString
-			"" }}}
-		"" }}}
-	"" }}}
-
-"syntax cluster sqlClSelectContentGeneral add=@sqlClSelectContent
-
-"highlight link sqlSelect sqlStructure
+highlight link sqlSelect sqlStructure
 "" }}}
 
 " COLORS: {{{
 highlight link sqlError			Error
-"highlight link sqlFunction		Function
-"highlight link sqlNumber		Number
-"highlight link sqlString		String
-"highlight link sqlStructure		Structure
+highlight link sqlFunction		Function
+highlight link sqlNumber		Number
+highlight link sqlString		String
+highlight link sqlStructure		Structure
 " }}}
 
