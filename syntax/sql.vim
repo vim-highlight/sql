@@ -92,7 +92,7 @@ syntax match sqlSelectColumnName nextgroup=@sqlClSelectContentNext contained /\h
 syntax cluster sqlClSelectContent add=sqlSelectColumnName
 
 highlight link sqlSelectColumnName sqlColumnName
-		"" }}}
+		" }}}
 	" }}}
 	" Values Separator: {{{
 syntax match sqlSelectContentComma nextgroup=@sqlClSelectContent skipwhite skipempty /,/
@@ -105,6 +105,24 @@ syntax cluster sqlClSelectContentGeneral add=@sqlClSelectContent
 
 highlight link sqlSelect sqlStructure
 " }}}
+" INTO: {{{
+syntax keyword sqlInto nextgroup=@sqlClIntoContent skipwhite skipempty INTO
+
+	" Variable: {{{
+syntax match sqlIntoVarName nextgroup=@sqlClIntoContentNext contained /\h\w*/
+syntax cluster sqlClIntoContent add=sqlIntoVarName
+	" }}}
+	" Variable Separator: {{{
+syntax match sqlIntoContentComma nextgroup=@sqlClIntoContent skipwhite skipempty /,/
+syntax cluster sqlClIntoContentNext add=sqlIntoContentComma
+
+highlight link sqlIntoContentComma sqlComma
+	" }}}
+
+syntax cluster sqlClSelectContentNext add=sqlInto
+
+highlight link sqlInto sqlStructure
+" }}}
 
 " COLORS: {{{
 highlight link sqlComma				Operator
@@ -116,6 +134,8 @@ highlight link sqlString			String
 highlight link sqlStringDelimiter	sqlString
 highlight link sqlStructure			Structure
 
-highlight link sqlColumnName		Todo
+highlight link sqlNone				Todo
+highlight link sqlColumnName		sqlNone
+highlight link sqlIntoVarName		sqlNone
 " }}}
 
