@@ -88,10 +88,13 @@ highlight link sqlSelectStringDelimiter sqlStringDelimiter
 syntax region sqlSelectColumnEscaped nextgroup=@sqlClSelectContentNext skipwhite skipempty transparent oneline contains=sqlSelectColumnName matchgroup=sqlEscape start=/`/ end=/`/
 syntax cluster sqlClSelectContent add=sqlSelectColumnEscaped
 
-syntax match sqlSelectColumnName nextgroup=@sqlClSelectContentNext contained /\h\w*/
+syntax match sqlSelectColumnName nextgroup=@sqlClSelectContentNext skipwhite skipempty contained /\h\w*/
 syntax cluster sqlClSelectContent add=sqlSelectColumnName
 
 highlight link sqlSelectColumnName sqlColumnName
+		" }}}
+		" Functions: {{{
+syntax keyword sqlSelectFunction nextgroup=sqlSelectFunctionGroup skipwhite skipempty count sum min max
 		" }}}
 	" }}}
 	" Values Separator: {{{
@@ -109,7 +112,7 @@ highlight link sqlSelect sqlStructure
 syntax keyword sqlInto nextgroup=@sqlClIntoContent skipwhite skipempty INTO
 
 	" Variable: {{{
-syntax match sqlIntoVarName nextgroup=@sqlClIntoContentNext contained /\h\w*/
+syntax match sqlIntoVarName nextgroup=@sqlClIntoContentNext skipwhite skipempty contained /\h\w*/
 syntax cluster sqlClIntoContent add=sqlIntoVarName
 	" }}}
 	" Variable Separator: {{{
@@ -122,6 +125,18 @@ highlight link sqlIntoContentComma sqlComma
 syntax cluster sqlClSelectContentNext add=sqlInto
 
 highlight link sqlInto sqlStructure
+" }}}
+" FROM: {{{
+syntax keyword sqlFrom nextgroup=@sqlClFromContent skipwhite skipempty FROM
+
+	" Table: {{{
+syntax match sqlFromTable nextgroup=@sqlClFromContentNext skipwhite skipempty contained /\h\w*/
+syntax cluster sqlClFromContent add=sqlFromTable
+	" }}}
+
+syntax cluster sqlClSelectContentNext add=sqlFrom
+
+highlight link sqlFrom sqlStructure
 " }}}
 
 " COLORS: {{{
@@ -137,5 +152,6 @@ highlight link sqlStructure			Structure
 highlight link sqlNone				Todo
 highlight link sqlColumnName		sqlNone
 highlight link sqlIntoVarName		sqlNone
+highlight link sqlFromTable			sqlNone
 " }}}
 
