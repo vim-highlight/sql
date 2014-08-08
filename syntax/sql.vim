@@ -99,9 +99,9 @@ syntax match sqlError /\S.\+$/
 
 " COLORS: {{{
 highlight link sqlError			Error
-highlight link sqlFunction		Function
-highlight link sqlNumber		Number
-highlight link sqlString		String
-highlight link sqlStructure		Structure
+"highlight link sqlFunction		Function
+"highlight link sqlNumber		Number
+"highlight link sqlString		String
+"highlight link sqlStructure		Structure
 " }}}
 
