@@ -94,8 +94,48 @@ syntax cluster sqlClSelectContent add=sqlSelectColumnName
 highlight link sqlSelectColumnName sqlColumnName
 		" }}}
 		" Functions: {{{
-syntax keyword sqlSelectFunction nextgroup=sqlSelectFunctionGroup skipwhite skipempty count sum min max
+syntax match sqlSelectFunction nextgroup=sqlSelectFunctionCall skipwhite skipempty contains=@sqlClSelectFunctionName contained /\h\w*\(\s*(\)\@=/
+
+			" Common: {{{
+syntax keyword sqlSelectFunctionNameCommon contained sum min max
+syntax cluster sqlClSelectFunctionName add=sqlSelectFunctionNameCommon
+
+highlight link sqlSelectFunctionNameCommon sqlSelectFunctionName
+			" }}}
+			" MySQL: {{{
+syntax keyword sqlSelectFunctionNameSpecific contained concat group_concat
+syntax cluster sqlClSelectFunctionName add=sqlSelectFunctionNameSpecific
+
+highlight link sqlSelectFunctionNameSpecific sqlSelectFunctionName
+			" }}}
+
+			" () {{{
+syntax region sqlSelectFunctionCall nextgroup=@sqlClSelectContentNext skipwhite skipempty contains=@sqlClSelectFunctionContent matchgroup=sqlSelectFunctionCallDelimiter start=/(/ end=/)/
+
+highlight link sqlSelectFunctionCallDelimiter sqlFunctionCallDelimiter
+			" }}}
+
+syntax cluster sqlClSelectContent add=sqlSelectFunction
+
+highlight link sqlSelectFunctionName sqlFunction
+highlight link sqlSelectFunction sqlFunctionUnknown
 		" }}}
+	" }}}
+	" Alias AS: {{{
+syntax keyword sqlSelectContentAliasAs nextgroup=@sqlClSelectContentAliasName skipwhite skipempty AS
+syntax cluster sqlClSelectContentNext add=sqlSelectContentAliasAs
+
+		" Name: {{{
+syntax region sqlSelectContentAliasEscaped nextgroup=@sqlClSelectContentNext skipwhite skipempty transparent oneline contains=sqlSelectContentAliasName matchgroup=sqlEscape start=/`/ end=/`/
+syntax cluster sqlClSelectContentAliasName add=sqlSelectContentAliasEscaped
+
+syntax match sqlSelectContentAliasName nextgroup=@sqlClSelectContentNext skipwhite skipempty contained /\h\w*/
+syntax cluster sqlClSelectContentAliasName add=sqlSelectContentAliasName
+
+highlight link sqlSelectContentAliasName sqlColumnName
+		" }}}
+
+highlight link sqlSelectContentAliasAs sqlStructure
 	" }}}
 	" Values Separator: {{{
 syntax match sqlSelectContentComma nextgroup=@sqlClSelectContent skipwhite skipempty /,/
@@ -140,18 +180,20 @@ highlight link sqlFrom sqlStructure
 " }}}
 
 " COLORS: {{{
-highlight link sqlComma				Operator
-highlight link sqlError				Error
-highlight link sqlEscape			Special
-highlight link sqlFunction			Function
-highlight link sqlNumber			Number
-highlight link sqlString			String
-highlight link sqlStringDelimiter	sqlString
-highlight link sqlStructure			Structure
+highlight link sqlComma						Operator
+highlight link sqlError						Error
+highlight link sqlEscape					Special
+highlight link sqlFunction					Function
+highlight link sqlFunctionUnknown			None
+highlight link sqlFunctionCallDelimiter		Operator
+highlight link sqlNumber					Number
+highlight link sqlString					String
+highlight link sqlStringDelimiter			sqlString
+highlight link sqlStructure					Structure
 
-highlight link sqlNone				Todo
-highlight link sqlColumnName		sqlNone
-highlight link sqlIntoVarName		sqlNone
-highlight link sqlFromTable			sqlNone
+highlight link sqlNone						Todo
+highlight link sqlColumnName				sqlNone
+highlight link sqlIntoVarName				sqlNone
+highlight link sqlFromTable					sqlNone
 " }}}
 
