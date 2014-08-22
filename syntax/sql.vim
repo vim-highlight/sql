@@ -57,8 +57,8 @@ highlight link sqlSelectDistinct sqlFunction
 	" Values: {{{
 		" Constant: {{{
 			" Number: {{{
-syntax match sqlSelectNumber nextgroup=@sqlClSelectContentNex skipwhite skipempty /[0-9]\+\(\.[0-9]\+\)\?/
-syntax cluster sqlSelectContent add=sqlSelectNumber
+syntax match sqlSelectNumber nextgroup=@sqlClSelectContentNext skipwhite skipempty /[0-9]\+\(\.[0-9]\+\)\?/
+syntax cluster sqlClSelectContent add=sqlSelectNumber
 
 highlight link sqlSelectNumber sqlNumber
 			" }}}
@@ -78,7 +78,7 @@ highlight link sqlSelectStringDouble          sqlSelectString
 highlight link sqlSelectStringDoubleDelimiter sqlSelectStringDelimiter
 				" }}}
 
-syntax cluster sqlSelectContent add=@sqlSelectString
+syntax cluster sqlClSelectContent add=@sqlClSelectString
 
 highlight link sqlSelectString          sqlString
 highlight link sqlSelectStringDelimiter sqlStringDelimiter
