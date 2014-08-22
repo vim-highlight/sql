@@ -73,8 +73,44 @@ function! s:DefineEntity_Column (name, next, cluster)
 
 	execute 'syntax cluster '.a:cluster.' add='.a:name.'Escaped,'.a:name
 
-	execute 'highlight link '.a:name.'Delimiter sqlDelimiter'
+	execute 'highlight link '.a:name.'Delimiter sqlColumnDelimiter'
 	execute 'highlight link '.a:name.'          sqlColumn'
+endfunction
+	" }}}
+	" Function: {{{
+function! s:DefineEntity_Function (name, next, cluster)
+	execute 'syntax keyword '.a:name.'Common nextgroup='.a:name.'Call skipwhite skipempty sum min max'
+
+	execute 'syntax cluster sqlClSelectFunction add=sqlSelectFunctionCommon'
+	execute 'highlight link sqlSelectFunctionCommon sqlSelectFunction'
+
+
+	execute 'syntax keyword sqlSelectFunctionCommonStar nextgroup=sqlSelectFunctionCallStar skipwhite skipempty count'
+
+	execute 'syntax cluster sqlClSelectFunction add=sqlSelectFunctionCommonStar'
+	execute 'highlight link sqlSelectFunctionCommonStar sqlSelectFunction'
+
+
+	execute 'syntax match sqlSelectFunctionUser nextgroup=sqlSelectFunctionCallStar skipwhite skipempty contained /\h\w*\([\s\n\t\r]*(\)\@=/'
+	execute 'syntax cluster sqlClSelectFunction add=sqlSelectFunctionUser'
+	execute 'highlight link sqlSelectFunctionUser sqlSelectFunctionUser'
+
+
+	execute 'syntax cluster sqlClSelectContent add=@sqlClSelectFunction'
+	execute 'highlight link sqlSelectFunction     sqlFunction'
+	execute 'highlight link sqlSelectFunctionUser sqlFunctionUser'
+
+
+	execute 'syntax region sqlSelectFunctionCall     nextgroup=@sqlClSelectContentNext skipwhite skipempty contains=@sqlClSelectFunctionContent     matchgroup=sqlSelectFunctionCallDelimiter start=/(/ end=/)/'
+	execute 'syntax region sqlSelectFunctionCallStar nextgroup=@sqlClSelectContentNext skipwhite skipempty contains=@sqlClSelectFunctionContentStar matchgroup=sqlSelectFunctionCallDelimiter start=/(/ end=/)/'
+
+	execute 'highlight link sqlSelectFunctionCallDelimiter sqlFunctionCallDelimiter'
+endfunction
+
+function! s:DefineFunctionNames (names, blocks)
+	let blocks = substitute(a:blocks, '^ALL', 'Select', 'I')
+
+
 endfunction
 	" }}}
 " }}}
@@ -94,37 +130,69 @@ highlight link sqlSelectDistinct sqlFunction
 	" }}}
 
 	" Values: {{{
-call s:DefineEntity_Number('sqlSelectNumber', '@sqlClSelectContentNext', 'sqlClSelectContent')
-call s:DefineEntity_String('sqlSelectString', '@sqlClSelectContentNext', 'sqlClSelectContent')
-call s:DefineEntity_Column('sqlSelectColumn', '@sqlClSelectContentNext', 'sqlClSelectContent')
+call s:DefineEntity_Number  ('sqlSelectNumber',   '@sqlClSelectContentNext', 'sqlClSelectContent')
+call s:DefineEntity_String  ('sqlSelectString',   '@sqlClSelectContentNext', 'sqlClSelectContent')
+call s:DefineEntity_Column  ('sqlSelectColumn',   '@sqlClSelectContentNext', 'sqlClSelectContent')
+
+call s:DefineEntity_Function('sqlSelectFunction', '@sqlClSelectContentNext', 'sqlClSelectContent')
 
 		" Functions: {{{
-syntax match sqlSelectFunction nextgroup=sqlSelectFunctionCall skipwhite skipempty contains=@sqlClSelectFunctionName contained /\h\w*\([\s\n\t\r]*(\)\@=/
+syntax keyword sqlSelectFunctionCommon nextgroup=sqlSelectFunctionCall skipwhite skipempty sum min max
 
-			" Common: {{{
-syntax keyword sqlSelectFunctionNameCommon contained sum min max
-syntax cluster sqlClSelectFunctionName add=sqlSelectFunctionNameCommon
+syntax cluster sqlClSelectFunction add=sqlSelectFunctionCommon
+highlight link sqlSelectFunctionCommon sqlSelectFunction
 
-highlight link sqlSelectFunctionNameCommon sqlSelectFunctionName
-			" }}}
-			" MySQL: {{{
-syntax keyword sqlSelectFunctionNameSpecific contained concat group_concat
-syntax cluster sqlClSelectFunctionName add=sqlSelectFunctionNameSpecific
 
-highlight link sqlSelectFunctionNameSpecific sqlSelectFunctionName
-			" }}}
+syntax keyword sqlSelectFunctionCommonStar nextgroup=sqlSelectFunctionCallStar skipwhite skipempty count
 
-			" () {{{
-syntax region sqlSelectFunctionCall nextgroup=@sqlClSelectContentNext skipwhite skipempty contains=@sqlClSelectFunctionContent matchgroup=sqlSelectFunctionCallDelimiter start=/(/ end=/)/
+syntax cluster sqlClSelectFunction add=sqlSelectFunctionCommonStar
+highlight link sqlSelectFunctionCommonStar sqlSelectFunction
+
+
+syntax match sqlSelectFunctionUser nextgroup=sqlSelectFunctionCallStar skipwhite skipempty contained /\h\w*\([\s\n\t\r]*(\)\@=/
+syntax cluster sqlClSelectFunction add=sqlSelectFunctionUser
+highlight link sqlSelectFunctionUser sqlSelectFunctionUser
+
+
+syntax cluster sqlClSelectContent add=@sqlClSelectFunction
+highlight link sqlSelectFunction     sqlFunction
+highlight link sqlSelectFunctionUser sqlFunctionUser
+
+
+syntax region sqlSelectFunctionCall     nextgroup=@sqlClSelectContentNext skipwhite skipempty contains=@sqlClSelectFunctionContent     matchgroup=sqlSelectFunctionCallDelimiter start=/(/ end=/)/
+syntax region sqlSelectFunctionCallStar nextgroup=@sqlClSelectContentNext skipwhite skipempty contains=@sqlClSelectFunctionContentStar matchgroup=sqlSelectFunctionCallDelimiter start=/(/ end=/)/
 
 highlight link sqlSelectFunctionCallDelimiter sqlFunctionCallDelimiter
-			" }}}
 
-syntax cluster sqlClSelectContent add=sqlSelectFunction
 
-highlight link sqlSelectFunctionName sqlFunction
-highlight link sqlSelectFunction sqlFunctionUnknown
-		" }}}
+
+
+"syntax match sqlSelectFunction nextgroup=sqlSelectFunctionCall skipwhite skipempty contains=@sqlClSelectFunctionName contained /\h\w*\([\s\n\t\r]*(\)\@=/
+
+			"" Common: {{{
+"syntax keyword sqlSelectFunctionNameCommon contained sum min max
+"syntax cluster sqlClSelectFunctionName add=sqlSelectFunctionNameCommon
+
+"highlight link sqlSelectFunctionNameCommon sqlSelectFunctionName
+			"" }}}
+			"" MySQL: {{{
+"syntax keyword sqlSelectFunctionNameSpecific contained concat group_concat
+"syntax cluster sqlClSelectFunctionName add=sqlSelectFunctionNameSpecific
+
+"highlight link sqlSelectFunctionNameSpecific sqlSelectFunctionName
+			"" }}}
+
+			"" () {{{
+"syntax region sqlSelectFunctionCall nextgroup=@sqlClSelectContentNext skipwhite skipempty contains=@sqlClSelectFunctionContent matchgroup=sqlSelectFunctionCallDelimiter start=/(/ end=/)/
+
+"highlight link sqlSelectFunctionCallDelimiter sqlFunctionCallDelimiter
+			"" }}}
+
+"syntax cluster sqlClSelectContent add=sqlSelectFunction
+
+"highlight link sqlSelectFunctionName sqlFunction
+"highlight link sqlSelectFunction sqlFunctionUnknown
+		"" }}}
 	" }}}
 	" Alias AS: {{{
 syntax keyword sqlSelectContentAliasAs nextgroup=@sqlClSelectContentAliasName skipwhite skipempty AS
@@ -195,7 +263,7 @@ highlight link sqlComma						Operator
 highlight link sqlError						Error
 highlight link sqlEscape					Special
 highlight link sqlFunction					Function
-highlight link sqlFunctionUnknown			None
+highlight link sqlFunctionUser				None
 highlight link sqlFunctionCallDelimiter		Operator
 highlight link sqlNumber					Number
 highlight link sqlString					String
