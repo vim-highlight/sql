@@ -40,6 +40,45 @@ endif
 "endif
 " }}}
 
+" Entities: {{{
+	" Number: {{{
+function! s:DefineEntity_Number (name, next, cluster)
+	execute 'syntax match '.a:name.' nextgroup='.a:next.' skipwhite skipempty /[0-9]\+\(\.[0-9]\+\)\?/'
+	execute 'syntax cluster '.a:cluster.' add='.a:name
+
+	execute 'highlight link '.a:name.' sqlNumber'
+endfunction
+	" }}}
+	" String: {{{
+function! s:DefineEntity_String (name, next, cluster)
+	execute 'syntax region '.a:name.'Single nextgroup='.a:next.' skipwhite skipempty matchgroup='.a:name.'SingleDelimiter start=/''/ skip=/\\''/ end=/''/'
+	execute 'syntax region '.a:name.'Double nextgroup='.a:next.' skipwhite skipempty matchgroup='.a:name.'DoubleDelimiter start=/"/  skip=/\\"/  end=/"/ '
+
+	execute 'syntax cluster '.a:cluster.' add='.a:name.'Single,'.a:name.'Double'
+
+	execute 'highlight link '.a:name.'SingleDelimiter '.a:name.'Delimiter'
+	execute 'highlight link '.a:name.'DoubleDelimiter '.a:name.'Delimiter'
+
+	execute 'highlight link '.a:name.'Single          '.a:name
+	execute 'highlight link '.a:name.'Double          '.a:name
+
+	execute 'highlight link '.a:name.'Delimiter       sqlStringDelimiter'
+	execute 'highlight link '.a:name.'                sqlString'
+endfunction
+	" }}}
+	" Column: {{{
+function! s:DefineEntity_Column (name, next, cluster)
+	execute 'syntax region '.a:name.'Escaped nextgroup='.a:next.' skipwhite skipempty transparent oneline contains='.a:name.' matchgroup='.a:name.'Delimiter start=/`/ end=/`/'
+	execute 'syntax match  '.a:name.'        nextgroup='.a:next.' skipwhite skipempty contained /\h\w*/'
+
+	execute 'syntax cluster '.a:cluster.' add='.a:name.'Escaped,'.a:name
+
+	execute 'highlight link '.a:name.'Delimiter sqlDelimiter'
+	execute 'highlight link '.a:name.'          sqlColumn'
+endfunction
+	" }}}
+" }}}
+
 " ERROR: {{{
 syntax match sqlError /.\+/
 " }}}
@@ -55,46 +94,12 @@ highlight link sqlSelectDistinct sqlFunction
 	" }}}
 
 	" Values: {{{
-		" Constant: {{{
-			" Number: {{{
-syntax match sqlSelectNumber nextgroup=@sqlClSelectContentNext skipwhite skipempty /[0-9]\+\(\.[0-9]\+\)\?/
-syntax cluster sqlClSelectContent add=sqlSelectNumber
+call s:DefineEntity_Number('sqlSelectNumber', '@sqlClSelectContentNext', 'sqlClSelectContent')
+call s:DefineEntity_String('sqlSelectString', '@sqlClSelectContentNext', 'sqlClSelectContent')
+call s:DefineEntity_Column('sqlSelectColumn', '@sqlClSelectContentNext', 'sqlClSelectContent')
 
-highlight link sqlSelectNumber sqlNumber
-			" }}}
-			" String: {{{
-				" Single Quote: {{{
-syntax region sqlSelectStringSingle nextgroup=@sqlClSelectContentNext skipwhite skipempty matchgroup=sqlSelectStringSingleDelimiter start=/'/ skip=/\\'/ end=/'/
-syntax cluster sqlClSelectString add=sqlSelectStringSingle
-
-highlight link sqlSelectStringSingle          sqlSelectString
-highlight link sqlSelectStringSingleDelimiter sqlSelectStringDelimiter
-				" }}}
-				" Double Quote: {{{
-syntax region sqlSelectStringDouble nextgroup=@sqlClSelectContentNext skipwhite skipempty matchgroup=sqlSelectStringDoubleDelimiter start=/"/ skip=/\\"/ end=/"/
-syntax cluster sqlClSelectString add=sqlSelectStringDouble
-
-highlight link sqlSelectStringDouble          sqlSelectString
-highlight link sqlSelectStringDoubleDelimiter sqlSelectStringDelimiter
-				" }}}
-
-syntax cluster sqlClSelectContent add=@sqlClSelectString
-
-highlight link sqlSelectString          sqlString
-highlight link sqlSelectStringDelimiter sqlStringDelimiter
-			" }}}
-		" }}}
-		" Column: {{{
-syntax region sqlSelectColumnEscaped nextgroup=@sqlClSelectContentNext skipwhite skipempty transparent oneline contains=sqlSelectColumnName matchgroup=sqlEscape start=/`/ end=/`/
-syntax cluster sqlClSelectContent add=sqlSelectColumnEscaped
-
-syntax match sqlSelectColumnName nextgroup=@sqlClSelectContentNext skipwhite skipempty contained /\h\w*/
-syntax cluster sqlClSelectContent add=sqlSelectColumnName
-
-highlight link sqlSelectColumnName sqlColumnName
-		" }}}
 		" Functions: {{{
-syntax match sqlSelectFunction nextgroup=sqlSelectFunctionCall skipwhite skipempty contains=@sqlClSelectFunctionName contained /\h\w*\(\s*(\)\@=/
+syntax match sqlSelectFunction nextgroup=sqlSelectFunctionCall skipwhite skipempty contains=@sqlClSelectFunctionName contained /\h\w*\([\s\n\t\r]*(\)\@=/
 
 			" Common: {{{
 syntax keyword sqlSelectFunctionNameCommon contained sum min max
@@ -179,6 +184,12 @@ syntax cluster sqlClSelectContentNext add=sqlFrom
 highlight link sqlFrom sqlStructure
 " }}}
 
+" Cleaning: {{{
+delfunction s:DefineEntity_Number
+delfunction s:DefineEntity_String
+delfunction s:DefineEntity_Column
+" }}}
+
 " COLORS: {{{
 highlight link sqlComma						Operator
 highlight link sqlError						Error
@@ -192,7 +203,7 @@ highlight link sqlStringDelimiter			sqlString
 highlight link sqlStructure					Structure
 
 highlight link sqlNone						Todo
-highlight link sqlColumnName				sqlNone
+highlight link sqlColumn					sqlNone
 highlight link sqlIntoVarName				sqlNone
 highlight link sqlFromTable					sqlNone
 " }}}
