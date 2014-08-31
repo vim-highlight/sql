@@ -42,75 +42,88 @@ endif
 
 " Entities: {{{
 	" Number: {{{
-function! s:DefineEntity_Number (name, next, cluster)
-	execute 'syntax match '.a:name.' nextgroup='.a:next.' skipwhite skipempty /[0-9]\+\(\.[0-9]\+\)\?/'
-	execute 'syntax cluster '.a:cluster.' add='.a:name
+function! s:DefineEntity_Number (block)
+	execute 'syntax match sql'.a:block.'Number nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty /[0-9]\+\(\.[0-9]\+\)\?/'
+	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'Number'
 
-	execute 'highlight link '.a:name.' sqlNumber'
+	execute 'highlight link sql'.a:block.' sqlNumber'
 endfunction
 	" }}}
 	" String: {{{
-function! s:DefineEntity_String (name, next, cluster)
-	execute 'syntax region '.a:name.'Single nextgroup='.a:next.' skipwhite skipempty matchgroup='.a:name.'SingleDelimiter start=/''/ skip=/\\''/ end=/''/'
-	execute 'syntax region '.a:name.'Double nextgroup='.a:next.' skipwhite skipempty matchgroup='.a:name.'DoubleDelimiter start=/"/  skip=/\\"/  end=/"/ '
+function! s:DefineEntity_String (block)
+	execute 'syntax region sql'.a:block.'StringSingle nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty matchgroup=sql'.a:block.'StringSingleDelimiter start=/''/ skip=/\\''/ end=/''/'
+	execute 'syntax region sql'.a:block.'StringDouble nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty matchgroup=sql'.a:block.'StringDoubleDelimiter start=/"/  skip=/\\"/  end=/"/ '
 
-	execute 'syntax cluster '.a:cluster.' add='.a:name.'Single,'.a:name.'Double'
+	execute 'syntax cluster sqlCl'.a:block.'String  add=sql'.a:block.'StringSingle,sql'.a:block.'StringDouble'
+	execute 'syntax cluster sqlCl'.a:block.'Content add=@sqlCl'.a:block.'String'
 
-	execute 'highlight link '.a:name.'SingleDelimiter '.a:name.'Delimiter'
-	execute 'highlight link '.a:name.'DoubleDelimiter '.a:name.'Delimiter'
+	execute 'highlight link sql'.a:block.'StringSingleDelimiter sql'.a:block.'StringDelimiter'
+	execute 'highlight link sql'.a:block.'StringDoubleDelimiter sql'.a:block.'StringDelimiter'
 
-	execute 'highlight link '.a:name.'Single          '.a:name
-	execute 'highlight link '.a:name.'Double          '.a:name
+	execute 'highlight link sql'.a:block.'StringSingle sql'.a:block.'String'
+	execute 'highlight link sql'.a:block.'StringDouble sql'.a:block.'String'
 
-	execute 'highlight link '.a:name.'Delimiter       sqlStringDelimiter'
-	execute 'highlight link '.a:name.'                sqlString'
+	execute 'highlight link sql'.a:block.'Delimiter sqlStringDelimiter'
+	execute 'highlight link sql'.a:block.'String    sqlString'
 endfunction
 	" }}}
 	" Column: {{{
-function! s:DefineEntity_Column (name, next, cluster)
-	execute 'syntax region '.a:name.'Escaped nextgroup='.a:next.' skipwhite skipempty transparent oneline contains='.a:name.' matchgroup='.a:name.'Delimiter start=/`/ end=/`/'
-	execute 'syntax match  '.a:name.'        nextgroup='.a:next.' skipwhite skipempty contained /\h\w*/'
+function! s:DefineEntity_Column (block)
+	execute 'syntax region sql'.a:block.'ColumnEscaped nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty transparent oneline contains=sql'.a:block.'Column matchgroup=sql'.a:block.'ColumnDelimiter start=/`/ end=/`/'
+	execute 'syntax match  sql'.a:block.'Column        nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained /\h\w*/'
 
-	execute 'syntax cluster '.a:cluster.' add='.a:name.'Escaped,'.a:name
+	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'ColumnEscaped,sql'.a:block.'Column'
 
-	execute 'highlight link '.a:name.'Delimiter sqlColumnDelimiter'
-	execute 'highlight link '.a:name.'          sqlColumn'
+	execute 'highlight link sql'.a:block.'ColumnDelimiter sqlColumnDelimiter'
+	execute 'highlight link sql'.a:block.'Column          sqlColumn'
 endfunction
 	" }}}
 	" Function: {{{
-function! s:DefineEntity_Function (name, next, cluster)
-	execute 'syntax keyword '.a:name.'Common nextgroup='.a:name.'Call skipwhite skipempty sum min max'
+function! s:DefineFunctionNames (blocks, star, names)
+	let blocks = substitute(a:blocks, '^ALL', 'Select', 'I')
+	
+	let pos_old = 0
+	let pos     = match(l:blocks, '\s\+', l:pos_old)
+	while l:pos != -1
+		let block = strpart(l:blocks, l:pos_old, l:pos - l:pos_old)
 
-	execute 'syntax cluster sqlClSelectFunction add=sqlSelectFunctionCommon'
-	execute 'highlight link sqlSelectFunctionCommon sqlSelectFunction'
+		if a:star
+			execute 'syntax keyword sql'.l:block.'FunctionCommonStar nextgroup=sql'.l:block.'FunctionCallStar skipwhite skipempty '.a:names
+		else
+			execute 'syntax keyword sql'.l:block.'FunctionCommon     nextgroup=sql'.l:block.'FunctionCall     skipwhite skipempty '.a:names
+		endif
 
+		let pos_old = l:pos
+		let pos     = match(l:blocks, '\s\+', l:pos_old)
+	endwhile
 
-	execute 'syntax keyword sqlSelectFunctionCommonStar nextgroup=sqlSelectFunctionCallStar skipwhite skipempty count'
-
-	execute 'syntax cluster sqlClSelectFunction add=sqlSelectFunctionCommonStar'
-	execute 'highlight link sqlSelectFunctionCommonStar sqlSelectFunction'
-
-
-	execute 'syntax match sqlSelectFunctionUser nextgroup=sqlSelectFunctionCallStar skipwhite skipempty contained /\h\w*\([\s\n\t\r]*(\)\@=/'
-	execute 'syntax cluster sqlClSelectFunction add=sqlSelectFunctionUser'
-	execute 'highlight link sqlSelectFunctionUser sqlSelectFunctionUser'
-
-
-	execute 'syntax cluster sqlClSelectContent add=@sqlClSelectFunction'
-	execute 'highlight link sqlSelectFunction     sqlFunction'
-	execute 'highlight link sqlSelectFunctionUser sqlFunctionUser'
-
-
-	execute 'syntax region sqlSelectFunctionCall     nextgroup=@sqlClSelectContentNext skipwhite skipempty contains=@sqlClSelectFunctionContent     matchgroup=sqlSelectFunctionCallDelimiter start=/(/ end=/)/'
-	execute 'syntax region sqlSelectFunctionCallStar nextgroup=@sqlClSelectContentNext skipwhite skipempty contains=@sqlClSelectFunctionContentStar matchgroup=sqlSelectFunctionCallDelimiter start=/(/ end=/)/'
-
-	execute 'highlight link sqlSelectFunctionCallDelimiter sqlFunctionCallDelimiter'
+	let block = strpart(l:blocks, l:pos_old)
+	if a:star
+		execute 'syntax keyword sql'.l:block.'FunctionCommonStar nextgroup=sql'.l:block.'FunctionCallStar skipwhite skipempty '.a:names
+	else
+		execute 'syntax keyword sql'.l:block.'FunctionCommon     nextgroup=sql'.l:block.'FunctionCall     skipwhite skipempty '.a:names
+	endif
 endfunction
 
-function! s:DefineFunctionNames (names, blocks)
-	let blocks = substitute(a:blocks, '^ALL', 'Select', 'I')
+function! s:DefineEntity_Function (block)
+	call s:DefineFunctionNames(a:block, 0, 'sum min max')
+	call s:DefineFunctionNames(a:block, 1, 'count')
+	execute 'syntax match sql'.a:block.'FunctionUser nextgroup=sql'.a:block.'FunctionCallStar skipwhite skipempty contained /\h\w*\([\s\n\t\r]*(\)\@=/'
+
+	execute 'syntax cluster sqlCl'.a:block.'Function add=sql'.a:block.'FunctionCommon,sql'.a:block.'FunctionCommonStar,sql'.a:block.'FunctionUser'
+	execute 'syntax cluster sqlCl'.a:block.'Content add=@sqlCl'.a:block.'Function'
+
+	execute 'highlight link sql'.a:block.'FunctionCommon     sql'.a:block.'Function'
+	execute 'highlight link sql'.a:block.'FunctionCommonStar sql'.a:block.'Function'
+
+	execute 'highlight link sql'.a:block.'Function     sqlFunction'
+	execute 'highlight link sql'.a:block.'FunctionUser sqlFunctionUser'
 
 
+	execute 'syntax region sql'.a:block.'FunctionCall     nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contains=@sqlCl'.a:block.'FunctionContent     matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
+	execute 'syntax region sql'.a:block.'FunctionCallStar nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contains=@sqlCl'.a:block.'FunctionContentStar matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
+
+	execute 'highlight link sql'.a:block.'FunctionCallDelimiter sqlFunctionCallDelimiter'
 endfunction
 	" }}}
 " }}}
@@ -130,69 +143,11 @@ highlight link sqlSelectDistinct sqlFunction
 	" }}}
 
 	" Values: {{{
-call s:DefineEntity_Number  ('sqlSelectNumber',   '@sqlClSelectContentNext', 'sqlClSelectContent')
-call s:DefineEntity_String  ('sqlSelectString',   '@sqlClSelectContentNext', 'sqlClSelectContent')
-call s:DefineEntity_Column  ('sqlSelectColumn',   '@sqlClSelectContentNext', 'sqlClSelectContent')
+call s:DefineEntity_Number  ('Select')
+call s:DefineEntity_String  ('Select')
+call s:DefineEntity_Column  ('Select')
 
-call s:DefineEntity_Function('sqlSelectFunction', '@sqlClSelectContentNext', 'sqlClSelectContent')
-
-		" Functions: {{{
-syntax keyword sqlSelectFunctionCommon nextgroup=sqlSelectFunctionCall skipwhite skipempty sum min max
-
-syntax cluster sqlClSelectFunction add=sqlSelectFunctionCommon
-highlight link sqlSelectFunctionCommon sqlSelectFunction
-
-
-syntax keyword sqlSelectFunctionCommonStar nextgroup=sqlSelectFunctionCallStar skipwhite skipempty count
-
-syntax cluster sqlClSelectFunction add=sqlSelectFunctionCommonStar
-highlight link sqlSelectFunctionCommonStar sqlSelectFunction
-
-
-syntax match sqlSelectFunctionUser nextgroup=sqlSelectFunctionCallStar skipwhite skipempty contained /\h\w*\([\s\n\t\r]*(\)\@=/
-syntax cluster sqlClSelectFunction add=sqlSelectFunctionUser
-highlight link sqlSelectFunctionUser sqlSelectFunctionUser
-
-
-syntax cluster sqlClSelectContent add=@sqlClSelectFunction
-highlight link sqlSelectFunction     sqlFunction
-highlight link sqlSelectFunctionUser sqlFunctionUser
-
-
-syntax region sqlSelectFunctionCall     nextgroup=@sqlClSelectContentNext skipwhite skipempty contains=@sqlClSelectFunctionContent     matchgroup=sqlSelectFunctionCallDelimiter start=/(/ end=/)/
-syntax region sqlSelectFunctionCallStar nextgroup=@sqlClSelectContentNext skipwhite skipempty contains=@sqlClSelectFunctionContentStar matchgroup=sqlSelectFunctionCallDelimiter start=/(/ end=/)/
-
-highlight link sqlSelectFunctionCallDelimiter sqlFunctionCallDelimiter
-
-
-
-
-"syntax match sqlSelectFunction nextgroup=sqlSelectFunctionCall skipwhite skipempty contains=@sqlClSelectFunctionName contained /\h\w*\([\s\n\t\r]*(\)\@=/
-
-			"" Common: {{{
-"syntax keyword sqlSelectFunctionNameCommon contained sum min max
-"syntax cluster sqlClSelectFunctionName add=sqlSelectFunctionNameCommon
-
-"highlight link sqlSelectFunctionNameCommon sqlSelectFunctionName
-			"" }}}
-			"" MySQL: {{{
-"syntax keyword sqlSelectFunctionNameSpecific contained concat group_concat
-"syntax cluster sqlClSelectFunctionName add=sqlSelectFunctionNameSpecific
-
-"highlight link sqlSelectFunctionNameSpecific sqlSelectFunctionName
-			"" }}}
-
-			"" () {{{
-"syntax region sqlSelectFunctionCall nextgroup=@sqlClSelectContentNext skipwhite skipempty contains=@sqlClSelectFunctionContent matchgroup=sqlSelectFunctionCallDelimiter start=/(/ end=/)/
-
-"highlight link sqlSelectFunctionCallDelimiter sqlFunctionCallDelimiter
-			"" }}}
-
-"syntax cluster sqlClSelectContent add=sqlSelectFunction
-
-"highlight link sqlSelectFunctionName sqlFunction
-"highlight link sqlSelectFunction sqlFunctionUnknown
-		"" }}}
+call s:DefineEntity_Function('Select')
 	" }}}
 	" Alias AS: {{{
 syntax keyword sqlSelectContentAliasAs nextgroup=@sqlClSelectContentAliasName skipwhite skipempty AS
@@ -256,6 +211,9 @@ highlight link sqlFrom sqlStructure
 delfunction s:DefineEntity_Number
 delfunction s:DefineEntity_String
 delfunction s:DefineEntity_Column
+delfunction s:DefineEntity_Function
+
+delfunction s:DefineFunctionNames
 " }}}
 
 " COLORS: {{{
