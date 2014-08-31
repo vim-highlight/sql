@@ -46,7 +46,7 @@ function! s:DefineEntity_Number (block)
 	execute 'syntax match sql'.a:block.'Number nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty /[0-9]\+\(\.[0-9]\+\)\?/'
 	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'Number'
 
-	execute 'highlight link sql'.a:block.' sqlNumber'
+	execute 'highlight link sql'.a:block.'Number sqlNumber'
 endfunction
 	" }}}
 	" String: {{{
@@ -122,6 +122,20 @@ function! s:DefineEntity_Function (block)
 
 	execute 'syntax region sql'.a:block.'FunctionCall     nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contains=@sqlCl'.a:block.'FunctionContent     matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
 	execute 'syntax region sql'.a:block.'FunctionCallStar nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contains=@sqlCl'.a:block.'FunctionContentStar matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
+
+	execute 'syntax cluster sqlCl'.a:block.'FunctionContentStar add=sqlCl'.a:block.'FunctionContent'
+
+	" * {{{
+	execute 'syntax match sql'.a:block.'FunctionContentStarStar nextgroup=@sqlCl'.a:block.'FunctionContentNext skipwhite skipempty contained /\*/'
+	execute 'syntax cluster sqlCl'.a:block.'FunctionContentStar add=sql'.a:block.'FunctionContentStarStar'
+	execute 'highlight link sql'.a:block.'FunctionContentStarStar sqlStar'
+	" }}}
+	
+	call s:DefineEntity_Number  ('SelectFunction')
+	call s:DefineEntity_String  ('SelectFunction')
+	"call s:DefineEntity_Column  ('SelectFunction')
+	
+	execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=sqlError'
 
 	execute 'highlight link sql'.a:block.'FunctionCallDelimiter sqlFunctionCallDelimiter'
 endfunction
@@ -224,6 +238,7 @@ highlight link sqlFunction					Function
 highlight link sqlFunctionUser				None
 highlight link sqlFunctionCallDelimiter		Operator
 highlight link sqlNumber					Number
+highlight link sqlStar						Operator
 highlight link sqlString					String
 highlight link sqlStringDelimiter			sqlString
 highlight link sqlStructure					Structure
