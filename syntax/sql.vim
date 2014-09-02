@@ -178,6 +178,12 @@ syntax cluster sqlClSelectContentGeneral add=sqlSelectDistinct
 highlight link sqlSelectDistinct sqlFunction
 	" }}}
 
+	" Star: * {{{
+syntax match sqlSelectStar nextgroup=@sqlClSelectContentNext skipwhite skipempty /\*/
+syntax cluster sqlClSelectContent add=sqlSelectStar
+
+highlight link sqlSelectStar sqlStar
+	" }}}
 	" Values: {{{
 call s:DefineEntity_Number  ('Select')
 call s:DefineEntity_String  ('Select')
