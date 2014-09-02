@@ -69,17 +69,41 @@ function! s:DefineEntity_String (block)
 	execute 'highlight link sql'.a:block.'String    sqlString'
 endfunction
 	" }}}
+	" Table: {{{
+function! s:DefineEntity_TablePart (block, next, skip)
+	execute 'syntax region sql'.a:block.'TableEscaped nextgroup='.a:next.' '.(a:skip ? 'skipwhite skipempty' : '').' transparent oneline contains=sql'.a:block.'Table matchgroup=sql'.a:block.'TableDelimiter contained start=/`/ end=/`/'
+	execute 'syntax match  sql'.a:block.'Table        nextgroup='.a:next.' '.(a:skip ? 'skipwhite skipempty' : '').' contained /\h\w*/'
+
+	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'TableEscaped,sql'.a:block.'Table'
+
+	execute 'highlight link sql'.a:block.'TableDelimiter sqlTableDelimiter'
+	execute 'highlight link sql'.a:block.'Table          sqlTable'
+endfunction
+function! s:DefineEntity_Table (block)
+	call s:DefineEntity_TablePart(a:block, '@sqlCl'.a:block.'ContentNext', 1)
+endfunction
+	" }}}
 	" Column: {{{
 function! s:DefineEntity_Column (block)
-	execute 'syntax region sql'.a:block.'ColumnEscaped nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty transparent oneline contains=sql'.a:block.'Column matchgroup=sql'.a:block.'ColumnDelimiter start=/`/ end=/`/'
+		" table. {{{
+	call s:DefineEntity_TablePart(a:block, 'sql'.a:block.'TableSeparator', 0)
+
+	execute 'syntax match sql'.a:block.'TableSeparator nextgroup=@sqlCl'.a:block.'Column /\./'
+	execute 'highlight link sql'.a:block.'TableSeparator sqlTableSeparator'
+		" }}}
+		" column {{{
+	execute 'syntax region sql'.a:block.'ColumnEscaped nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty transparent oneline contains=sql'.a:block.'Column matchgroup=sql'.a:block.'ColumnDelimiter contained start=/`/ end=/`/'
 	execute 'syntax match  sql'.a:block.'Column        nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained /\h\w*/'
 
-	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'ColumnEscaped,sql'.a:block.'Column'
+	execute 'syntax cluster sqlCl'.a:block.'Column  add=sql'.a:block.'ColumnEscaped,sql'.a:block.'Column'
+	execute 'syntax cluster sqlCl'.a:block.'Content add=@sqlCl'.a:block.'Column'
 
 	execute 'highlight link sql'.a:block.'ColumnDelimiter sqlColumnDelimiter'
 	execute 'highlight link sql'.a:block.'Column          sqlColumn'
 endfunction
+		" }}}
 	" }}}
+	
 	" Function: {{{
 		" DefineFunctionNames {{{
 function! s:DefineFunctionNames (blocks, star, names)
@@ -138,17 +162,6 @@ function! s:DefineEntity_Function (block)
 	call s:DefineEntity_Column  ('SelectFunction')
 
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=@sqlCl'.a:block.'Function'
-
-		" Spaces: {{{
-	execute 'syntax match sql'.a:block.'FunctionContentSpace     nextgroup=@sqlCl'.a:block.'FunctionContent     skipwhite skipempty /\s\+/'
-	execute 'syntax match sql'.a:block.'FunctionContentSpaceStar nextgroup=@sqlCl'.a:block.'FunctionContentStar skipwhite skipempty /\s\+/'
-
-	execute 'syntax cluster sqlCl'.a:block.'FunctionContent     add=sql'.a:block.'FunctionContentSpace'
-	execute 'syntax cluster sqlCl'.a:block.'FunctionContentStar add=sql'.a:block.'FunctionContentSpaceStar'
-
-	execute 'highlight link sql'.a:block.'FunctionContentSpace     None'
-	execute 'highlight link sql'.a:block.'FunctionContentSpaceStar sql'.a:block.'FunctionContentSpace'
-		" }}}
 	" }}}
 	
 	" Values Separator: {{{
@@ -167,15 +180,15 @@ endfunction
 " }}}
 
 " ERROR: {{{
-syntax match sqlError /.\+/
+syntax match sqlError /\S\+.\+/
 " }}}
 
 " SELECT: {{{
-syntax keyword sqlSelect nextgroup=@sqlClSelectContentGeneral skipwhite skipempty SELECT
+syntax keyword sqlSelect nextgroup=@sqlClSelectContentStart skipwhite skipempty SELECT
 
 	" DISTINCT: {{{
 syntax keyword sqlSelectDistinct nextgroup=@sqlClSelectContent skipwhite skipempty DISTINCT
-syntax cluster sqlClSelectContentGeneral add=sqlSelectDistinct
+syntax cluster sqlClSelectContentStart add=sqlSelectDistinct
 
 highlight link sqlSelectDistinct sqlFunction
 	" }}}
@@ -195,29 +208,35 @@ call s:DefineEntity_Function('Select')
 call s:DefineFunctionNames  ('Select', 0, 'concat group_concat')
 	" }}}
 	" Alias AS: {{{
-syntax keyword sqlSelectContentAliasAs nextgroup=@sqlClSelectContentAliasName skipwhite skipempty AS
-syntax cluster sqlClSelectContentNext add=sqlSelectContentAliasAs
+syntax keyword sqlSelectAliasAs nextgroup=@sqlClSelectAliasName skipwhite skipempty AS
+syntax cluster sqlClSelectContentNext add=sqlSelectAliasAs
 
 		" Name: {{{
-syntax region sqlSelectContentAliasEscaped nextgroup=@sqlClSelectContentNext skipwhite skipempty transparent oneline contains=sqlSelectContentAliasName matchgroup=sqlEscape start=/`/ end=/`/
-syntax cluster sqlClSelectContentAliasName add=sqlSelectContentAliasEscaped
+syntax region sqlSelectAliasEscaped nextgroup=@sqlClSelectAliasNext skipwhite skipempty transparent oneline contains=sqlSelectAliasName matchgroup=sqlSelectAliasNameDelimiter contained start=/`/ end=/`/
+syntax match  sqlSelectAliasName    nextgroup=@sqlClSelectAliasNext skipwhite skipempty                                                                                        contained /\h\w*/
 
-syntax match sqlSelectContentAliasName nextgroup=@sqlClSelectContentNext skipwhite skipempty contained /\h\w*/
-syntax cluster sqlClSelectContentAliasName add=sqlSelectContentAliasName
+syntax cluster sqlClSelectAliasName add=sqlSelectAliasEscaped,sqlSelectAliasName
 
-highlight link sqlSelectContentAliasName sqlColumnName
+highlight link sqlSelectAliasNameDelimiter sqlAliasDelimiter
+highlight link sqlSelectAliasName          sqlAlias
 		" }}}
 
-highlight link sqlSelectContentAliasAs sqlStructure
+
+syntax cluster sqlClSelectAliasNext add=sqlError
+syntax cluster sqlClSelectAliasNext add=@sqlClSelectNext
+
+highlight link sqlSelectAliasAs sqlStructure
 	" }}}
 	" Values Separator: {{{
 syntax match sqlSelectContentComma nextgroup=@sqlClSelectContent skipwhite skipempty /,/
 syntax cluster sqlClSelectContentNext add=sqlSelectContentComma
+syntax cluster sqlClSelectAliasNext   add=sqlSelectContentComma
 
 highlight link sqlSelectContentComma sqlComma
 	" }}}
 
-syntax cluster sqlClSelectContentGeneral add=@sqlClSelectContent
+syntax cluster sqlClSelectContentNext  add=@sqlClSelectNext
+syntax cluster sqlClSelectContentStart add=@sqlClSelectContent
 
 highlight link sqlSelect sqlStructure
 " }}}
@@ -235,7 +254,7 @@ syntax cluster sqlClIntoContentNext add=sqlIntoContentComma
 highlight link sqlIntoContentComma sqlComma
 	" }}}
 
-syntax cluster sqlClSelectContentNext add=sqlInto
+syntax cluster sqlClSelectNext add=sqlInto
 
 highlight link sqlInto sqlStructure
 " }}}
@@ -243,15 +262,34 @@ highlight link sqlInto sqlStructure
 syntax keyword sqlFrom nextgroup=@sqlClFromContent skipwhite skipempty FROM
 
 	" Table: {{{
-syntax match sqlFromTable nextgroup=@sqlClFromContentNext skipwhite skipempty contained /\h\w*/
-syntax cluster sqlClFromContent add=sqlFromTable
+call s:DefineEntity_Table('From')
 	" }}}
-	" Jointure: norme 87 : , {{{
-	" }}}
-	" Jointure: norme 92 : JOIN {{{
-	" }}}
+	"" Jointure: norme 87 : , {{{
+"syntax match sqlFromJoin87 nextgroup=@sqlClFromJoinContent skipwhite skipempty /,/
+"syntax cluster sqlClFromContentNext add=sqlFromJoin87
 
-syntax cluster sqlClSelectContentNext add=sqlFrom
+"highlight link sqlFromJoin87 sqlOperator
+	"" }}}
+	"" Jointure: norme 92 : JOIN {{{
+"syntax keyword sqlFromJoin92Common     nextgroup=sqlFromJoin92Join                         skipwhite skipempty INNER CROSS NATURAL
+"syntax keyword sqlFromJoin92Outer      nextgroup=sqlFromJoin92OuterOuter,sqlFromJoin92Join skipwhite skipempty LEFT RIGHT FULL
+"syntax keyword sqlFromJoin92OuterOuter nextgroup=sqlFromJoin92Join                         skipwhite skipempty OUTER
+"syntax keyword sqlFromJoin92Join       nextgroup=@sqlClFromJoinContent                     skipwhite skipempty JOIN
+
+"syntax cluster sqlClFromJoin92 add=sqlFromJoin92Common,sqlFromJoin92Outer,sqlFromJoin92OuterOuter,sqlFromJoin92Join
+
+"highlight link sqlFromJoin92Common     sqlFromJoin92
+"highlight link sqlFromJoin92Outer      sqlFromJoin92
+"highlight link sqlFromJoin92OuterOuter sqlFromJoin92
+"highlight link sqlFromJoin92Join       sqlFromJoin92
+
+"syntax cluster sqlClFromContentNext add=@sqlClFromJoin92
+
+"highlight link sqlFromJoin92 sqlStructure
+		"" }}}
+	"" }}}
+
+syntax cluster sqlClSelectNext add=sqlFrom
 
 highlight link sqlFrom sqlStructure
 " }}}
@@ -259,6 +297,8 @@ highlight link sqlFrom sqlStructure
 " Cleaning: {{{
 delfunction s:DefineEntity_Number
 delfunction s:DefineEntity_String
+delfunction s:DefineEntity_TablePart
+delfunction s:DefineEntity_Table
 delfunction s:DefineEntity_Column
 delfunction s:DefineEntity_Function
 
@@ -266,7 +306,11 @@ delfunction s:DefineFunctionNames
 " }}}
 
 " COLORS: {{{
+highlight link sqlAlias						sqlNone
+highlight link sqlAliasDelimiter			Delimiter
 highlight link sqlComma						Operator
+highlight link sqlColumn					sqlNone
+highlight link sqlColumnDelimiter			Delimiter
 highlight link sqlError						Error
 highlight link sqlEscape					Special
 highlight link sqlFunction					Function
@@ -277,9 +321,11 @@ highlight link sqlStar						Operator
 highlight link sqlString					String
 highlight link sqlStringDelimiter			sqlString
 highlight link sqlStructure					Structure
+highlight link sqlTable						sqlNone
+highlight link sqlTableDelimiter			Delimiter
+highlight link sqlTableSeparator			Operator
 
 highlight link sqlNone						Todo
-highlight link sqlColumn					sqlNone
 highlight link sqlIntoVarName				sqlNone
 highlight link sqlFromTable					sqlNone
 " }}}
