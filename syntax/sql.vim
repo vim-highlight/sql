@@ -131,7 +131,7 @@ function! s:DefineEntity_Function (block)
 	
 	call s:DefineEntity_Number  ('SelectFunction')
 	call s:DefineEntity_String  ('SelectFunction')
-	"call s:DefineEntity_Column  ('SelectFunction')
+	call s:DefineEntity_Column  ('SelectFunction')
 	
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContent     add=sqlError'
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContentStar add=@sqlCl'.a:block.'FunctionContent'
