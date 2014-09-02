@@ -79,6 +79,7 @@ function! s:DefineEntity_Column (block)
 endfunction
 	" }}}
 	" Function: {{{
+		" DefineFunctionNames {{{
 function! s:DefineFunctionNames (blocks, star, names)
 	let blocks = substitute(a:blocks, '^ALL', 'Select', 'I')
 	
@@ -104,11 +105,12 @@ function! s:DefineFunctionNames (blocks, star, names)
 		execute 'syntax keyword sql'.l:block.'FunctionCommon     nextgroup=sql'.l:block.'FunctionCall     skipwhite skipempty '.a:names
 	endif
 endfunction
-
+		" }}}
+		" DefineEntity_Function {{{
 function! s:DefineEntity_Function (block)
 	call s:DefineFunctionNames(a:block, 0, 'sum min max')
 	call s:DefineFunctionNames(a:block, 1, 'count')
-	execute 'syntax match sql'.a:block.'FunctionUser nextgroup=sql'.a:block.'FunctionCallStar skipwhite skipempty contained /\h\w*\([\s\n\t\r]*(\)\@=/'
+	execute 'syntax match sql'.a:block.'FunctionUser nextgroup=sql'.a:block.'FunctionCallStar skipwhite skipempty contained /\h\w*\(\s*(\)\@=/'
 
 	execute 'syntax cluster sqlCl'.a:block.'Function add=sql'.a:block.'FunctionCommon,sql'.a:block.'FunctionCommonStar,sql'.a:block.'FunctionUser'
 	execute 'syntax cluster sqlCl'.a:block.'Content add=@sqlCl'.a:block.'Function'
@@ -123,21 +125,42 @@ function! s:DefineEntity_Function (block)
 	execute 'syntax region sql'.a:block.'FunctionCall     nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contains=@sqlCl'.a:block.'FunctionContent     matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
 	execute 'syntax region sql'.a:block.'FunctionCallStar nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contains=@sqlCl'.a:block.'FunctionContentStar matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
 
-	" * {{{
+	" Star: * {{{
 	execute 'syntax match sql'.a:block.'FunctionContentStarStar nextgroup=@sqlCl'.a:block.'FunctionContentNext skipwhite skipempty contained /\*/'
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContentStar add=sql'.a:block.'FunctionContentStarStar'
 	execute 'highlight link sql'.a:block.'FunctionContentStarStar sqlStar'
 	" }}}
-	
+	" Values: {{{
 	call s:DefineEntity_Number  ('SelectFunction')
 	call s:DefineEntity_String  ('SelectFunction')
 	call s:DefineEntity_Column  ('SelectFunction')
+
+	execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=@sqlCl'.a:block.'Function'
+
+		" Spaces: {{{
+	execute 'syntax match sql'.a:block.'FunctionContentSpace     nextgroup=@sqlCl'.a:block.'FunctionContent     skipwhite skipempty /\s\+/'
+	execute 'syntax match sql'.a:block.'FunctionContentSpaceStar nextgroup=@sqlCl'.a:block.'FunctionContentStar skipwhite skipempty /\s\+/'
+
+	execute 'syntax cluster sqlCl'.a:block.'FunctionContent     add=sql'.a:block.'FunctionContentSpace'
+	execute 'syntax cluster sqlCl'.a:block.'FunctionContentStar add=sql'.a:block.'FunctionContentSpaceStar'
+
+	execute 'highlight link sql'.a:block.'FunctionContentSpace     None'
+	execute 'highlight link sql'.a:block.'FunctionContentSpaceStar sql'.a:block.'FunctionContentSpace'
+		" }}}
+	" }}}
+	
+	" Values Separator: {{{
+	execute 'syntax match sql'.a:block.'FunctionContentComma nextgroup=@sqlCl'.a:block.'FunctionContentCall skipwhite skipempty /,/'
+	execute 'syntax cluster sqlCl'.a:block.'FunctionContentNext add=sql'.a:block.'FunctionContentComma'
+	execute 'highlight link sql'.a:block.'FunctionContentComma sqlComma'
+	" }}}
 	
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContent     add=sqlError'
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContentStar add=@sqlCl'.a:block.'FunctionContent'
 
 	execute 'highlight link sql'.a:block.'FunctionCallDelimiter sqlFunctionCallDelimiter'
 endfunction
+		" }}}
 	" }}}
 " }}}
 
