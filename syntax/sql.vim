@@ -20,9 +20,11 @@ function! s:DefineOption (name, value)
 	endif
 endfunction
 
-let s:driver = s:DefineOption('driver', '')
+let s:driver         = s:DefineOption('driver'        , '')
 
 let s:case_sensitive = s:DefineOption('case_sensitive', 0)
+
+let s:join_92        = s:DefineOption('join_92'       , 1)
 
 delfunction s:DefineOption
 " }}}
@@ -190,6 +192,7 @@ call s:DefineEntity_String  ('Select')
 call s:DefineEntity_Column  ('Select')
 
 call s:DefineEntity_Function('Select')
+call s:DefineFunctionNames  ('Select', 0, 'concat group_concat')
 	" }}}
 	" Alias AS: {{{
 syntax keyword sqlSelectContentAliasAs nextgroup=@sqlClSelectContentAliasName skipwhite skipempty AS
@@ -242,6 +245,10 @@ syntax keyword sqlFrom nextgroup=@sqlClFromContent skipwhite skipempty FROM
 	" Table: {{{
 syntax match sqlFromTable nextgroup=@sqlClFromContentNext skipwhite skipempty contained /\h\w*/
 syntax cluster sqlClFromContent add=sqlFromTable
+	" }}}
+	" Jointure: norme 87 : , {{{
+	" }}}
+	" Jointure: norme 92 : JOIN {{{
 	" }}}
 
 syntax cluster sqlClSelectContentNext add=sqlFrom

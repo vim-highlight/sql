@@ -8,6 +8,7 @@ CONTENTS                                                     *vim-sql-contents*
     2.Options.......................................|vim-sql-options|
 		2.1.General options.........................|vim-sql-options-general|
 		2.2.Case match options......................|vim-sql-options-caseMatch|
+		2.3.Standards options.......................|vim-sql-options-standards|
 
 ===============================================================================
 1. Introduction                                          *vim-sql-introduction*
@@ -39,15 +40,18 @@ SQL sub-highlight to use. Must be `syntax/sql/XXX.vim` file >
 -------------------------------------------------------------------------------
 2.2. Case match options                             *vim-sql-options-caseMatch*
 
-                                            *'vim_sql_case_sensitive_keywords'*
+                                                     *'vim_sql_case_sensitive'*
 Default: 0
 Is SQL keywords case sensitive ? >
-    let g:vim_sql_sensistive_keywords = 0
+    let g:vim_sql_case_sensistive = 0
 <
 
-                                           *'vim_sql_case_sensitive_functions'*
-Default: 0
-Is SQL functions case sensitive ? >
-    let g:vim_sql_sensistive_functions = 0
+-------------------------------------------------------------------------------
+2.3. Standards options                              *vim-sql-options-standards*
+
+                                                            *'vim_sql_join_92'*
+Default: 1
+can SQL use the 'INNER/OUTER JOIN' form (standard of 1992) ? >
+    let g:vim_sql_join_92 = 1
 <
 
