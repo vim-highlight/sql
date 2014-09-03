@@ -277,33 +277,44 @@ syntax keyword sqlFrom nextgroup=@sqlClFromContent skipwhite skipempty FROM
 call s:DefineEntity_Table('From')
 
 		" Alias: AS {{{
-"call s:DefineEntity_Alias('From')
+call s:DefineEntity_Alias('From')
 		" }}}
 	" }}}
+	
 	"" Jointure: norme 87 : , {{{
 "syntax match sqlFromJoin87 nextgroup=@sqlClFromJoinContent skipwhite skipempty /,/
 "syntax cluster sqlClFromContentNext add=sqlFromJoin87
 
 "highlight link sqlFromJoin87 sqlOperator
 	"" }}}
-	"" Jointure: norme 92 : JOIN {{{
-"syntax keyword sqlFromJoin92Common     nextgroup=sqlFromJoin92Join                         skipwhite skipempty INNER CROSS NATURAL
-"syntax keyword sqlFromJoin92Outer      nextgroup=sqlFromJoin92OuterOuter,sqlFromJoin92Join skipwhite skipempty LEFT RIGHT FULL
-"syntax keyword sqlFromJoin92OuterOuter nextgroup=sqlFromJoin92Join                         skipwhite skipempty OUTER
-"syntax keyword sqlFromJoin92Join       nextgroup=@sqlClFromJoinContent                     skipwhite skipempty JOIN
+	" Jointure: norme 92 : JOIN {{{
+		" JOIN: {{{
+syntax keyword sqlFromJoin92Common     nextgroup=sqlFromJoin92Join                         skipwhite skipempty contained INNER CROSS NATURAL
+syntax keyword sqlFromJoin92Outer      nextgroup=sqlFromJoin92OuterOuter,sqlFromJoin92Join skipwhite skipempty contained LEFT RIGHT FULL
+syntax keyword sqlFromJoin92OuterOuter nextgroup=sqlFromJoin92Join                         skipwhite skipempty contained OUTER
+syntax keyword sqlFromJoin92Join       nextgroup=@sqlClFromJoin92Content                   skipwhite skipempty contained JOIN
 
-"syntax cluster sqlClFromJoin92 add=sqlFromJoin92Common,sqlFromJoin92Outer,sqlFromJoin92OuterOuter,sqlFromJoin92Join
+syntax cluster sqlClFromJoin92 add=sqlFromJoin92Common,sqlFromJoin92Outer,sqlFromJoin92OuterOuter,sqlFromJoin92Join
 
-"highlight link sqlFromJoin92Common     sqlFromJoin92
-"highlight link sqlFromJoin92Outer      sqlFromJoin92
-"highlight link sqlFromJoin92OuterOuter sqlFromJoin92
-"highlight link sqlFromJoin92Join       sqlFromJoin92
+highlight link sqlFromJoin92Common     sqlFromJoin92
+highlight link sqlFromJoin92Outer      sqlFromJoin92
+highlight link sqlFromJoin92OuterOuter sqlFromJoin92
+highlight link sqlFromJoin92Join       sqlFromJoin92
 
-"syntax cluster sqlClFromContentNext add=@sqlClFromJoin92
+syntax cluster sqlClFromContentNext add=@sqlClFromJoin92
+syntax cluster sqlClFromAliasNext   add=@sqlClFromJoin92
 
-"highlight link sqlFromJoin92 sqlStructure
-		"" }}}
-	"" }}}
+highlight link sqlFromJoin92           sqlStructure
+		" }}}
+		" Table: {{{
+call s:DefineEntity_Table('FromJoin92')
+
+			" Alias: AS {{{
+call s:DefineEntity_Alias('FromJoin92')
+			" }}}
+		" }}}
+	" }}}
+" }}}
 
 syntax cluster sqlClSelectNext add=sqlFrom
 
