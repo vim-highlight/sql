@@ -311,10 +311,18 @@ call s:DefineEntity_Table('FromJoin92')
 
 			" Alias: AS {{{
 call s:DefineEntity_Alias('FromJoin92')
+syntax clear @sqlClFromJoin92AliasNext
 			" }}}
 		" }}}
+		" ON: {{{
+syntax keyword sqlFromJoin92On nextgroup=@sqlClFromContentNext skipwhite skipempty contained ON
+
+syntax cluster sqlClFromJoin92ContentNext add=sqlFromJoin92On
+syntax cluster sqlClFromJoin92AliasNext   add=sqlFromJoin92On
+
+highlight link sqlFromJoin92On sqlStatement
+		" }}}
 	" }}}
-" }}}
 
 syntax cluster sqlClSelectNext add=sqlFrom
 
@@ -346,6 +354,7 @@ highlight link sqlFunctionUser				Operator
 highlight link sqlFunctionCallDelimiter		Operator
 highlight link sqlNumber					Number
 highlight link sqlStar						Operator
+highlight link sqlStatement					Statement
 highlight link sqlString					String
 highlight link sqlStringDelimiter			sqlString
 highlight link sqlStructure					Structure
