@@ -133,6 +133,24 @@ function! s:DefineEntity_Alias (block)
 endfunction
 	" }}}
 	
+	" Group: () {{{
+function! s:DefineEntity_Group (block)
+	execute 'syntax region sql'.a:block.'Group nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'GroupContent matchgroup=sql'.a:block.'GroupDelimiter start=/(/ end=/)/'
+
+		" Values: {{{
+	call s:DefineEntity_Number  (a:block.'Group')
+	call s:DefineEntity_String  (a:block.'Group')
+	call s:DefineEntity_Column  (a:block.'Group')
+
+	execute 'syntax cluster sqlCl'.a:block.'GroupContent add=sql'.a:block.'Group,@sqlCl'.a:block.'Function,sqlError'
+		" }}}
+
+	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'Group'
+
+	execute 'highlight link sql'.a:block.'GroupDelimiter sqlGroupDelimiter'
+endfunction
+	" }}}
+
 	" Function: {{{
 		" DefineFunctionNames {{{
 function! s:DefineFunctionNames (blocks, star, names)
@@ -177,8 +195,8 @@ function! s:DefineEntity_Function (block)
 	execute 'highlight link sql'.a:block.'FunctionUser sqlFunctionUser'
 
 
-	execute 'syntax region sql'.a:block.'FunctionCall     nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained contains=@sqlCl'.a:block.'FunctionContent     matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
-	execute 'syntax region sql'.a:block.'FunctionCallStar nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained contains=@sqlCl'.a:block.'FunctionContentStar matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
+	execute 'syntax region sql'.a:block.'FunctionCall     nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionContent     matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
+	execute 'syntax region sql'.a:block.'FunctionCallStar nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionContentStar matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
 
 	" Star: * {{{
 	execute 'syntax match sql'.a:block.'FunctionContentStarStar nextgroup=@sqlCl'.a:block.'FunctionContentNext skipwhite skipempty contained display /\*/'
@@ -186,11 +204,11 @@ function! s:DefineEntity_Function (block)
 	execute 'highlight link sql'.a:block.'FunctionContentStarStar sqlStar'
 	" }}}
 	" Values: {{{
-	call s:DefineEntity_Number  ('SelectFunction')
-	call s:DefineEntity_String  ('SelectFunction')
-	call s:DefineEntity_Column  ('SelectFunction')
+	call s:DefineEntity_Number  (a:block.'Function')
+	call s:DefineEntity_String  (a:block.'Function')
+	call s:DefineEntity_Column  (a:block.'Function')
 
-	execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=@sqlCl'.a:block.'Function'
+	execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=@sqlCl'.a:block.'Function,sql'.a:block.'Group,sqlError'
 	" }}}
 	
 	" Values Separator: {{{
@@ -232,6 +250,8 @@ highlight link sqlSelectStar sqlStar
 call s:DefineEntity_Number  ('Select')
 call s:DefineEntity_String  ('Select')
 call s:DefineEntity_Column  ('Select')
+
+call s:DefineEntity_Group   ('Select')
 
 call s:DefineEntity_Function('Select')
 call s:DefineFunctionNames  ('Select', 0, 'concat group_concat')
@@ -335,6 +355,7 @@ delfunction s:DefineEntity_String
 delfunction s:DefineEntity_Table
 delfunction s:DefineEntity_Column
 delfunction s:DefineEntity_Alias
+delfunction s:DefineEntity_Group
 delfunction s:DefineEntity_Function
 
 delfunction s:DefineFunctionNames
@@ -352,6 +373,7 @@ highlight link sqlEscape					Special
 highlight link sqlFunction					Function
 highlight link sqlFunctionUser				Operator
 highlight link sqlFunctionCallDelimiter		Operator
+highlight link sqlGroupDelimiter			Operator
 highlight link sqlNumber					Number
 highlight link sqlStar						Operator
 highlight link sqlStatement					Statement
