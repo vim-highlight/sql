@@ -49,7 +49,7 @@ endif
 " Entities: {{{
 	" Number: {{{
 function! s:DefineEntity_Number (block)
-	execute 'syntax match sql'.a:block.'Number nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained display /[0-9]\+\(\.[0-9]\+\)\?/'
+	execute 'syntax match sql'.a:block.'Number nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained display /[+-]\?[0-9]\+\(\.[0-9]\+\)\?/'
 	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'Number'
 
 	execute 'highlight link sql'.a:block.'Number sqlNumber'
@@ -208,14 +208,15 @@ function! s:DefineEntity_Function (block)
 	call s:DefineEntity_String  (a:block.'Function')
 	call s:DefineEntity_Column  (a:block.'Function')
 
-	execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=@sqlCl'.a:block.'Function,sql'.a:block.'Group,sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=@sqlCl'.a:block.'Function,sql'.a:block.'Group'
 	" }}}
 	
 	" Values Separator: {{{
-	execute 'syntax match sql'.a:block.'FunctionContentComma nextgroup=@sqlCl'.a:block.'FunctionContentCall skipwhite skipempty contained display /,/'
+	execute 'syntax match sql'.a:block.'FunctionContentComma nextgroup=@sqlCl'.a:block.'FunctionContent skipwhite skipempty contained display /,/'
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContentNext add=sql'.a:block.'FunctionContentComma'
 	execute 'highlight link sql'.a:block.'FunctionContentComma sqlComma'
 	" }}}
+	execute 'syntax cluster sqlCl'.a:block.'FunctionContentNext add=sqlError'
 	
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContent     add=sqlError'
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContentStar add=@sqlCl'.a:block.'FunctionContent'
