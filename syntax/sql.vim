@@ -253,19 +253,36 @@ endfunction
 function! s:DefineEntity_OperationComparisonOperator(block)
 	execute 'syntax match sql'.a:block.'OperationComparisonOperator nextgroup=@sqlCl'.a:block.'OperationComparisonOperatorNext skipwhite skipempty contained display /\(=\|!\(=\|<\|>\)\|<\(>\|=\)\?\|>\(=\)\?\)/'
 
-	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonOperatorNext add=sql'.a:block.'OperationComparisonMultiple,@sqlCl'.a:block.'OperationPartNext'
+	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonOperatorNext add=sql'.a:block.'OperationComparisonMultipleOperator,@sqlCl'.a:block.'OperationPartNext'
 	execute 'syntax cluster sqlCl'.a:block.'OperationComparison             add=sql'.a:block.'OperationComparisonOperator'
 	
 	execute 'highlight link sql'.a:block.'OperationComparisonOperator sqlOperationComparisonOperator'
 endfunction
 			" }}}
-			" IN: {{{
-function! s:DefineEntity_OperationComparisonIn(block)
-	execute 'syntax keyword sql'.a:block.'OperationComparisonIn nextgroup=@sqlCl'.a:block.'OperationComparisonMultipleBlock skipwhite skipempty contained display IN'
+			" Multiple: IN ANY ALL {{{
+				" Operator: ANY ALL {{{
+function! s:DefineEntity_OperationComparisonMultipleOperator(block)
+	execute 'syntax keyword sql'.a:block.'OperationComparisonMultipleOperator nextgroup=@sqlCl'.a:block.'OperationComparisonMultipleBlock skipwhite skipempty contained display ANY ALL'
 	
-	execute 'syntax cluster sqlCl'.a:block.'OperationComparison add=sql'.a:block.'OperationComparisonIn'
+	execute 'highlight link sql'.a:block.'OperationComparisonMultipleOperator sqlOperationComparisonMultiple'
+endfunction
+				" }}}
+				" Root: IN {{{
+function! s:DefineEntity_OperationComparisonMultipleRoot(block)
+	execute 'syntax keyword sql'.a:block.'OperationComparisonMultipleRoot nextgroup=@sqlCl'.a:block.'OperationComparisonMultipleBlock skipwhite skipempty contained display IN'
 	
-	execute 'highlight link sql'.a:block.'OperationComparisonIn sqlOperationComparisonIn'
+	execute 'syntax cluster sqlCl'.a:block.'OperationComparison add=sql'.a:block.'OperationComparisonMultipleRoot'
+	
+	execute 'highlight link sql'.a:block.'OperationComparisonMultipleRoot sqlOperationComparisonMultiple'
+endfunction
+				" }}}
+
+function! s:DefineEntity_OperationComparisonMultiple(block)
+	call s:DefineEntity_OperationComparisonMultipleOperator(a:block)
+	call s:DefineEntity_OperationComparisonMultipleRoot    (a:block)
+
+	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlock add=sqlError'
+	"call s:DefineEntity_OperationComparisonMultipleBlock   (a:block)
 endfunction
 			" }}}
 
@@ -273,8 +290,7 @@ function! s:DefineEntity_OperationComparison(block)
 	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlock add=sqlError'
 
 	call s:DefineEntity_OperationComparisonOperator(a:block)
-	"call s:DefineEntity_OperationComparisonMultiple(a:block)
-	call s:DefineEntity_OperationComparisonIn      (a:block)
+	call s:DefineEntity_OperationComparisonMultiple(a:block)
 	
 	execute 'syntax cluster sqlCl'.a:block.'Operation add=@sqlCl'.a:block.'OperationComparison'
 endfunction
@@ -433,8 +449,9 @@ delfunction s:DefineEntity_Function
 delfunction s:DefineEntity_Group
 delfunction s:DefineEntity_OperationCalculation
 delfunction s:DefineEntity_OperationComparisonOperator
-"delfunction s:DefineEntity_OperationComparisonMultiple
-delfunction s:DefineEntity_OperationComparisonIn
+delfunction s:DefineEntity_OperationComparisonMultipleOperator
+delfunction s:DefineEntity_OperationComparisonMultipleRoot
+delfunction s:DefineEntity_OperationComparisonMultiple
 delfunction s:DefineEntity_OperationCombination
 "delfunction s:DefineEntity_OperationTest
 delfunction s:DefineEntity_Operation
@@ -458,7 +475,7 @@ highlight link sqlGroupDelimiter				Operator
 highlight link sqlNumber						Number
 highlight link sqlOperationCalculation			Operator
 highlight link sqlOperationComparisonOperator	Operator
-highlight link sqlOperationComparisonIn			Statement
+highlight link sqlOperationComparisonMultiple	Statement
 highlight link sqlOperationCombination			Statement
 highlight link sqlStar							Operator
 highlight link sqlStatement						Statement
