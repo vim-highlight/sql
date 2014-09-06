@@ -240,16 +240,38 @@ endfunction
 	" Operation: {{{
 		" Calculation: + - * / % {{{
 function! s:DefineEntity_OperationCalculation(block)
-	execute 'syntax match sql'.a:block.'OperationCalculation nextgroup=@sqlCl'.a:block.'OperationPartNext skipwhite skipempty contained display /[-+*\/%]/'
+	execute 'syntax match sql'.a:block.'OperationCalculation nextgroup=@sqlCl'.a:block.'OperationCalculationNext skipwhite skipempty contained display /[-+*\/%]/'
 
-	execute 'syntax cluster sqlCl'.a:block.'Operation add=sql'.a:block.'OperationCalculation'
+	execute 'syntax cluster sqlCl'.a:block.'OperationCalculationNext add=@sqlCl'.a:block.'OperationPartNext'
+	execute 'syntax cluster sqlCl'.a:block.'Operation                add=sql'.a:block.'OperationCalculation'
 	
 	execute 'highlight link sql'.a:block.'OperationCalculation sqlOperationCalculation'
 endfunction
 		" }}}
+		" Comparison: = != <> < <= > >= <! >! {{{
+function! s:DefineEntity_OperationComparison(block)
+	execute 'syntax match sql'.a:block.'OperationComparison nextgroup=@sqlCl'.a:block.'OperationComparisonNext skipwhite skipempty contained display /\(=\|!\(=\|<\|>\)\|<\(>\|=\)\?\|>\(=\)\?\)/'
+
+	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonNext add=@sqlCl'.a:block.'OperationPartNext'
+	execute 'syntax cluster sqlCl'.a:block.'Operation               add=sql'.a:block.'OperationComparison'
+	
+	execute 'highlight link sql'.a:block.'OperationComparison sqlOperationComparison'
+endfunction
+		" }}}
+		" Combination: AND OR {{{
+function! s:DefineEntity_OperationCombination(block)
+	execute 'syntax keyword sql'.a:block.'OperationCombination nextgroup=@sqlCl'.a:block.'OperationCombinationNext skipwhite skipempty contained display AND OR'
+
+	execute 'syntax cluster sqlCl'.a:block.'OperationCombinationNext add=@sqlCl'.a:block.'OperationPartNext'
+	execute 'syntax cluster sqlCl'.a:block.'Operation                add=sql'.a:block.'OperationCombination'
+	
+	execute 'highlight link sql'.a:block.'OperationCombination sqlOperationCombination'
+endfunction
+		" }}}
 function! s:DefineEntity_Operation (block)
 	call s:DefineEntity_OperationCalculation(a:block)
-	"call s:DefineEntity_OperationComparison(a:block)
+	call s:DefineEntity_OperationComparison (a:block)
+	call s:DefineEntity_OperationCombination(a:block)
 	"call s:DefineEntity_OperationTest(a:block)
 endfunction
 	" }}}
@@ -388,7 +410,8 @@ delfunction s:DefineEntity_Alias
 delfunction s:DefineEntity_Function
 delfunction s:DefineEntity_Group
 delfunction s:DefineEntity_OperationCalculation
-"delfunction s:DefineEntity_OperationComparison
+delfunction s:DefineEntity_OperationComparison
+delfunction s:DefineEntity_OperationCombination
 "delfunction s:DefineEntity_OperationTest
 delfunction s:DefineEntity_Operation
 
@@ -410,6 +433,8 @@ highlight link sqlFunctionCallDelimiter		Operator
 highlight link sqlGroupDelimiter			Operator
 highlight link sqlNumber					Number
 highlight link sqlOperationCalculation		Operator
+highlight link sqlOperationComparison		Operator
+highlight link sqlOperationCombination		Statement
 highlight link sqlStar						Operator
 highlight link sqlStatement					Statement
 highlight link sqlString					String
