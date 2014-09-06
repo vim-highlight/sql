@@ -242,7 +242,7 @@ endfunction
 function! s:DefineEntity_OperationCalculation(block)
 	execute 'syntax match sql'.a:block.'OperationCalculation nextgroup=@sqlCl'.a:block.'OperationCalculationNext skipwhite skipempty contained display /[-+*\/%]/'
 
-	execute 'syntax cluster sqlCl'.a:block.'OperationCalculationNext add=@sqlCl'.a:block.'OperationPartNext'
+	execute 'syntax cluster sqlCl'.a:block.'OperationCalculationNext add=sqlError,@sqlCl'.a:block.'OperationPartNext'
 	execute 'syntax cluster sqlCl'.a:block.'Operation                add=sql'.a:block.'OperationCalculation'
 	
 	execute 'highlight link sql'.a:block.'OperationCalculation sqlOperationCalculation'
@@ -258,21 +258,32 @@ function! s:DefineEntity_OperationComparisonOperator(block)
 	
 	execute 'highlight link sql'.a:block.'OperationComparisonOperator sqlOperationComparisonOperator'
 endfunction
+			" }}}
+			" IN: {{{
+function! s:DefineEntity_OperationComparisonIn(block)
+	execute 'syntax keyword sql'.a:block.'OperationComparisonIn nextgroup=@sqlCl'.a:block.'OperationComparisonMultipleBlock skipwhite skipempty contained display IN'
+	
+	execute 'syntax cluster sqlCl'.a:block.'OperationComparison add=sql'.a:block.'OperationComparisonIn'
+	
+	execute 'highlight link sql'.a:block.'OperationComparisonIn sqlOperationComparisonIn'
+endfunction
+			" }}}
 
 function! s:DefineEntity_OperationComparison(block)
+	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlock add=sqlError'
+
 	call s:DefineEntity_OperationComparisonOperator(a:block)
 	"call s:DefineEntity_OperationComparisonMultiple(a:block)
-	"call s:DefineEntity_OperationComparisonIn      (a:block)
+	call s:DefineEntity_OperationComparisonIn      (a:block)
 	
 	execute 'syntax cluster sqlCl'.a:block.'Operation add=@sqlCl'.a:block.'OperationComparison'
 endfunction
-			" }}}
 		" }}}
 		" Combination: AND OR {{{
 function! s:DefineEntity_OperationCombination(block)
 	execute 'syntax keyword sql'.a:block.'OperationCombination nextgroup=@sqlCl'.a:block.'OperationCombinationNext skipwhite skipempty contained display AND OR'
 
-	execute 'syntax cluster sqlCl'.a:block.'OperationCombinationNext add=@sqlCl'.a:block.'OperationPartNext'
+	execute 'syntax cluster sqlCl'.a:block.'OperationCombinationNext add=sqlError,@sqlCl'.a:block.'OperationPartNext'
 	execute 'syntax cluster sqlCl'.a:block.'Operation                add=sql'.a:block.'OperationCombination'
 	
 	execute 'highlight link sql'.a:block.'OperationCombination sqlOperationCombination'
@@ -423,7 +434,7 @@ delfunction s:DefineEntity_Group
 delfunction s:DefineEntity_OperationCalculation
 delfunction s:DefineEntity_OperationComparisonOperator
 "delfunction s:DefineEntity_OperationComparisonMultiple
-"delfunction s:DefineEntity_OperationComparisonIn
+delfunction s:DefineEntity_OperationComparisonIn
 delfunction s:DefineEntity_OperationCombination
 "delfunction s:DefineEntity_OperationTest
 delfunction s:DefineEntity_Operation
@@ -447,6 +458,7 @@ highlight link sqlGroupDelimiter				Operator
 highlight link sqlNumber						Number
 highlight link sqlOperationCalculation			Operator
 highlight link sqlOperationComparisonOperator	Operator
+highlight link sqlOperationComparisonIn			Statement
 highlight link sqlOperationCombination			Statement
 highlight link sqlStar							Operator
 highlight link sqlStatement						Statement
