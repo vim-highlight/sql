@@ -49,16 +49,22 @@ endif
 " Entities: {{{
 	" Number: {{{
 function! s:DefineEntity_Number (block)
-	execute 'syntax match sql'.a:block.'Number nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained display /[+-]\?[0-9]\+\(\.[0-9]\+\)\?/'
-	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'Number'
+	execute 'syntax match sql'.a:block.'Number nextgroup=@sqlCl'.a:block.'NumberNext skipwhite skipempty contained display /[+-]\?[0-9]\+\(\.[0-9]\+\)\?/'
+
+	execute 'syntax cluster sqlCl'.a:block.'NumberNext add=@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'Content    add=sql'.a:block.'Number'
 
 	execute 'highlight link sql'.a:block.'Number sqlNumber'
 endfunction
 	" }}}
 	" String: {{{
 function! s:DefineEntity_String (block)
-	execute 'syntax region sql'.a:block.'StringSingle nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained matchgroup=sql'.a:block.'StringSingleDelimiter start=/''/ skip=/\\''/ end=/''/'
-	execute 'syntax region sql'.a:block.'StringDouble nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained matchgroup=sql'.a:block.'StringDoubleDelimiter start=/"/  skip=/\\"/  end=/"/ '
+	execute 'syntax region sql'.a:block.'StringSingle nextgroup=@sqlCl'.a:block.'StringSingleNext skipwhite skipempty contained matchgroup=sql'.a:block.'StringSingleDelimiter start=/''/ skip=/\\''/ end=/''/'
+	execute 'syntax region sql'.a:block.'StringDouble nextgroup=@sqlCl'.a:block.'StringDoubleNext skipwhite skipempty contained matchgroup=sql'.a:block.'StringDoubleDelimiter start=/"/  skip=/\\"/  end=/"/ '
+
+	execute 'syntax cluster sqlCl'.a:block.'StringSingleNext add=@sqlCl'.a:block.'StringNext'
+	execute 'syntax cluster sqlCl'.a:block.'StringDoubleNext add=@sqlCl'.a:block.'StringNext'
+	execute 'syntax cluster sqlCl'.a:block.'StringNext       add=@sqlCl'.a:block.'ContentNext'
 
 	execute 'syntax cluster sqlCl'.a:block.'String  add=sql'.a:block.'StringSingle,sql'.a:block.'StringDouble'
 	execute 'syntax cluster sqlCl'.a:block.'Content add=@sqlCl'.a:block.'String'
@@ -75,10 +81,11 @@ endfunction
 	" }}}
 	" Table: {{{
 function! s:DefineEntity_Table (block)
-	execute 'syntax region sql'.a:block.'TableEscaped nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained display transparent oneline contains=sql'.a:block.'Table matchgroup=sql'.a:block.'TableDelimiter start=/`/ end=/`/'
-	execute 'syntax match  sql'.a:block.'Table        nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained display /\h\w*/'
+	execute 'syntax region sql'.a:block.'TableEscaped nextgroup=@sqlCl'.a:block.'TableNext skipwhite skipempty contained display transparent oneline contains=sql'.a:block.'Table matchgroup=sql'.a:block.'TableDelimiter start=/`/ end=/`/'
+	execute 'syntax match  sql'.a:block.'Table        nextgroup=@sqlCl'.a:block.'TableNext skipwhite skipempty contained display /\h\w*/'
 
-	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'TableEscaped,sql'.a:block.'Table'
+	execute 'syntax cluster sqlCl'.a:block.'TableNext add=@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'Content   add=sql'.a:block.'TableEscaped,sql'.a:block.'Table'
 
 	execute 'highlight link sql'.a:block.'TableDelimiter sqlTableDelimiter'
 	execute 'highlight link sql'.a:block.'Table          sqlTable'
@@ -87,11 +94,12 @@ endfunction
 	" Column: {{{
 function! s:DefineEntity_Column (block)
 		" column {{{
-	execute 'syntax region sql'.a:block.'ColumnEscaped nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained display transparent oneline contains=sql'.a:block.'Column matchgroup=sql'.a:block.'ColumnDelimiter start=/`/ end=/`/'
-	execute 'syntax match  sql'.a:block.'Column        nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained display /\h\w*/'
+	execute 'syntax region sql'.a:block.'ColumnEscaped nextgroup=@sqlCl'.a:block.'ColumnNext skipwhite skipempty contained display transparent oneline contains=sql'.a:block.'Column matchgroup=sql'.a:block.'ColumnDelimiter start=/`/ end=/`/'
+	execute 'syntax match  sql'.a:block.'Column        nextgroup=@sqlCl'.a:block.'ColumnNext skipwhite skipempty contained display /\h\w*/'
 
-	execute 'syntax cluster sqlCl'.a:block.'Column  add=sql'.a:block.'ColumnEscaped,sql'.a:block.'Column'
-	execute 'syntax cluster sqlCl'.a:block.'Content add=@sqlCl'.a:block.'Column'
+	execute 'syntax cluster sqlCl'.a:block.'Column     add=sql'.a:block.'ColumnEscaped,sql'.a:block.'Column'
+	execute 'syntax cluster sqlCl'.a:block.'ColumnNext add=@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'Content    add=@sqlCl'.a:block.'Column'
 
 	execute 'highlight link sql'.a:block.'ColumnDelimiter sqlColumnDelimiter'
 	execute 'highlight link sql'.a:block.'Column          sqlColumn'
@@ -135,7 +143,7 @@ endfunction
 	
 	" Group: () {{{
 function! s:DefineEntity_Group (block)
-	execute 'syntax region sql'.a:block.'Group nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'GroupContent matchgroup=sql'.a:block.'GroupDelimiter start=/(/ end=/)/'
+	execute 'syntax region sql'.a:block.'Group nextgroup=@sqlCl'.a:block.'GroupNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'GroupContent matchgroup=sql'.a:block.'GroupDelimiter start=/(/ end=/)/'
 
 		" Values: {{{
 	call s:DefineEntity_Number  (a:block.'Group')
@@ -145,7 +153,8 @@ function! s:DefineEntity_Group (block)
 	execute 'syntax cluster sqlCl'.a:block.'GroupContent add=sql'.a:block.'Group,@sqlCl'.a:block.'Function,sqlError'
 		" }}}
 
-	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'Group'
+	execute 'syntax cluster sqlCl'.a:block.'GroupNext add=@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'Content   add=sql'.a:block.'Group'
 
 	execute 'highlight link sql'.a:block.'GroupDelimiter sqlGroupDelimiter'
 endfunction
@@ -195,8 +204,8 @@ function! s:DefineEntity_Function (block)
 	execute 'highlight link sql'.a:block.'FunctionUser sqlFunctionUser'
 
 
-	execute 'syntax region sql'.a:block.'FunctionCall     nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionContent     matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
-	execute 'syntax region sql'.a:block.'FunctionCallStar nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionContentStar matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
+	execute 'syntax region sql'.a:block.'FunctionCall     nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionContent     matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
+	execute 'syntax region sql'.a:block.'FunctionCallStar nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionContentStar matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
 
 	" Star: * {{{
 	execute 'syntax match sql'.a:block.'FunctionContentStarStar nextgroup=@sqlCl'.a:block.'FunctionContentNext skipwhite skipempty contained display /\*/'
@@ -220,6 +229,7 @@ function! s:DefineEntity_Function (block)
 	
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContent     add=sqlError'
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContentStar add=@sqlCl'.a:block.'FunctionContent'
+	execute 'syntax cluster sqlCl'.a:block.'FunctionNext        add=@sqlCl'.a:block.'ContentNext'
 
 	execute 'highlight link sql'.a:block.'FunctionCallDelimiter sqlFunctionCallDelimiter'
 endfunction
