@@ -51,8 +51,9 @@ endif
 function! s:DefineEntity_Number (block)
 	execute 'syntax match sql'.a:block.'Number nextgroup=@sqlCl'.a:block.'NumberNext skipwhite skipempty contained display /[+-]\?[0-9]\+\(\.[0-9]\+\)\?/'
 
-	execute 'syntax cluster sqlCl'.a:block.'NumberNext add=@sqlCl'.a:block.'ContentNext'
-	execute 'syntax cluster sqlCl'.a:block.'Content    add=sql'.a:block.'Number'
+	execute 'syntax cluster sqlCl'.a:block.'NumberNext        add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'Content           add=sql'.a:block.'Number'
+	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=sql'.a:block.'Number'
 
 	execute 'highlight link sql'.a:block.'Number sqlNumber'
 endfunction
@@ -140,25 +141,6 @@ function! s:DefineEntity_Alias (block)
 	execute 'highlight link sql'.a:block.'AliasAs sqlAliasAs'
 endfunction
 	" }}}
-	
-	" Group: () {{{
-function! s:DefineEntity_Group (block)
-	execute 'syntax region sql'.a:block.'Group nextgroup=@sqlCl'.a:block.'GroupNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'GroupContent matchgroup=sql'.a:block.'GroupDelimiter start=/(/ end=/)/'
-
-		" Values: {{{
-	call s:DefineEntity_Number  (a:block.'Group')
-	call s:DefineEntity_String  (a:block.'Group')
-	call s:DefineEntity_Column  (a:block.'Group')
-
-	execute 'syntax cluster sqlCl'.a:block.'GroupContent add=sql'.a:block.'Group,@sqlCl'.a:block.'Function,sqlError'
-		" }}}
-
-	execute 'syntax cluster sqlCl'.a:block.'GroupNext add=@sqlCl'.a:block.'ContentNext'
-	execute 'syntax cluster sqlCl'.a:block.'Content   add=sql'.a:block.'Group'
-
-	execute 'highlight link sql'.a:block.'GroupDelimiter sqlGroupDelimiter'
-endfunction
-	" }}}
 
 	" Function: {{{
 		" DefineFunctionNames {{{
@@ -235,6 +217,42 @@ function! s:DefineEntity_Function (block)
 endfunction
 		" }}}
 	" }}}
+	
+	" Group: () {{{
+function! s:DefineEntity_Group (block)
+	execute 'syntax region sql'.a:block.'Group nextgroup=@sqlCl'.a:block.'GroupNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'GroupContent matchgroup=sql'.a:block.'GroupDelimiter start=/(/ end=/)/'
+
+		" Values: {{{
+	call s:DefineEntity_Number  (a:block.'Group')
+	call s:DefineEntity_String  (a:block.'Group')
+	call s:DefineEntity_Column  (a:block.'Group')
+
+	execute 'syntax cluster sqlCl'.a:block.'GroupContent add=sql'.a:block.'Group,@sqlCl'.a:block.'Function,sqlError'
+		" }}}
+
+	execute 'syntax cluster sqlCl'.a:block.'GroupNext add=@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'Content   add=sql'.a:block.'Group'
+
+	execute 'highlight link sql'.a:block.'GroupDelimiter sqlGroupDelimiter'
+endfunction
+	" }}}
+
+	" Operation: {{{
+		" Calculation: + - * / % {{{
+function! s:DefineEntity_OperationCalculation(block)
+	execute 'syntax match sql'.a:block.'OperationCalculation nextgroup=@sqlCl'.a:block.'OperationPartNext skipwhite skipempty contained display /[-+*\/%]/'
+
+	execute 'syntax cluster sqlCl'.a:block.'Operation add=sql'.a:block.'OperationCalculation'
+	
+	execute 'highlight link sql'.a:block.'OperationCalculation sqlOperationCalculation'
+endfunction
+		" }}}
+function! s:DefineEntity_Operation (block)
+	call s:DefineEntity_OperationCalculation(a:block)
+	"call s:DefineEntity_OperationComparison(a:block)
+	"call s:DefineEntity_OperationTest(a:block)
+endfunction
+	" }}}
 " }}}
 
 " ERROR: {{{
@@ -258,14 +276,15 @@ syntax cluster sqlClSelectContent add=sqlSelectStar
 highlight link sqlSelectStar sqlStar
 	" }}}
 	" Values: {{{
-call s:DefineEntity_Number  ('Select')
-call s:DefineEntity_String  ('Select')
-call s:DefineEntity_Column  ('Select')
+call s:DefineEntity_Number   ('Select')
+call s:DefineEntity_String   ('Select')
+call s:DefineEntity_Column   ('Select')
 
-call s:DefineEntity_Group   ('Select')
+call s:DefineEntity_Function ('Select')
+call s:DefineFunctionNames   ('Select', 0, 'concat group_concat')
 
-call s:DefineEntity_Function('Select')
-call s:DefineFunctionNames  ('Select', 0, 'concat group_concat')
+call s:DefineEntity_Group    ('Select')
+call s:DefineEntity_Operation('Select')
 	" }}}
 	" Alias AS: {{{
 call s:DefineEntity_Alias('Select')
@@ -366,8 +385,12 @@ delfunction s:DefineEntity_String
 delfunction s:DefineEntity_Table
 delfunction s:DefineEntity_Column
 delfunction s:DefineEntity_Alias
-delfunction s:DefineEntity_Group
 delfunction s:DefineEntity_Function
+delfunction s:DefineEntity_Group
+delfunction s:DefineEntity_OperationCalculation
+"delfunction s:DefineEntity_OperationComparison
+"delfunction s:DefineEntity_OperationTest
+delfunction s:DefineEntity_Operation
 
 delfunction s:DefineFunctionNames
 " }}}
@@ -386,6 +409,7 @@ highlight link sqlFunctionUser				Operator
 highlight link sqlFunctionCallDelimiter		Operator
 highlight link sqlGroupDelimiter			Operator
 highlight link sqlNumber					Number
+highlight link sqlOperationCalculation		Operator
 highlight link sqlStar						Operator
 highlight link sqlStatement					Statement
 highlight link sqlString					String
