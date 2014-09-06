@@ -171,7 +171,7 @@ function! s:DefineFunctionNames (blocks, star, names)
 endfunction
 		" }}}
 		" DefineEntity_Function {{{
-function! s:DefineEntity_Function (block)
+function! s:DefineEntity_Function_real (block, included)
 	call s:DefineFunctionNames(a:block, 0, 'sum min max')
 	call s:DefineFunctionNames(a:block, 1, 'count')
 	execute 'syntax match sql'.a:block.'FunctionUser nextgroup=sql'.a:block.'FunctionCallStar skipwhite skipempty contained /\h\w*\(\s*(\)\@=/'
@@ -199,7 +199,13 @@ function! s:DefineEntity_Function (block)
 	call s:DefineEntity_String  (a:block.'Function')
 	call s:DefineEntity_Column  (a:block.'Function')
 
-	execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=@sqlCl'.a:block.'Function,sql'.a:block.'Group'
+	if a:included
+		call s:DefineEntity_Function_real(a:block.'Function', 1)
+	else
+		execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=@sqlCl'.a:block.'Function'
+	endif
+
+	execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=sql'.a:block.'Group'
 	" }}}
 	
 	" Values Separator: {{{
@@ -211,11 +217,15 @@ function! s:DefineEntity_Function (block)
 	
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContent     add=sqlError'
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContentStar add=@sqlCl'.a:block.'FunctionContent'
+
 	execute 'syntax cluster sqlCl'.a:block.'FunctionNext        add=@sqlCl'.a:block.'ContentNext'
 
 	execute 'highlight link sql'.a:block.'FunctionCallDelimiter sqlFunctionCallDelimiter'
 endfunction
 		" }}}
+function! s:DefineEntity_Function (block)
+	call s:DefineEntity_Function_real(a:block, 0)
+endfunction
 	" }}}
 	
 	" Group: () {{{
@@ -276,13 +286,29 @@ function! s:DefineEntity_OperationComparisonMultipleRoot(block)
 	execute 'highlight link sql'.a:block.'OperationComparisonMultipleRoot sqlOperationComparisonMultiple'
 endfunction
 				" }}}
+				" Block: (...) {{{
+function! s:DefineEntity_OperationComparisonMultipleBlock(block)
+	execute 'syntax region sql'.a:block.'OperationComparisonMultipleBlock nextgroup=@sqlCl'.a:block.'OperationPartNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'OperationComparisonMultipleBlockContent matchgroup=sql'.a:block.'OperationComparisonMultipleBlockDelimiter start=/(/ end=/)/'
+
+		" Values: {{{
+	call s:DefineEntity_Number  (a:block.'OperationComparisonMultipleBlock')
+	call s:DefineEntity_String  (a:block.'OperationComparisonMultipleBlock')
+
+	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockContent add=sql'.a:block.'Group,@sqlCl'.a:block.'Function,sqlError'
+		" }}}
+	
+	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlock add=sql'.a:block.'OperationComparisonMultipleBlock,sqlError'
+
+	execute 'highlight link sql'.a:block.'OperationComparisonMultipleBlockDelimiter sqlOperationComparisonMultipleBlockDelimiter'
+endfunction
+				" }}}
+
 
 function! s:DefineEntity_OperationComparisonMultiple(block)
 	call s:DefineEntity_OperationComparisonMultipleOperator(a:block)
 	call s:DefineEntity_OperationComparisonMultipleRoot    (a:block)
 
-	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlock add=sqlError'
-	"call s:DefineEntity_OperationComparisonMultipleBlock   (a:block)
+	call s:DefineEntity_OperationComparisonMultipleBlock   (a:block)
 endfunction
 			" }}}
 
@@ -451,6 +477,7 @@ delfunction s:DefineEntity_OperationCalculation
 delfunction s:DefineEntity_OperationComparisonOperator
 delfunction s:DefineEntity_OperationComparisonMultipleOperator
 delfunction s:DefineEntity_OperationComparisonMultipleRoot
+delfunction s:DefineEntity_OperationComparisonMultipleBlock
 delfunction s:DefineEntity_OperationComparisonMultiple
 delfunction s:DefineEntity_OperationCombination
 "delfunction s:DefineEntity_OperationTest
@@ -460,31 +487,32 @@ delfunction s:DefineFunctionNames
 " }}}
 
 " COLORS: {{{
-highlight link sqlAliasAs						sqlStructure
-highlight link sqlAliasName						sqlNone
-highlight link sqlAliasDelimiter				Delimiter
-highlight link sqlComma							Operator
-highlight link sqlColumn						sqlNone
-highlight link sqlColumnDelimiter				Delimiter
-highlight link sqlError							Error
-highlight link sqlEscape						Special
-highlight link sqlFunction						Function
-highlight link sqlFunctionUser					Operator
-highlight link sqlFunctionCallDelimiter			Operator
-highlight link sqlGroupDelimiter				Operator
-highlight link sqlNumber						Number
-highlight link sqlOperationCalculation			Operator
-highlight link sqlOperationComparisonOperator	Operator
-highlight link sqlOperationComparisonMultiple	Statement
-highlight link sqlOperationCombination			Statement
-highlight link sqlStar							Operator
-highlight link sqlStatement						Statement
-highlight link sqlString						String
-highlight link sqlStringDelimiter				sqlString
-highlight link sqlStructure						Structure
-highlight link sqlTable							sqlNone
-highlight link sqlTableDelimiter				Delimiter
-highlight link sqlTableSeparator				Operator
+highlight link sqlAliasAs									sqlStructure
+highlight link sqlAliasName									sqlNone
+highlight link sqlAliasDelimiter							Delimiter
+highlight link sqlComma										Operator
+highlight link sqlColumn									sqlNone
+highlight link sqlColumnDelimiter							Delimiter
+highlight link sqlError										Error
+highlight link sqlEscape									Special
+highlight link sqlFunction									Function
+highlight link sqlFunctionUser								Operator
+highlight link sqlFunctionCallDelimiter						Operator
+highlight link sqlGroupDelimiter							Operator
+highlight link sqlNumber									Number
+highlight link sqlOperationCalculation						Operator
+highlight link sqlOperationComparisonOperator				Operator
+highlight link sqlOperationComparisonMultiple				Statement
+highlight link sqlOperationComparisonMultipleBlockDelimiter	Operator
+highlight link sqlOperationCombination						Statement
+highlight link sqlStar										Operator
+highlight link sqlStatement									Statement
+highlight link sqlString									String
+highlight link sqlStringDelimiter							sqlString
+highlight link sqlStructure									Structure
+highlight link sqlTable										sqlNone
+highlight link sqlTableDelimiter							Delimiter
+highlight link sqlTableSeparator							Operator
 
 highlight link sqlNone						Todo
 highlight link sqlIntoVarName				sqlNone
