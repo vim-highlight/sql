@@ -48,6 +48,17 @@ endif
 
 " Entities: {{{
 	" Number: {{{
+function! s:DefineEntity_Null (block)
+	execute 'syntax keyword sql'.a:block.'Null nextgroup=@sqlCl'.a:block.'NullNext skipwhite skipempty contained display NULL'
+
+	execute 'syntax cluster sqlCl'.a:block.'NullNext          add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'Content           add=sql'.a:block.'Null'
+	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=sql'.a:block.'Null'
+
+	execute 'highlight link sql'.a:block.'Null sqlNull'
+endfunction
+	" }}}
+	" Number: {{{
 function! s:DefineEntity_Number (block)
 	execute 'syntax match sql'.a:block.'Number nextgroup=@sqlCl'.a:block.'NumberNext skipwhite skipempty contained display /[+-]\?[0-9]\+\(\.[0-9]\+\)\?/'
 
@@ -358,6 +369,7 @@ endfunction
 
 	" Commons: {{{
 function! s:DefineEntityCommon_Root(block, section)
+	call s:DefineEntity_Null  (a:block.a:section)
 	call s:DefineEntity_Number(a:block.a:section)
 	call s:DefineEntity_String(a:block.a:section)
 	call s:DefineEntity_Column(a:block.a:section)
@@ -499,6 +511,7 @@ highlight link sqlFrom sqlStructure
 
 " Cleaning: {{{
 	" Entities: {{{
+delfunction s:DefineEntity_Null
 delfunction s:DefineEntity_Number
 delfunction s:DefineEntity_String
 delfunction s:DefineEntity_Table
@@ -561,6 +574,7 @@ highlight link sqlFunction									Function
 highlight link sqlFunctionUser								Operator
 highlight link sqlFunctionCallDelimiter						Operator
 highlight link sqlGroupDelimiter							Operator
+highlight link sqlNull										Statement
 highlight link sqlNumber									Number
 highlight link sqlOperationCalculation						Operator
 highlight link sqlOperationComparisonOperator				Operator
