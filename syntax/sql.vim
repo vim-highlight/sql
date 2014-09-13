@@ -47,7 +47,7 @@ endif
 " }}}
 
 " Entities: {{{
-	" Number: {{{
+	" Null: {{{
 function! s:DefineEntity_Null (block)
 	execute 'syntax keyword sql'.a:block.'Null nextgroup=@sqlCl'.a:block.'NullNext skipwhite skipempty contained display NULL'
 
