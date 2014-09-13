@@ -177,9 +177,7 @@ endfunction
 function! s:DefineEntity_Function_real (block, included)
 	" Values: {{{
 		" Must be declared at first to allow user function match BEFORE column match
-	call s:DefineEntity_Number  (a:block.'Function')
-	call s:DefineEntity_String  (a:block.'Function')
-	call s:DefineEntity_Column  (a:block.'Function')
+	call s:DefineEntityCommon_Root(a:block, 'Function')
 	" }}}
 
 	call s:DefineFunctionNames(a:block, 0, 'sum min max')
@@ -205,14 +203,7 @@ function! s:DefineEntity_Function_real (block, included)
 	execute 'highlight link sql'.a:block.'FunctionContentStarStar sqlStar'
 	" }}}
 	" Values: {{{
-	if a:included
-		execute 'syntax cluster sqlCl'.a:block.'FunctionContent   add=@sqlCl'.a:block.'Function,sql'.a:block.'Group'
-		execute 'syntax cluster sqlCl'.a:block.'FunctionOperation add=@sqlCl'.a:block.'Operation'
-	else
-		call s:DefineEntity_Function_real (a:block.'Function', 1)
-		call s:DefineEntity_Group_real    (a:block.'Function', 1)
-		call s:DefineEntity_Operation_real(a:block.'Function', 1)
-	endif
+	call s:DefineEntityCommon_Nested(a:block, 'Function', a:included)
 	" }}}
 	
 	" Values Separator: {{{
@@ -240,20 +231,8 @@ function! s:DefineEntity_Group_real (block, included)
 	execute 'syntax region sql'.a:block.'Group nextgroup=@sqlCl'.a:block.'GroupNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'GroupContent matchgroup=sql'.a:block.'GroupDelimiter start=/(/ end=/)/'
 
 		" Values: {{{
-	call s:DefineEntity_Number  (a:block.'Group')
-	call s:DefineEntity_String  (a:block.'Group')
-	call s:DefineEntity_Column  (a:block.'Group')
-
-	if a:included
-		execute 'syntax cluster sqlCl'.a:block.'GroupContent   add=sql'.a:block.'Group,@sqlCl'.a:block.'Function'
-		execute 'syntax cluster sqlCl'.a:block.'GroupOperation add=@sqlCl'.a:block.'Operation'
-	else
-		call s:DefineEntity_Group_real    (a:block.'Group', 1)
-		call s:DefineEntity_Function_real (a:block.'Group', 1)
-		call s:DefineEntity_Operation_real(a:block.'Group', 1)
-	endif
-
-	"call s:DefineEntity_Operation(a:block.'Group')
+	call s:DefineEntityCommon_Root  (a:block, 'Group')
+	call s:DefineEntityCommon_Nested(a:block, 'Group', a:included)
 		" }}}
 	execute 'syntax cluster sqlCl'.a:block.'GroupContentNext add=sqlError'
 
@@ -310,20 +289,10 @@ function! s:DefineEntity_OperationComparisonMultipleBlock_real(block, included)
 	execute 'syntax region sql'.a:block.'OperationComparisonMultipleBlock nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'OperationComparisonMultipleBlockContent matchgroup=sql'.a:block.'OperationComparisonMultipleBlockDelimiter start=/(/ end=/)/'
 
 					" Values: {{{
-	call s:DefineEntity_Number  (a:block.'OperationComparisonMultipleBlock')
-	call s:DefineEntity_String  (a:block.'OperationComparisonMultipleBlock')
-	call s:DefineEntity_Column  (a:block.'OperationComparisonMultipleBlock')
-	
 	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockContent add=sqlError'
-
-	if a:included
-		execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockOperation add=@sqlCl'.a:block.'Operation'
-		execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockContent   add=@sqlCl'.a:block.'Function,sql'.a:block.'Group'
-	else
-		call s:DefineEntity_Operation_real(a:block.'OperationComparisonMultipleBlock', 1)
-		call s:DefineEntity_Function_real (a:block.'OperationComparisonMultipleBlock', 1)
-		call s:DefineEntity_Group_real    (a:block.'OperationComparisonMultipleBlock', 1)
-	endif
+	
+	call s:DefineEntityCommon_Root  (a:block, 'OperationComparisonMultipleBlock')
+	call s:DefineEntityCommon_Nested(a:block, 'OperationComparisonMultipleBlock', a:included)
 					" }}}
 
 					" Values Separator: {{{
@@ -341,7 +310,6 @@ function! s:DefineEntity_OperationComparisonMultipleBlock(block)
 	call s:DefineEntity_OperationComparisonMultipleBlock_real(a:block, 0)
 endfunction
 				" }}}
-
 
 function! s:DefineEntity_OperationComparisonMultiple_real(block, included)
 	call s:DefineEntity_OperationComparisonMultipleOperator(a:block)
@@ -385,6 +353,24 @@ function! s:DefineEntity_Operation_real (block, included)
 endfunction
 function! s:DefineEntity_Operation (block)
 	call s:DefineEntity_Operation_real(a:block, 0)
+endfunction
+	" }}}
+
+	" Commons: {{{
+function! s:DefineEntityCommon_Root(block, section)
+	call s:DefineEntity_Number(a:block.a:section)
+	call s:DefineEntity_String(a:block.a:section)
+	call s:DefineEntity_Column(a:block.a:section)
+endfunction
+function! s:DefineEntityCommon_Nested(block, section, included)
+	if a:included
+		execute 'syntax cluster sqlCl'.a:block.a:section.'Content   add=@sqlCl'.a:block.'Function,sql'.a:block.'Group'
+		execute 'syntax cluster sqlCl'.a:block.a:section.'Operation add=@sqlCl'.a:block.'Operation'
+	else
+		call s:DefineEntity_Function_real (a:block.a:section, 1)
+		call s:DefineEntity_Group_real    (a:block.a:section, 1)
+		call s:DefineEntity_Operation_real(a:block.a:section, 1)
+	endif
 endfunction
 	" }}}
 " }}}
@@ -524,6 +510,8 @@ delfunction s:DefineEntity_Alias
 		" Function: {{{
 delfunction s:DefineEntity_Function
 delfunction s:DefineEntity_Function_real
+
+delfunction s:DefineFunctionNames
 		" }}}
 		" Group: {{{
 delfunction s:DefineEntity_Group
@@ -555,7 +543,10 @@ delfunction s:DefineEntity_Operation
 delfunction s:DefineEntity_Operation_real
 		" }}}
 
-delfunction s:DefineFunctionNames
+		" Commons: {{{
+delfunction s:DefineEntityCommon_Root
+delfunction s:DefineEntityCommon_Nested
+		" }}}
 	" }}}
 " }}}
 
