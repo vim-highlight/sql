@@ -396,15 +396,13 @@ syntax cluster sqlClSelectContent add=sqlSelectStar
 highlight link sqlSelectStar sqlStar
 	" }}}
 	" Values: {{{
-call s:DefineEntity_Number   ('Select')
-call s:DefineEntity_String   ('Select')
-call s:DefineEntity_Column   ('Select')
+call s:DefineEntityCommon_Root('', 'Select')
 
 call s:DefineEntity_Function ('Select')
-call s:DefineFunctionNames   ('Select', 0, 'concat group_concat')
-
 call s:DefineEntity_Group    ('Select')
 call s:DefineEntity_Operation('Select')
+
+call s:DefineFunctionNames   ('Select', 0, 'concat group_concat')
 	" }}}
 	" Alias AS: {{{
 call s:DefineEntity_Alias('Select')
