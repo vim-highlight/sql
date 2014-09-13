@@ -355,12 +355,33 @@ function! s:DefineEntity_OperationCombination(block)
 	execute 'highlight link sql'.a:block.'OperationCombination sqlOperationCombination'
 endfunction
 		" }}}
+		" Test: IS [NOT] NULL {{{
+function! s:DefineEntity_OperationTest(block)
+	"execute 'syntax keyword sql'.a:block.'OperationTestIs   nextgroup=sql'.a:block.'OperationTestNot,sql'.a:block.'OperationTestNull contained IS'
+	execute 'syntax keyword sql'.a:block.'OperationTestIs   nextgroup=@sqlCl'.a:block.'OperationTestIsNext   skipwhite skipempty contained IS'
+	execute 'syntax keyword sql'.a:block.'OperationTestNot  nextgroup=@sqlCl'.a:block.'OperationTestNotNext  skipwhite skipempty contained NOT'
+	execute 'syntax keyword sql'.a:block.'OperationTestNull nextgroup=@sqlCl'.a:block.'OperationTestNullNext skipwhite skipempty contained NULL'
+	
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestIsNext   add=sql'.a:block.'OperationTestNot,sql'.a:block.'OperationTestNull,sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestNotNext  add=sql'.a:block.'OperationTestNull,sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestNullNext add=@sqlCl'.a:block.'OperationTestNext,sqlError'
+
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'Operation         add=sql'.a:block.'OperationTestIs'
+
+	execute 'highlight link sql'.a:block.'OperationTestIs   sql'.a:block.'OperationTest'
+	execute 'highlight link sql'.a:block.'OperationTestNot  sql'.a:block.'OperationTest'
+	execute 'highlight link sql'.a:block.'OperationTestNull sql'.a:block.'OperationTest'
+
+	execute 'highlight link sql'.a:block.'OperationTest sqlOperationTest'
+endfunction
+		" }}}
 
 function! s:DefineEntity_Operation_real (block, included)
 	call s:DefineEntity_OperationCalculation    (a:block)
 	call s:DefineEntity_OperationComparison_real(a:block, a:included)
 	call s:DefineEntity_OperationCombination    (a:block)
-	"call s:DefineEntity_OperationTest           (a:block)
+	call s:DefineEntity_OperationTest           (a:block)
 endfunction
 function! s:DefineEntity_Operation (block)
 	call s:DefineEntity_Operation_real(a:block, 0)
@@ -390,7 +411,6 @@ endfunction
 " ERROR: {{{
 syntax match sqlError /\S.*/
 " }}}
-
 " SELECT: {{{
 syntax keyword sqlSelect nextgroup=@sqlClSelectContentStart skipwhite skipempty SELECT
 
@@ -432,6 +452,7 @@ syntax cluster sqlClSelectContentStart add=@sqlClSelectContent
 
 highlight link sqlSelect sqlStructure
 " }}}
+
 " INTO: {{{
 syntax keyword sqlInto nextgroup=@sqlClIntoContent skipwhite skipempty INTO
 
@@ -548,7 +569,7 @@ delfunction s:DefineEntity_OperationComparison
 delfunction s:DefineEntity_OperationComparison_real
 			" }}}
 delfunction s:DefineEntity_OperationCombination
-"delfunction s:DefineEntity_OperationTest
+delfunction s:DefineEntity_OperationTest
 
 delfunction s:DefineEntity_Operation
 delfunction s:DefineEntity_Operation_real
@@ -581,6 +602,7 @@ highlight link sqlOperationComparisonOperator				Operator
 highlight link sqlOperationComparisonMultiple				Statement
 highlight link sqlOperationComparisonMultipleBlockDelimiter	Operator
 highlight link sqlOperationCombination						Statement
+highlight link sqlOperationTest								Statement
 highlight link sqlStar										Operator
 highlight link sqlStatement									Statement
 highlight link sqlString									String
