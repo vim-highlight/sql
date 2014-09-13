@@ -227,7 +227,8 @@ function! s:DefineEntity_Function_real (block, included)
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContent     add=sqlError'
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContentStar add=@sqlCl'.a:block.'FunctionContent'
 
-	execute 'syntax cluster sqlCl'.a:block.'FunctionNext        add=@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'FunctionNext        add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'Content   			add=sql'.a:block.'Function'
 
 	execute 'highlight link sql'.a:block.'FunctionCallDelimiter sqlFunctionCallDelimiter'
 endfunction
@@ -247,7 +248,7 @@ function! s:DefineEntity_Group_real (block, included)
 		" }}}
 	execute 'syntax cluster sqlCl'.a:block.'GroupContentNext add=sqlError'
 
-	execute 'syntax cluster sqlCl'.a:block.'GroupNext add=@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'GroupNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
 	execute 'syntax cluster sqlCl'.a:block.'Content   add=sql'.a:block.'Group'
 
 	execute 'highlight link sql'.a:block.'GroupDelimiter sqlGroupDelimiter'
@@ -297,7 +298,7 @@ endfunction
 				" }}}
 				" Block: (...) {{{
 function! s:DefineEntity_OperationComparisonMultipleBlock_real(block, included)
-	execute 'syntax region sql'.a:block.'OperationComparisonMultipleBlock nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'OperationComparisonMultipleBlockContent matchgroup=sql'.a:block.'OperationComparisonMultipleBlockDelimiter start=/(/ end=/)/'
+	execute 'syntax region sql'.a:block.'OperationComparisonMultipleBlock nextgroup=@sqlCl'.a:block.'OperationComparisonMultipleBlockNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'OperationComparisonMultipleBlockContent matchgroup=sql'.a:block.'OperationComparisonMultipleBlockDelimiter start=/(/ end=/)/'
 
 					" Values: {{{
 	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockContent add=sqlError'
@@ -313,7 +314,8 @@ function! s:DefineEntity_OperationComparisonMultipleBlock_real(block, included)
 					" }}}
 	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockContentNext add=sqlError'
 	
-	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlock add=sql'.a:block.'OperationComparisonMultipleBlock,sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlock     add=sql'.a:block.'OperationComparisonMultipleBlock,sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
 
 	execute 'highlight link sql'.a:block.'OperationComparisonMultipleBlockDelimiter sqlOperationComparisonMultipleBlockDelimiter'
 endfunction
@@ -355,12 +357,33 @@ function! s:DefineEntity_OperationCombination(block)
 	execute 'highlight link sql'.a:block.'OperationCombination sqlOperationCombination'
 endfunction
 		" }}}
+		" Test: IS [NOT] NULL {{{
+function! s:DefineEntity_OperationTest(block)
+	"execute 'syntax keyword sql'.a:block.'OperationTestIs   nextgroup=sql'.a:block.'OperationTestNot,sql'.a:block.'OperationTestNull contained IS'
+	execute 'syntax keyword sql'.a:block.'OperationTestIs   nextgroup=@sqlCl'.a:block.'OperationTestIsNext   skipwhite skipempty contained IS'
+	execute 'syntax keyword sql'.a:block.'OperationTestNot  nextgroup=@sqlCl'.a:block.'OperationTestNotNext  skipwhite skipempty contained NOT'
+	execute 'syntax keyword sql'.a:block.'OperationTestNull nextgroup=@sqlCl'.a:block.'OperationTestNullNext skipwhite skipempty contained NULL'
+	
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestIsNext   add=sql'.a:block.'OperationTestNot,sql'.a:block.'OperationTestNull,sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestNotNext  add=sql'.a:block.'OperationTestNull,sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestNullNext add=@sqlCl'.a:block.'OperationTestNext,sqlError'
+
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'Operation         add=sql'.a:block.'OperationTestIs'
+
+	execute 'highlight link sql'.a:block.'OperationTestIs   sql'.a:block.'OperationTest'
+	execute 'highlight link sql'.a:block.'OperationTestNot  sql'.a:block.'OperationTest'
+	execute 'highlight link sql'.a:block.'OperationTestNull sql'.a:block.'OperationTest'
+
+	execute 'highlight link sql'.a:block.'OperationTest sqlOperationTest'
+endfunction
+		" }}}
 
 function! s:DefineEntity_Operation_real (block, included)
 	call s:DefineEntity_OperationCalculation    (a:block)
 	call s:DefineEntity_OperationComparison_real(a:block, a:included)
 	call s:DefineEntity_OperationCombination    (a:block)
-	"call s:DefineEntity_OperationTest           (a:block)
+	call s:DefineEntity_OperationTest           (a:block)
 endfunction
 function! s:DefineEntity_Operation (block)
 	call s:DefineEntity_Operation_real(a:block, 0)
@@ -548,7 +571,7 @@ delfunction s:DefineEntity_OperationComparison
 delfunction s:DefineEntity_OperationComparison_real
 			" }}}
 delfunction s:DefineEntity_OperationCombination
-"delfunction s:DefineEntity_OperationTest
+delfunction s:DefineEntity_OperationTest
 
 delfunction s:DefineEntity_Operation
 delfunction s:DefineEntity_Operation_real
@@ -581,6 +604,7 @@ highlight link sqlOperationComparisonOperator				Operator
 highlight link sqlOperationComparisonMultiple				Statement
 highlight link sqlOperationComparisonMultipleBlockDelimiter	Operator
 highlight link sqlOperationCombination						Statement
+highlight link sqlOperationTest								Statement
 highlight link sqlStar										Operator
 highlight link sqlStatement									Statement
 highlight link sqlString									String
