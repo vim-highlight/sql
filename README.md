@@ -1,5 +1,5 @@
-vim-highlight
+vim-highlight / sql
 =======
 
-A collection of Vim syntax / highlight file for various languages like PHP or SQL.
+A Vim syntax / highlight file for SQL language (standards & driver specifics).
 They are based on real-time typo detection.
