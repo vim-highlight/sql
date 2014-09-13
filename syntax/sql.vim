@@ -96,7 +96,7 @@ endfunction
 function! s:DefineEntity_Column (block)
 		" column {{{
 	execute 'syntax region sql'.a:block.'ColumnEscaped nextgroup=@sqlCl'.a:block.'ColumnNext skipwhite skipempty contained display transparent oneline contains=sql'.a:block.'Column matchgroup=sql'.a:block.'ColumnDelimiter start=/`/ end=/`/'
-	execute 'syntax match  sql'.a:block.'Column        nextgroup=@sqlCl'.a:block.'ColumnNext skipwhite skipempty contained display /\h\w*/'
+	execute 'syntax match  sql'.a:block.'Column        nextgroup=@sqlCl'.a:block.'ColumnNext skipwhite skipempty contained /\h\w*/'
 
 	execute 'syntax cluster sqlCl'.a:block.'Column     add=sql'.a:block.'ColumnEscaped,sql'.a:block.'Column'
 	execute 'syntax cluster sqlCl'.a:block.'ColumnNext add=@sqlCl'.a:block.'ContentNext'
@@ -172,6 +172,13 @@ endfunction
 		" }}}
 		" DefineEntity_Function {{{
 function! s:DefineEntity_Function_real (block, included)
+	" Values: {{{
+		" Must be declared at first to allow user function match BEFORE column match
+	call s:DefineEntity_Number  (a:block.'Function')
+	call s:DefineEntity_String  (a:block.'Function')
+	call s:DefineEntity_Column  (a:block.'Function')
+	" }}}
+
 	call s:DefineFunctionNames(a:block, 0, 'sum min max')
 	call s:DefineFunctionNames(a:block, 1, 'count')
 	execute 'syntax match sql'.a:block.'FunctionUser nextgroup=sql'.a:block.'FunctionCallStar skipwhite skipempty contained /\h\w*\(\s*(\)\@=/'
@@ -195,17 +202,12 @@ function! s:DefineEntity_Function_real (block, included)
 	execute 'highlight link sql'.a:block.'FunctionContentStarStar sqlStar'
 	" }}}
 	" Values: {{{
-	call s:DefineEntity_Number  (a:block.'Function')
-	call s:DefineEntity_String  (a:block.'Function')
-	call s:DefineEntity_Column  (a:block.'Function')
-
 	if a:included
-		call s:DefineEntity_Function_real(a:block.'Function', 1)
+		execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=@sqlCl'.a:block.'Function,sql'.a:block.'Group'
 	else
-		execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=@sqlCl'.a:block.'Function'
+		call s:DefineEntity_Function_real(a:block.'Function', 1)
+		call s:DefineEntity_Group_real   (a:block.'Function', 1)
 	endif
-
-	execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=sql'.a:block.'Group'
 	" }}}
 	
 	" Values Separator: {{{
@@ -222,14 +224,15 @@ function! s:DefineEntity_Function_real (block, included)
 
 	execute 'highlight link sql'.a:block.'FunctionCallDelimiter sqlFunctionCallDelimiter'
 endfunction
-		" }}}
+
 function! s:DefineEntity_Function (block)
 	call s:DefineEntity_Function_real(a:block, 0)
 endfunction
+		" }}}
 	" }}}
 	
 	" Group: () {{{
-function! s:DefineEntity_Group (block)
+function! s:DefineEntity_Group_real (block, included)
 	execute 'syntax region sql'.a:block.'Group nextgroup=@sqlCl'.a:block.'GroupNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'GroupContent matchgroup=sql'.a:block.'GroupDelimiter start=/(/ end=/)/'
 
 		" Values: {{{
@@ -237,13 +240,24 @@ function! s:DefineEntity_Group (block)
 	call s:DefineEntity_String  (a:block.'Group')
 	call s:DefineEntity_Column  (a:block.'Group')
 
-	execute 'syntax cluster sqlCl'.a:block.'GroupContent add=sql'.a:block.'Group,@sqlCl'.a:block.'Function,sqlError'
+	if a:included
+		execute 'syntax cluster sqlCl'.a:block.'GroupContent add=sql'.a:block.'Group,@sqlCl'.a:block.'Function'
+	else
+		call s:DefineEntity_Group_real   (a:block.'Group', 1)
+		call s:DefineEntity_Function_real(a:block.'Group', 1)
+	endif
+
+	call s:DefineEntity_Operation(a:block.'Group')
 		" }}}
+	execute 'syntax cluster sqlCl'.a:block.'GroupContentNext add=sqlError'
 
 	execute 'syntax cluster sqlCl'.a:block.'GroupNext add=@sqlCl'.a:block.'ContentNext'
 	execute 'syntax cluster sqlCl'.a:block.'Content   add=sql'.a:block.'Group'
 
 	execute 'highlight link sql'.a:block.'GroupDelimiter sqlGroupDelimiter'
+endfunction
+function! s:DefineEntity_Group (block)
+	call s:DefineEntity_Group_real(a:block, 0)
 endfunction
 	" }}}
 
@@ -472,7 +486,9 @@ delfunction s:DefineEntity_Table
 delfunction s:DefineEntity_Column
 delfunction s:DefineEntity_Alias
 delfunction s:DefineEntity_Function
+delfunction s:DefineEntity_Function_real
 delfunction s:DefineEntity_Group
+delfunction s:DefineEntity_Group_real
 delfunction s:DefineEntity_OperationCalculation
 delfunction s:DefineEntity_OperationComparisonOperator
 delfunction s:DefineEntity_OperationComparisonMultipleOperator
