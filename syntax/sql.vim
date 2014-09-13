@@ -65,10 +65,11 @@ function! s:DefineEntity_String (block)
 
 	execute 'syntax cluster sqlCl'.a:block.'StringSingleNext add=@sqlCl'.a:block.'StringNext'
 	execute 'syntax cluster sqlCl'.a:block.'StringDoubleNext add=@sqlCl'.a:block.'StringNext'
-	execute 'syntax cluster sqlCl'.a:block.'StringNext       add=@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'StringNext       add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
 
-	execute 'syntax cluster sqlCl'.a:block.'String  add=sql'.a:block.'StringSingle,sql'.a:block.'StringDouble'
-	execute 'syntax cluster sqlCl'.a:block.'Content add=@sqlCl'.a:block.'String'
+	execute 'syntax cluster sqlCl'.a:block.'String            add=sql'.a:block.'StringSingle,sql'.a:block.'StringDouble'
+	execute 'syntax cluster sqlCl'.a:block.'Content           add=@sqlCl'.a:block.'String'
+	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=@sqlCl'.a:block.'String'
 
 	execute 'highlight link sql'.a:block.'StringSingleDelimiter sql'.a:block.'StringDelimiter'
 	execute 'highlight link sql'.a:block.'StringDoubleDelimiter sql'.a:block.'StringDelimiter'
@@ -99,8 +100,10 @@ function! s:DefineEntity_Column (block)
 	execute 'syntax match  sql'.a:block.'Column        nextgroup=@sqlCl'.a:block.'ColumnNext skipwhite skipempty contained /\h\w*/'
 
 	execute 'syntax cluster sqlCl'.a:block.'Column     add=sql'.a:block.'ColumnEscaped,sql'.a:block.'Column'
-	execute 'syntax cluster sqlCl'.a:block.'ColumnNext add=@sqlCl'.a:block.'ContentNext'
-	execute 'syntax cluster sqlCl'.a:block.'Content    add=@sqlCl'.a:block.'Column'
+	execute 'syntax cluster sqlCl'.a:block.'ColumnNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
+
+	execute 'syntax cluster sqlCl'.a:block.'Content           add=@sqlCl'.a:block.'Column'
+	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=@sqlCl'.a:block.'Column'
 
 	execute 'highlight link sql'.a:block.'ColumnDelimiter sqlColumnDelimiter'
 	execute 'highlight link sql'.a:block.'Column          sqlColumn'
@@ -203,10 +206,12 @@ function! s:DefineEntity_Function_real (block, included)
 	" }}}
 	" Values: {{{
 	if a:included
-		execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=@sqlCl'.a:block.'Function,sql'.a:block.'Group'
+		execute 'syntax cluster sqlCl'.a:block.'FunctionContent   add=@sqlCl'.a:block.'Function,sql'.a:block.'Group'
+		execute 'syntax cluster sqlCl'.a:block.'FunctionOperation add=@sqlCl'.a:block.'Operation'
 	else
-		call s:DefineEntity_Function_real(a:block.'Function', 1)
-		call s:DefineEntity_Group_real   (a:block.'Function', 1)
+		call s:DefineEntity_Function_real (a:block.'Function', 1)
+		call s:DefineEntity_Group_real    (a:block.'Function', 1)
+		call s:DefineEntity_Operation_real(a:block.'Function', 1)
 	endif
 	" }}}
 	
@@ -230,7 +235,6 @@ function! s:DefineEntity_Function (block)
 endfunction
 		" }}}
 	" }}}
-	
 	" Group: () {{{
 function! s:DefineEntity_Group_real (block, included)
 	execute 'syntax region sql'.a:block.'Group nextgroup=@sqlCl'.a:block.'GroupNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'GroupContent matchgroup=sql'.a:block.'GroupDelimiter start=/(/ end=/)/'
@@ -241,13 +245,15 @@ function! s:DefineEntity_Group_real (block, included)
 	call s:DefineEntity_Column  (a:block.'Group')
 
 	if a:included
-		execute 'syntax cluster sqlCl'.a:block.'GroupContent add=sql'.a:block.'Group,@sqlCl'.a:block.'Function'
+		execute 'syntax cluster sqlCl'.a:block.'GroupContent   add=sql'.a:block.'Group,@sqlCl'.a:block.'Function'
+		execute 'syntax cluster sqlCl'.a:block.'GroupOperation add=@sqlCl'.a:block.'Operation'
 	else
-		call s:DefineEntity_Group_real   (a:block.'Group', 1)
-		call s:DefineEntity_Function_real(a:block.'Group', 1)
+		call s:DefineEntity_Group_real    (a:block.'Group', 1)
+		call s:DefineEntity_Function_real (a:block.'Group', 1)
+		call s:DefineEntity_Operation_real(a:block.'Group', 1)
 	endif
 
-	call s:DefineEntity_Operation(a:block.'Group')
+	"call s:DefineEntity_Operation(a:block.'Group')
 		" }}}
 	execute 'syntax cluster sqlCl'.a:block.'GroupContentNext add=sqlError'
 
@@ -260,7 +266,6 @@ function! s:DefineEntity_Group (block)
 	call s:DefineEntity_Group_real(a:block, 0)
 endfunction
 	" }}}
-
 	" Operation: {{{
 		" Calculation: + - * / % {{{
 function! s:DefineEntity_OperationCalculation(block)
@@ -301,38 +306,64 @@ function! s:DefineEntity_OperationComparisonMultipleRoot(block)
 endfunction
 				" }}}
 				" Block: (...) {{{
-function! s:DefineEntity_OperationComparisonMultipleBlock(block)
-	execute 'syntax region sql'.a:block.'OperationComparisonMultipleBlock nextgroup=@sqlCl'.a:block.'OperationPartNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'OperationComparisonMultipleBlockContent matchgroup=sql'.a:block.'OperationComparisonMultipleBlockDelimiter start=/(/ end=/)/'
+function! s:DefineEntity_OperationComparisonMultipleBlock_real(block, included)
+	execute 'syntax region sql'.a:block.'OperationComparisonMultipleBlock nextgroup=@sqlCl'.a:block.'ContentNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'OperationComparisonMultipleBlockContent matchgroup=sql'.a:block.'OperationComparisonMultipleBlockDelimiter start=/(/ end=/)/'
 
-		" Values: {{{
+					" Values: {{{
 	call s:DefineEntity_Number  (a:block.'OperationComparisonMultipleBlock')
 	call s:DefineEntity_String  (a:block.'OperationComparisonMultipleBlock')
+	call s:DefineEntity_Column  (a:block.'OperationComparisonMultipleBlock')
+	
+	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockContent add=sqlError'
 
-	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockContent add=sql'.a:block.'Group,@sqlCl'.a:block.'Function,sqlError'
-		" }}}
+	if a:included
+		execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockOperation add=@sqlCl'.a:block.'Operation'
+		execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockContent   add=@sqlCl'.a:block.'Function,sql'.a:block.'Group'
+	else
+		call s:DefineEntity_Operation_real(a:block.'OperationComparisonMultipleBlock', 1)
+		call s:DefineEntity_Function_real (a:block.'OperationComparisonMultipleBlock', 1)
+		call s:DefineEntity_Group_real    (a:block.'OperationComparisonMultipleBlock', 1)
+	endif
+					" }}}
+
+					" Values Separator: {{{
+	execute 'syntax match sql'.a:block.'OperationComparisonMultipleBlockContentComma nextgroup=@sqlCl'.a:block.'OperationComparisonMultipleBlockContent skipwhite skipempty contained display /,/'
+	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockContentNext add=sql'.a:block.'OperationComparisonMultipleBlockContentComma'
+	execute 'highlight link sql'.a:block.'OperationComparisonMultipleBlockContentComma sqlComma'
+					" }}}
+	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockContentNext add=sqlError'
 	
 	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlock add=sql'.a:block.'OperationComparisonMultipleBlock,sqlError'
 
 	execute 'highlight link sql'.a:block.'OperationComparisonMultipleBlockDelimiter sqlOperationComparisonMultipleBlockDelimiter'
 endfunction
+function! s:DefineEntity_OperationComparisonMultipleBlock(block)
+	call s:DefineEntity_OperationComparisonMultipleBlock_real(a:block, 0)
+endfunction
 				" }}}
 
 
-function! s:DefineEntity_OperationComparisonMultiple(block)
+function! s:DefineEntity_OperationComparisonMultiple_real(block, included)
 	call s:DefineEntity_OperationComparisonMultipleOperator(a:block)
 	call s:DefineEntity_OperationComparisonMultipleRoot    (a:block)
 
-	call s:DefineEntity_OperationComparisonMultipleBlock   (a:block)
+	call s:DefineEntity_OperationComparisonMultipleBlock_real(a:block, a:included)
+endfunction
+function! s:DefineEntity_OperationComparisonMultiple(block)
+	call s:DefineEntity_OperationComparisonMultiple_real(a:block, 0)
 endfunction
 			" }}}
 
-function! s:DefineEntity_OperationComparison(block)
+function! s:DefineEntity_OperationComparison_real(block, included)
 	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlock add=sqlError'
 
-	call s:DefineEntity_OperationComparisonOperator(a:block)
-	call s:DefineEntity_OperationComparisonMultiple(a:block)
+	call s:DefineEntity_OperationComparisonOperator     (a:block)
+	call s:DefineEntity_OperationComparisonMultiple_real(a:block, a:included)
 	
 	execute 'syntax cluster sqlCl'.a:block.'Operation add=@sqlCl'.a:block.'OperationComparison'
+endfunction
+function! s:DefineEntity_OperationComparison(block)
+	call s:DefineEntity_OperationComparison_real(a:block, 0)
 endfunction
 		" }}}
 		" Combination: AND OR {{{
@@ -346,11 +377,14 @@ function! s:DefineEntity_OperationCombination(block)
 endfunction
 		" }}}
 
+function! s:DefineEntity_Operation_real (block, included)
+	call s:DefineEntity_OperationCalculation    (a:block)
+	call s:DefineEntity_OperationComparison_real(a:block, a:included)
+	call s:DefineEntity_OperationCombination    (a:block)
+	"call s:DefineEntity_OperationTest           (a:block)
+endfunction
 function! s:DefineEntity_Operation (block)
-	call s:DefineEntity_OperationCalculation(a:block)
-	call s:DefineEntity_OperationComparison (a:block)
-	call s:DefineEntity_OperationCombination(a:block)
-	"call s:DefineEntity_OperationTest(a:block)
+	call s:DefineEntity_Operation_real(a:block, 0)
 endfunction
 	" }}}
 " }}}
@@ -480,26 +514,49 @@ highlight link sqlFrom sqlStructure
 " }}}
 
 " Cleaning: {{{
+	" Entities: {{{
 delfunction s:DefineEntity_Number
 delfunction s:DefineEntity_String
 delfunction s:DefineEntity_Table
 delfunction s:DefineEntity_Column
 delfunction s:DefineEntity_Alias
+
+		" Function: {{{
 delfunction s:DefineEntity_Function
 delfunction s:DefineEntity_Function_real
+		" }}}
+		" Group: {{{
 delfunction s:DefineEntity_Group
 delfunction s:DefineEntity_Group_real
+		" }}}
+		" Operation: {{{
 delfunction s:DefineEntity_OperationCalculation
+			" Comparison: {{{
 delfunction s:DefineEntity_OperationComparisonOperator
+				" Multiple: {{{
 delfunction s:DefineEntity_OperationComparisonMultipleOperator
 delfunction s:DefineEntity_OperationComparisonMultipleRoot
+					" Block: {{{
 delfunction s:DefineEntity_OperationComparisonMultipleBlock
+delfunction s:DefineEntity_OperationComparisonMultipleBlock_real
+					" }}}
+					"
 delfunction s:DefineEntity_OperationComparisonMultiple
+delfunction s:DefineEntity_OperationComparisonMultiple_real
+				" }}}
+
+delfunction s:DefineEntity_OperationComparison
+delfunction s:DefineEntity_OperationComparison_real
+			" }}}
 delfunction s:DefineEntity_OperationCombination
 "delfunction s:DefineEntity_OperationTest
+
 delfunction s:DefineEntity_Operation
+delfunction s:DefineEntity_Operation_real
+		" }}}
 
 delfunction s:DefineFunctionNames
+	" }}}
 " }}}
 
 " COLORS: {{{
