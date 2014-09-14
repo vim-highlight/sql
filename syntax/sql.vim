@@ -595,11 +595,6 @@ delfunction s:DefineEntity_OperationCalculation
 delfunction s:DefineEntity_OperationComparisonOperator
 				" Multiple: {{{
 delfunction s:DefineEntity_OperationComparisonMultipleOperator
-delfunction s:DefineEntity_OperationComparisonMultipleRoot
-					" Block: {{{
-delfunction s:DefineEntity_OperationComparisonMultipleBlock
-delfunction s:DefineEntity_OperationComparisonMultipleBlock_real
-					" }}}
 					"
 delfunction s:DefineEntity_OperationComparisonMultiple
 delfunction s:DefineEntity_OperationComparisonMultiple_real
@@ -611,6 +606,10 @@ delfunction s:DefineEntity_OperationComparison_real
 delfunction s:DefineEntity_OperationCombination
 			" Test: {{{
 delfunction s:DefineEntity_OperationTestIs
+				" In {{{
+delfunction s:DefineEntity_OperationTestIn
+delfunction s:DefineEntity_OperationTestIn_real
+				" }}}
 				" BETWEEN ... AND {{{
 delfunction s:DefineEntity_OperationTestBetween
 delfunction s:DefineEntity_OperationTestBetween_real
