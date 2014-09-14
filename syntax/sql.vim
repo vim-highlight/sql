@@ -377,6 +377,19 @@ function! s:DefineEntity_OperationTestIs(block)
 	execute 'highlight link sqlOperationTestIs            sqlOperationTest'
 endfunction
 			" }}}
+			" IN: {{{
+function! s:DefineEntity_OperationTestIn_real(block, included)
+	execute 'syntax keyword sql'.a:block.'OperationTestIn nextgroup=@sqlCl'.a:block.'OperationTestInNext skipwhite skipempty contained display IN'
+	
+	execute 'syntax cluster sqlCl'.a:block.'OperationTest add=sql'.a:block.'OperationTestIn'
+	
+	execute 'highlight link sql'.a:block.'OperationTestIn sqlOperationTestIn'
+	execute 'highlight link sqlOperationTestIn            sqlOperationTest'
+endfunction
+function! s:DefineEntity_OperationTestIn(block)
+	call s:DefineEntity_OperationTestIn_real(a:block, 0)
+endfunction
+				" }}}
 			" BETWEEN ... AND {{{
 function! s:DefineEntity_OperationTestBetween_real(block, included)
 		" BETWEEN: {{{
