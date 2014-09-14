@@ -282,53 +282,14 @@ endfunction
 			" Multiple: IN ANY ALL {{{
 				" Operator: ANY ALL {{{
 function! s:DefineEntity_OperationComparisonMultipleOperator(block)
-	execute 'syntax keyword sql'.a:block.'OperationComparisonMultipleOperator nextgroup=@sqlCl'.a:block.'OperationComparisonMultipleBlock skipwhite skipempty contained display ANY ALL'
+	execute 'syntax keyword sql'.a:block.'OperationComparisonMultipleOperator nextgroup=@sqlCl'.a:block.'OperationComparisonMultipleOperatorBlock skipwhite skipempty contained display ANY ALL'
 	
 	execute 'highlight link sql'.a:block.'OperationComparisonMultipleOperator sqlOperationComparisonMultiple'
-endfunction
-				" }}}
-				" Root: IN {{{
-function! s:DefineEntity_OperationComparisonMultipleRoot(block)
-	execute 'syntax keyword sql'.a:block.'OperationComparisonMultipleRoot nextgroup=@sqlCl'.a:block.'OperationComparisonMultipleBlock skipwhite skipempty contained display IN'
-	
-	execute 'syntax cluster sqlCl'.a:block.'OperationComparison add=sql'.a:block.'OperationComparisonMultipleRoot'
-	
-	execute 'highlight link sql'.a:block.'OperationComparisonMultipleRoot sqlOperationComparisonMultiple'
-endfunction
-				" }}}
-				" Block: (...) {{{
-function! s:DefineEntity_OperationComparisonMultipleBlock_real(block, included)
-	execute 'syntax region sql'.a:block.'OperationComparisonMultipleBlock nextgroup=@sqlCl'.a:block.'OperationComparisonMultipleBlockNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'OperationComparisonMultipleBlockContent matchgroup=sql'.a:block.'OperationComparisonMultipleBlockDelimiter start=/(/ end=/)/'
-
-					" Values: {{{
-	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockContent add=sqlError'
-	
-	call s:DefineEntityCommon_Root  (a:block, 'OperationComparisonMultipleBlock')
-	call s:DefineEntityCommon_Nested(a:block, 'OperationComparisonMultipleBlock', a:included)
-					" }}}
-
-					" Values Separator: {{{
-	execute 'syntax match sql'.a:block.'OperationComparisonMultipleBlockContentComma nextgroup=@sqlCl'.a:block.'OperationComparisonMultipleBlockContent skipwhite skipempty contained display /,/'
-	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockContentNext add=sql'.a:block.'OperationComparisonMultipleBlockContentComma'
-	execute 'highlight link sql'.a:block.'OperationComparisonMultipleBlockContentComma sqlComma'
-					" }}}
-	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockContentNext add=sqlError'
-	
-	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlock     add=sql'.a:block.'OperationComparisonMultipleBlock,sqlError'
-	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonMultipleBlockNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
-
-	execute 'highlight link sql'.a:block.'OperationComparisonMultipleBlockDelimiter sqlOperationComparisonMultipleBlockDelimiter'
-endfunction
-function! s:DefineEntity_OperationComparisonMultipleBlock(block)
-	call s:DefineEntity_OperationComparisonMultipleBlock_real(a:block, 0)
 endfunction
 				" }}}
 
 function! s:DefineEntity_OperationComparisonMultiple_real(block, included)
 	call s:DefineEntity_OperationComparisonMultipleOperator(a:block)
-	call s:DefineEntity_OperationComparisonMultipleRoot    (a:block)
-
-	call s:DefineEntity_OperationComparisonMultipleBlock_real(a:block, a:included)
 endfunction
 function! s:DefineEntity_OperationComparisonMultiple(block)
 	call s:DefineEntity_OperationComparisonMultiple_real(a:block, 0)
@@ -357,7 +318,7 @@ function! s:DefineEntity_OperationCombination(block)
 	execute 'highlight link sql'.a:block.'OperationCombination sqlOperationCombination'
 endfunction
 		" }}}
-		" Test: IS [NOT] NULL, BETWEEN ... AND {{{
+		" Test: IS, IN, BETWEEN {{{
 			" IS [NOT] NULL {{{
 function! s:DefineEntity_OperationTestIs(block)
 				" IS: {{{
@@ -378,20 +339,43 @@ function! s:DefineEntity_OperationTestIs(block)
 				" }}}
 endfunction
 			" }}}
-			" IN: {{{
+			" IN (...) {{{
 function! s:DefineEntity_OperationTestIn_real(block, included)
+				" IN: {{{
 	execute 'syntax keyword sql'.a:block.'OperationTestIn nextgroup=@sqlCl'.a:block.'OperationTestInNext skipwhite skipempty contained display IN'
 	
 	execute 'syntax cluster sqlCl'.a:block.'OperationTest add=sql'.a:block.'OperationTestIn'
 	
 	execute 'highlight link sql'.a:block.'OperationTestIn sqlOperationTestIn'
 	execute 'highlight link sqlOperationTestIn            sqlOperationTest'
+				" }}}
+				" (...) {{{
+	execute 'syntax region sql'.a:block.'OperationTestInBlock nextgroup=@sqlCl'.a:block.'OperationTestInBlockNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'OperationTestInBlockContent matchgroup=sql'.a:block.'OperationTestInBlockDelimiter start=/(/ end=/)/'
+
+					" Values: {{{
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockContent add=sqlError'
+	
+	call s:DefineEntityCommon_Root  (a:block, 'OperationTestInBlock')
+	call s:DefineEntityCommon_Nested(a:block, 'OperationTestInBlock', a:included)
+					" }}}
+					" Values Separator: {{{
+	execute 'syntax match sql'.a:block.'OperationTestInBlockContentComma nextgroup=@sqlCl'.a:block.'OperationTestInBlockContent skipwhite skipempty contained display /,/'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockContentNext add=sql'.a:block.'OperationTestInBlockContentComma'
+	execute 'highlight link sql'.a:block.'OperationTestInBlockContentComma sqlComma'
+					" }}}
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockContentNext add=sqlError'
+	
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlock     add=sql'.a:block.'OperationTestInBlock,sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
+
+	execute 'highlight link sql'.a:block.'OperationTestInBlockDelimiter sqlOperationTestInBlockDelimiter'
+				" }}}
 endfunction
 function! s:DefineEntity_OperationTestIn(block)
 	call s:DefineEntity_OperationTestIn_real(a:block, 0)
 endfunction
 				" }}}
-			" BETWEEN ... AND {{{
+			" BETWEEN...AND {{{
 function! s:DefineEntity_OperationTestBetween_real(block, included)
 		" BETWEEN: {{{
 	execute 'syntax keyword sql'.a:block.'OperationTestBetween nextgroup=@sqlCl'.a:block.'OperationTestBetweenContent skipwhite skipempty contained BETWEEN'
@@ -423,6 +407,7 @@ endfunction
 
 function! s:DefineEntity_OperationTest_real(block, included)
 	call s:DefineEntity_OperationTestIs          (a:block)
+	call s:DefineEntity_OperationTestIn_real     (a:block, a:included)
 	call s:DefineEntity_OperationTestBetween_real(a:block, a:included)
 
 	execute 'syntax cluster sqlCl'.a:block.'Operation add=@sqlCl'.a:block.'OperationTest'
