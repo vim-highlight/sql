@@ -357,25 +357,65 @@ function! s:DefineEntity_OperationCombination(block)
 	execute 'highlight link sql'.a:block.'OperationCombination sqlOperationCombination'
 endfunction
 		" }}}
-		" Test: IS [NOT] NULL {{{
-function! s:DefineEntity_OperationTest(block)
-	"execute 'syntax keyword sql'.a:block.'OperationTestIs   nextgroup=sql'.a:block.'OperationTestNot,sql'.a:block.'OperationTestNull contained IS'
+		" Test: IS [NOT] NULL, BETWEEN ... AND {{{
+			" IS [NOT] NULL {{{
+function! s:DefineEntity_OperationTestIs(block)
 	execute 'syntax keyword sql'.a:block.'OperationTestIs   nextgroup=@sqlCl'.a:block.'OperationTestIsNext   skipwhite skipempty contained IS'
 	execute 'syntax keyword sql'.a:block.'OperationTestNot  nextgroup=@sqlCl'.a:block.'OperationTestNotNext  skipwhite skipempty contained NOT'
 	execute 'syntax keyword sql'.a:block.'OperationTestNull nextgroup=@sqlCl'.a:block.'OperationTestNullNext skipwhite skipempty contained NULL'
 	
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestIsNext   add=sql'.a:block.'OperationTestNot,sql'.a:block.'OperationTestNull,sqlError'
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestNotNext  add=sql'.a:block.'OperationTestNull,sqlError'
-	execute 'syntax cluster sqlCl'.a:block.'OperationTestNullNext add=@sqlCl'.a:block.'OperationTestNext,sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestNullNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext,sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'Operation             add=sql'.a:block.'OperationTestIs'
 
-	execute 'syntax cluster sqlCl'.a:block.'OperationTestNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
-	execute 'syntax cluster sqlCl'.a:block.'Operation         add=sql'.a:block.'OperationTestIs'
+	"execute 'highlight link sql'.a:block.'OperationTestIs   sql'.a:block.'OperationTestIs'
+	execute 'highlight link sql'.a:block.'OperationTestNot  sql'.a:block.'OperationTestIs'
+	execute 'highlight link sql'.a:block.'OperationTestNull sql'.a:block.'OperationTestIs'
 
-	execute 'highlight link sql'.a:block.'OperationTestIs   sql'.a:block.'OperationTest'
-	execute 'highlight link sql'.a:block.'OperationTestNot  sql'.a:block.'OperationTest'
-	execute 'highlight link sql'.a:block.'OperationTestNull sql'.a:block.'OperationTest'
+	execute 'highlight link sql'.a:block.'OperationTestIs sqlOperationTestIs'
+	execute 'highlight link sqlOperationTestIs            sqlOperationTest'
+endfunction
+			" }}}
+			" BETWEEN ... AND {{{
+function! s:DefineEntity_OperationTestBetween_real(block, included)
+		" BETWEEN: {{{
+	execute 'syntax keyword sql'.a:block.'OperationTestBetween nextgroup=@sqlCl'.a:block.'OperationTestBetweenContent skipwhite skipempty contained BETWEEN'
+	execute 'syntax cluster sqlCl'.a:block.'Operation add=sql'.a:block.'OperationTestBetween'
+	"execute 'highlight link sql'.a:block.'OperationTestIs sql'.a:block.'OperationTestIs'
+		" }}}
+		" Values: 1 {{{
+	call s:DefineEntityCommon_Root  (a:block, 'OperationTestBetween')
+	call s:DefineEntityCommon_Nested(a:block, 'OperationTestBetween', a:included)
+	
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestBetweenContentNext add=@sqlCl'.a:block.'Operation,sqlError'
+		" }}}
+		" AND: {{{
+	execute 'syntax keyword sql'.a:block.'OperationTestBetweenAnd nextgroup=@sqlCl'.a:block.'OperationTestBetweenAndContent skipwhite skipempty contained AND'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestBetweenContentNext add=sql'.a:block.'OperationTestBetweenAnd'
+	execute 'highlight link sql'.a:block.'OperationTestBetweenAnd sql'.a:block.'OperationTestBetween'
+		" }}}
+		" Values: 2 {{{
+	call s:DefineEntityCommon_Root  (a:block, 'OperationTestBetweenAnd')
+	call s:DefineEntityCommon_Nested(a:block, 'OperationTestBetweenAnd', a:included)
+	
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestBetweenAndContentNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext,sqlError'
+		" }}}
+	
+	execute 'highlight link sql'.a:block.'OperationTestBetween sqlOperationTestBetween'
+	execute 'highlight link sqlOperationTestBetween            sqlOperationTest'
+endfunction
+function! s:DefineEntity_OperationTestBetween(block)
+	call s:DefineEntity_OperationTestBetween_real(a:block, 0)
+endfunction
+			" }}}
 
-	execute 'highlight link sql'.a:block.'OperationTest sqlOperationTest'
+function! s:DefineEntity_OperationTest_real(block, included)
+	call s:DefineEntity_OperationTestIs          (a:block)
+	call s:DefineEntity_OperationTestBetween_real(a:block, a:included)
+endfunction
+function! s:DefineEntity_OperationTest(block)
+	call s:DefineEntity_OperationTest_real(a:block, 0)
 endfunction
 		" }}}
 
@@ -383,7 +423,7 @@ function! s:DefineEntity_Operation_real (block, included)
 	call s:DefineEntity_OperationCalculation    (a:block)
 	call s:DefineEntity_OperationComparison_real(a:block, a:included)
 	call s:DefineEntity_OperationCombination    (a:block)
-	call s:DefineEntity_OperationTest           (a:block)
+	call s:DefineEntity_OperationTest_real      (a:block, a:included)
 endfunction
 function! s:DefineEntity_Operation (block)
 	call s:DefineEntity_Operation_real(a:block, 0)
@@ -571,7 +611,16 @@ delfunction s:DefineEntity_OperationComparison
 delfunction s:DefineEntity_OperationComparison_real
 			" }}}
 delfunction s:DefineEntity_OperationCombination
+			" Test: {{{
+delfunction s:DefineEntity_OperationTestIs
+				" BETWEEN ... AND {{{
+delfunction s:DefineEntity_OperationTestBetween
+delfunction s:DefineEntity_OperationTestBetween_real
+				" }}}
+
 delfunction s:DefineEntity_OperationTest
+delfunction s:DefineEntity_OperationTest_real
+			" }}}
 
 delfunction s:DefineEntity_Operation
 delfunction s:DefineEntity_Operation_real
