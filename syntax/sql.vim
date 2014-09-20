@@ -335,7 +335,7 @@ function! s:DefineEntity_OperationCombination(block)
 	execute 'highlight default link sql'.a:block.'OperationCombination sqlOperationCombination'
 endfunction
 		" }}}
-		" Test: IS, IN, BETWEEN {{{
+		" Test: [NOT] IS, IN, BETWEEN {{{
 			" IS [NOT] NULL {{{
 function! s:DefineEntity_OperationTestIs(block)
 				" IS: {{{
@@ -367,8 +367,9 @@ function! s:DefineEntity_OperationTestIn_real(block, included)
 				" IN: {{{
 	execute 'syntax keyword sql'.a:block.'OperationTestIn nextgroup=@sqlCl'.a:block.'OperationTestInNext skipwhite skipempty contained display IN'
 	
-	execute 'syntax cluster sqlCl'.a:block.'OperationTest       add=sql'.a:block.'OperationTestIn'
-	execute 'syntax cluster sqlCl'.a:block.'OperationTestInNext add=sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTest        add=sql'.a:block.'OperationTestIn'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestNotNext add=sql'.a:block.'OperationTestIn'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestInNext  add=sqlError'
 	
 	execute 'highlight default link sql'.a:block.'OperationTestIn sqlOperationTestIn'
 				" }}}
@@ -413,7 +414,8 @@ function! s:DefineEntity_OperationTestBetween_real(block, included)
 				" BETWEEN: {{{
 	execute 'syntax keyword sql'.a:block.'OperationTestBetween nextgroup=@sqlCl'.a:block.'OperationTestBetweenContent skipwhite skipempty contained BETWEEN'
 
-	execute 'syntax cluster sqlCl'.a:block.'OperationTest add=sql'.a:block.'OperationTestBetween'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTest        add=sql'.a:block.'OperationTestBetween'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestNotNext add=sql'.a:block.'OperationTestBetween'
 
 	execute 'highlight default link sql'.a:block.'OperationTestBetween sqlOperationTestBetween'
 				" }}}
@@ -445,11 +447,22 @@ function! s:DefineEntity_OperationTestBetween(block)
 	call s:DefineEntity_OperationTestBetween_real(a:block, 0)
 endfunction
 			" }}}
+			" NOT: {{{
+function! s:DefineEntity_OperationTestNot(block)
+	execute 'syntax keyword sql'.a:block.'OperationTestNot nextgroup=@sqlCl'.a:block.'OperationTestNotNext skipwhite skipempty contained display NOT'
+	
+	execute 'syntax cluster sqlCl'.a:block.'OperationTest        add=sql'.a:block.'OperationTestNot'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestNotNext add=sqlError'
+	
+	execute 'highlight default link sql'.a:block.'OperationTestNot sqlOperationTestNot'
+endfunction
+			" }}}
 
 function! s:DefineEntity_OperationTest_real(block, included)
 	call s:DefineEntity_OperationTestIs          (a:block)
 	call s:DefineEntity_OperationTestIn_real     (a:block, a:included)
 	call s:DefineEntity_OperationTestBetween_real(a:block, a:included)
+	call s:DefineEntity_OperationTestNot         (a:block)
 
 	execute 'syntax cluster sqlCl'.a:block.'Operation add=@sqlCl'.a:block.'OperationTest'
 endfunction
@@ -656,6 +669,7 @@ delfunction s:DefineEntity_OperationTestIn_real
 delfunction s:DefineEntity_OperationTestBetween
 delfunction s:DefineEntity_OperationTestBetween_real
 				" }}}
+delfunction s:DefineEntity_OperationTestNot
 
 delfunction s:DefineEntity_OperationTest
 delfunction s:DefineEntity_OperationTest_real
@@ -709,6 +723,8 @@ highlight default link sqlOperationTestIsNull           sqlTest
 
 highlight default link sqlOperationTestBetween          sqlTest
 highlight default link sqlOperationTestBetweenAnd       sqlTest
+
+highlight default link sqlOperationTestNot				sqlTest
 
 highlight default link sqlOperationCombination          sqlLink
 
