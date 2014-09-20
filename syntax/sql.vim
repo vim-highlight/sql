@@ -55,7 +55,7 @@ function! s:DefineEntity_Null (block)
 	execute 'syntax cluster sqlCl'.a:block.'Content           add=sql'.a:block.'Null'
 	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=sql'.a:block.'Null'
 
-	execute 'highlight link sql'.a:block.'Null sqlNull'
+	execute 'highlight default link sql'.a:block.'Null sqlNull'
 endfunction
 	" }}}
 	" Number: {{{
@@ -66,7 +66,7 @@ function! s:DefineEntity_Number (block)
 	execute 'syntax cluster sqlCl'.a:block.'Content           add=sql'.a:block.'Number'
 	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=sql'.a:block.'Number'
 
-	execute 'highlight link sql'.a:block.'Number sqlNumber'
+	execute 'highlight default link sql'.a:block.'Number sqlNumber'
 endfunction
 	" }}}
 	" String: {{{
@@ -82,14 +82,14 @@ function! s:DefineEntity_String (block)
 	execute 'syntax cluster sqlCl'.a:block.'Content           add=@sqlCl'.a:block.'String'
 	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=@sqlCl'.a:block.'String'
 
-	execute 'highlight link sql'.a:block.'StringSingleDelimiter sql'.a:block.'StringDelimiter'
-	execute 'highlight link sql'.a:block.'StringDoubleDelimiter sql'.a:block.'StringDelimiter'
+	execute 'highlight default link sql'.a:block.'StringSingleDelimiter sql'.a:block.'StringDelimiter'
+	execute 'highlight default link sql'.a:block.'StringDoubleDelimiter sql'.a:block.'StringDelimiter'
 
-	execute 'highlight link sql'.a:block.'StringSingle sql'.a:block.'String'
-	execute 'highlight link sql'.a:block.'StringDouble sql'.a:block.'String'
+	execute 'highlight default link sql'.a:block.'StringSingle sql'.a:block.'String'
+	execute 'highlight default link sql'.a:block.'StringDouble sql'.a:block.'String'
 
-	execute 'highlight link sql'.a:block.'StringDelimiter sqlStringDelimiter'
-	execute 'highlight link sql'.a:block.'String          sqlString'
+	execute 'highlight default link sql'.a:block.'StringDelimiter sqlStringDelimiter'
+	execute 'highlight default link sql'.a:block.'String          sqlString'
 endfunction
 	" }}}
 	" Table: {{{
@@ -100,8 +100,8 @@ function! s:DefineEntity_Table (block)
 	execute 'syntax cluster sqlCl'.a:block.'TableNext add=@sqlCl'.a:block.'ContentNext'
 	execute 'syntax cluster sqlCl'.a:block.'Content   add=sql'.a:block.'TableEscaped,sql'.a:block.'Table'
 
-	execute 'highlight link sql'.a:block.'TableDelimiter sqlTableDelimiter'
-	execute 'highlight link sql'.a:block.'Table          sqlTable'
+	execute 'highlight default link sql'.a:block.'TableDelimiter sqlTableDelimiter'
+	execute 'highlight default link sql'.a:block.'Table          sqlTable'
 endfunction
 	" }}}
 	" Column: {{{
@@ -116,43 +116,48 @@ function! s:DefineEntity_Column (block)
 	execute 'syntax cluster sqlCl'.a:block.'Content           add=@sqlCl'.a:block.'Column'
 	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=@sqlCl'.a:block.'Column'
 
-	execute 'highlight link sql'.a:block.'ColumnDelimiter sqlColumnDelimiter'
-	execute 'highlight link sql'.a:block.'Column          sqlColumn'
+	execute 'highlight default link sql'.a:block.'ColumnDelimiter sqlColumnDelimiter'
+	execute 'highlight default link sql'.a:block.'Column          sqlColumn'
 		" }}}
 		" table. {{{
+			" table {{{
 	execute 'syntax region sql'.a:block.'TableEscaped nextgroup=sql'.a:block.'TableSeparator contained display transparent oneline contains=sql'.a:block.'TableSingle matchgroup=sql'.a:block.'TableDelimiter start=/`/ end=/`\(\.\)\@=/'
 	execute 'syntax match  sql'.a:block.'TableSingle  nextgroup=sql'.a:block.'TableSeparator contained display /\h\w*/'
 	execute 'syntax match  sql'.a:block.'Table        nextgroup=sql'.a:block.'TableSeparator contained display /\h\w*\(\.\)\@=/'
 
 	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'TableEscaped,sql'.a:block.'Table'
 
-	execute 'highlight link sql'.a:block.'TableDelimiter sqlTableDelimiter'
-	execute 'highlight link sql'.a:block.'TableSingle    sql'.a:block.'Table'
-	execute 'highlight link sql'.a:block.'Table          sqlTable'
+	execute 'highlight default link sql'.a:block.'TableSingle    sql'.a:block.'Table'
 
+	execute 'highlight default link sql'.a:block.'TableDelimiter sqlTableDelimiter'
+	execute 'highlight default link sql'.a:block.'Table          sqlTable'
+			" }}}
+			" . {{{
 	execute 'syntax match sql'.a:block.'TableSeparator nextgroup=@sqlCl'.a:block.'Column contained display /\./'
-	execute 'highlight link sql'.a:block.'TableSeparator sqlTableSeparator'
+	execute 'highlight default link sql'.a:block.'TableSeparator sqlTableSeparator'
+			" }}}
 		" }}}
 endfunction
 	" }}}
 	" Alias: AS {{{
 function! s:DefineEntity_Alias (block)
+		" AS: {{{
 	execute 'syntax keyword sql'.a:block.'AliasAs nextgroup=@sqlCl'.a:block.'AliasName skipwhite skipempty contained AS'
-	execute 'syntax cluster sqlCl'.a:block.'ContentNext add=sql'.a:block.'AliasAs'
 
+	execute 'syntax cluster sqlCl'.a:block.'ContentNext add=sql'.a:block.'AliasAs'
+	execute 'syntax cluster sqlCl'.a:block.'AliasNext   add=@sqlCl'.a:block.'Next'
+
+	execute 'highlight default link sql'.a:block.'AliasAs sqlAliasAs'
+		" }}}
 		" Name: {{{
 	execute 'syntax region sql'.a:block.'AliasEscaped nextgroup=@sqlCl'.a:block.'AliasNext skipwhite skipempty contained display transparent oneline contains=sql'.a:block.'AliasName matchgroup=sql'.a:block.'AliasNameDelimiter start=/`/ end=/`/'
 	execute 'syntax match  sql'.a:block.'AliasName    nextgroup=@sqlCl'.a:block.'AliasNext skipwhite skipempty contained display /\h\w*/'
 
 	execute 'syntax cluster sqlCl'.a:block.'AliasName add=sql'.a:block.'AliasEscaped,sql'.a:block.'AliasName'
 
-	execute 'highlight link sql'.a:block.'AliasNameDelimiter sqlAliasDelimiter'
-	execute 'highlight link sql'.a:block.'AliasName          sqlAliasName'
+	execute 'highlight default link sql'.a:block.'AliasNameDelimiter sqlAliasNameDelimiter'
+	execute 'highlight default link sql'.a:block.'AliasName          sqlAliasName'
 		" }}}
-
-	execute 'syntax cluster sqlCl'.a:block.'AliasNext add=@sqlCl'.a:block.'Next'
-
-	execute 'highlight link sql'.a:block.'AliasAs sqlAliasAs'
 endfunction
 	" }}}
 
@@ -186,11 +191,12 @@ endfunction
 		" }}}
 		" DefineEntity_Function {{{
 function! s:DefineEntity_Function_real (block, included)
-	" Values: {{{
+			" Values: {{{
 		" Must be declared at first to allow user function match BEFORE column match
 	call s:DefineEntityCommon_Root(a:block, 'Function')
-	" }}}
+			" }}}
 
+			" Function names {{{
 	call s:DefineFunctionNames(a:block, 0, 'sum min max')
 	call s:DefineFunctionNames(a:block, 1, 'count')
 	execute 'syntax match sql'.a:block.'FunctionUser nextgroup=sql'.a:block.'FunctionCallStar skipwhite skipempty contained /\h\w*\(\s*(\)\@=/'
@@ -198,39 +204,45 @@ function! s:DefineEntity_Function_real (block, included)
 	execute 'syntax cluster sqlCl'.a:block.'Function add=sql'.a:block.'FunctionCommon,sql'.a:block.'FunctionCommonStar,sql'.a:block.'FunctionUser'
 	execute 'syntax cluster sqlCl'.a:block.'Content add=@sqlCl'.a:block.'Function'
 
-	execute 'highlight link sql'.a:block.'FunctionCommon     sql'.a:block.'Function'
-	execute 'highlight link sql'.a:block.'FunctionCommonStar sql'.a:block.'Function'
+	execute 'highlight default link sql'.a:block.'FunctionCommon     sql'.a:block.'Function'
+	execute 'highlight default link sql'.a:block.'FunctionCommonStar sql'.a:block.'Function'
 
-	execute 'highlight link sql'.a:block.'Function     sqlFunction'
-	execute 'highlight link sql'.a:block.'FunctionUser sqlFunctionUser'
-
-
+	execute 'highlight default link sql'.a:block.'Function     sqlFunction'
+	execute 'highlight default link sql'.a:block.'FunctionUser sqlFunctionUser'
+			" }}}
+			" (... ,) {{{
+				" () {{{
 	execute 'syntax region sql'.a:block.'FunctionCall     nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionContent     matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
 	execute 'syntax region sql'.a:block.'FunctionCallStar nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionContentStar matchgroup=sql'.a:block.'FunctionCallDelimiter start=/(/ end=/)/'
 
-	" Star: * {{{
+	execute 'syntax cluster sqlCl'.a:block.'FunctionNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
+
+	execute 'highlight default link sql'.a:block.'FunctionCallDelimiter sqlFunctionCallDelimiter'
+				" }}}
+				" ... {{{
+					" Star: * {{{
 	execute 'syntax match sql'.a:block.'FunctionContentStarStar nextgroup=@sqlCl'.a:block.'FunctionContentNext skipwhite skipempty contained display /\*/'
+
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContentStar add=sql'.a:block.'FunctionContentStarStar'
-	execute 'highlight link sql'.a:block.'FunctionContentStarStar sqlStar'
-	" }}}
-	" Values: {{{
-	call s:DefineEntityCommon_Nested(a:block, 'Function', a:included)
-	" }}}
-	
-	" Values Separator: {{{
-	execute 'syntax match sql'.a:block.'FunctionContentComma nextgroup=@sqlCl'.a:block.'FunctionContent skipwhite skipempty contained display /,/'
-	execute 'syntax cluster sqlCl'.a:block.'FunctionContentNext add=sql'.a:block.'FunctionContentComma'
-	execute 'highlight link sql'.a:block.'FunctionContentComma sqlComma'
-	" }}}
-	execute 'syntax cluster sqlCl'.a:block.'FunctionContentNext add=sqlError'
-	
-	execute 'syntax cluster sqlCl'.a:block.'FunctionContent     add=sqlError'
 	execute 'syntax cluster sqlCl'.a:block.'FunctionContentStar add=@sqlCl'.a:block.'FunctionContent'
 
-	execute 'syntax cluster sqlCl'.a:block.'FunctionNext        add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
-	execute 'syntax cluster sqlCl'.a:block.'Content   			add=sql'.a:block.'Function'
+	execute 'highlight default link sql'.a:block.'FunctionContentStarStar sqlFunctionContentStar'
+					" }}}
+					" Values: {{{
+	call s:DefineEntityCommon_Nested(a:block, 'Function', a:included)
 
-	execute 'highlight link sql'.a:block.'FunctionCallDelimiter sqlFunctionCallDelimiter'
+	execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=sqlError'
+					" }}}
+				" }}}
+				" Values Separator: , {{{
+	execute 'syntax match sql'.a:block.'FunctionContentComma nextgroup=@sqlCl'.a:block.'FunctionContent skipwhite skipempty contained display /,/'
+
+	execute 'syntax cluster sqlCl'.a:block.'FunctionContentNext add=sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'FunctionContentNext add=sql'.a:block.'FunctionContentComma'
+
+	execute 'highlight default link sql'.a:block.'FunctionContentComma sqlFunctionComma'
+				" }}}
+			" }}}
 endfunction
 
 function! s:DefineEntity_Function (block)
@@ -240,18 +252,23 @@ endfunction
 	" }}}
 	" Group: () {{{
 function! s:DefineEntity_Group_real (block, included)
+		" (...) {{{
+			" () {{{
 	execute 'syntax region sql'.a:block.'Group nextgroup=@sqlCl'.a:block.'GroupNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'GroupContent matchgroup=sql'.a:block.'GroupDelimiter start=/(/ end=/)/'
-
-		" Values: {{{
-	call s:DefineEntityCommon_Root  (a:block, 'Group')
-	call s:DefineEntityCommon_Nested(a:block, 'Group', a:included)
-		" }}}
-	execute 'syntax cluster sqlCl'.a:block.'GroupContentNext add=sqlError'
 
 	execute 'syntax cluster sqlCl'.a:block.'GroupNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
 	execute 'syntax cluster sqlCl'.a:block.'Content   add=sql'.a:block.'Group'
 
-	execute 'highlight link sql'.a:block.'GroupDelimiter sqlGroupDelimiter'
+	execute 'highlight default link sql'.a:block.'GroupDelimiter sqlGroupDelimiter'
+			" }}}
+			" ... {{{
+	execute 'syntax cluster sqlCl'.a:block.'GroupContentNext add=sqlError'
+				" Values: {{{
+	call s:DefineEntityCommon_Root  (a:block, 'Group')
+	call s:DefineEntityCommon_Nested(a:block, 'Group', a:included)
+				" }}}
+			" }}}
+		" }}}
 endfunction
 function! s:DefineEntity_Group (block)
 	call s:DefineEntity_Group_real(a:block, 0)
@@ -265,7 +282,7 @@ function! s:DefineEntity_OperationCalculation(block)
 	execute 'syntax cluster sqlCl'.a:block.'OperationCalculationNext add=sqlError,@sqlCl'.a:block.'OperationPartNext'
 	execute 'syntax cluster sqlCl'.a:block.'Operation                add=sql'.a:block.'OperationCalculation'
 	
-	execute 'highlight link sql'.a:block.'OperationCalculation sqlOperationCalculation'
+	execute 'highlight default link sql'.a:block.'OperationCalculation sqlOperationCalculation'
 endfunction
 		" }}}
 		" Comparison: = != <> < <= > >= <! >! IN ANY ALL {{{
@@ -276,7 +293,7 @@ function! s:DefineEntity_OperationComparisonOperator(block)
 	execute 'syntax cluster sqlCl'.a:block.'OperationComparisonOperatorNext add=sql'.a:block.'OperationComparisonMultipleOperator,@sqlCl'.a:block.'OperationPartNext'
 	execute 'syntax cluster sqlCl'.a:block.'OperationComparison             add=sql'.a:block.'OperationComparisonOperator'
 	
-	execute 'highlight link sql'.a:block.'OperationComparisonOperator sqlOperationComparisonOperator'
+	execute 'highlight default link sql'.a:block.'OperationComparisonOperator sqlOperationComparisonOperator'
 endfunction
 			" }}}
 			" Multiple: IN ANY ALL {{{
@@ -284,7 +301,7 @@ endfunction
 function! s:DefineEntity_OperationComparisonMultipleOperator(block)
 	execute 'syntax keyword sql'.a:block.'OperationComparisonMultipleOperator nextgroup=@sqlCl'.a:block.'OperationComparisonMultipleOperatorBlock skipwhite skipempty contained display ANY ALL'
 	
-	execute 'highlight link sql'.a:block.'OperationComparisonMultipleOperator sqlOperationComparisonMultiple'
+	execute 'highlight default link sql'.a:block.'OperationComparisonMultipleOperator sqlOperationComparisonMultiple'
 endfunction
 				" }}}
 
@@ -315,7 +332,7 @@ function! s:DefineEntity_OperationCombination(block)
 	execute 'syntax cluster sqlCl'.a:block.'OperationCombinationNext add=sqlError,@sqlCl'.a:block.'OperationPartNext'
 	execute 'syntax cluster sqlCl'.a:block.'Operation                add=sql'.a:block.'OperationCombination'
 	
-	execute 'highlight link sql'.a:block.'OperationCombination sqlOperationCombination'
+	execute 'highlight default link sql'.a:block.'OperationCombination sqlOperationCombination'
 endfunction
 		" }}}
 		" Test: IS, IN, BETWEEN {{{
@@ -323,19 +340,25 @@ endfunction
 function! s:DefineEntity_OperationTestIs(block)
 				" IS: {{{
 	execute 'syntax keyword sql'.a:block.'OperationTestIs nextgroup=@sqlCl'.a:block.'OperationTestIsNext   skipwhite skipempty contained IS'
+
 	execute 'syntax cluster sqlCl'.a:block.'OperationTest       add=sql'.a:block.'OperationTestIs'
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestIsNext add=sql'.a:block.'OperationTestIsNot,sql'.a:block.'OperationTestIsNull,sqlError'
-	execute 'highlight link sql'.a:block.'OperationTestIs sqlOperationTestIs'
+
+	execute 'highlight default link sql'.a:block.'OperationTestIs sqlOperationTestIs'
 				" }}}
 				" NOT: {{{
 	execute 'syntax keyword sql'.a:block.'OperationTestIsNot nextgroup=@sqlCl'.a:block.'OperationTestIsNotNext skipwhite skipempty contained NOT'
+
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestIsNotNext add=sql'.a:block.'OperationTestIsNull,sqlError'
-	execute 'highlight link sql'.a:block.'OperationTestIsNot sqlOperationTestIsNot'
+
+	execute 'highlight default link sql'.a:block.'OperationTestIsNot sqlOperationTestIsNot'
 				" }}}
 				" NULL: {{{
 	execute 'syntax keyword sql'.a:block.'OperationTestIsNull nextgroup=@sqlCl'.a:block.'OperationTestIsNullNext skipwhite skipempty contained NULL'
+
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestIsNullNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext,sqlError'
-	execute 'highlight link sql'.a:block.'OperationTestIsNull sqlOperationTestIsNull'
+
+	execute 'highlight default link sql'.a:block.'OperationTestIsNull sqlOperationTestIsNull'
 				" }}}
 endfunction
 			" }}}
@@ -347,10 +370,10 @@ function! s:DefineEntity_OperationTestIn_real(block, included)
 	execute 'syntax cluster sqlCl'.a:block.'OperationTest       add=sql'.a:block.'OperationTestIn'
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestInNext add=sqlError'
 	
-	execute 'highlight link sql'.a:block.'OperationTestIn sqlOperationTestIn'
-	execute 'highlight link sqlOperationTestIn            sqlOperationTest'
+	execute 'highlight default link sql'.a:block.'OperationTestIn sqlOperationTestIn'
+	execute 'highlight default link sqlOperationTestIn            sqlOperationTest'
 				" }}}
-				" (...) {{{
+				" (... ,) {{{
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlock add=sqlError'
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestInNext  add=@sqlCl'.a:block.'OperationTestInBlock'
 
@@ -360,7 +383,7 @@ function! s:DefineEntity_OperationTestIn_real(block, included)
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestInNext      add=sql'.a:block.'OperationTestInBlock'
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
 
-	execute 'highlight link sql'.a:block.'OperationTestInBlockDelimiter sqlOperationTestInBlockDelimiter'
+	execute 'highlight default link sql'.a:block.'OperationTestInBlockDelimiter sqlOperationTestInBlockDelimiter'
 					" }}}
 					" ... {{{
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockContent add=sqlError'
@@ -369,46 +392,55 @@ function! s:DefineEntity_OperationTestIn_real(block, included)
 	call s:DefineEntityCommon_Root  (a:block, 'OperationTestInBlock')
 	call s:DefineEntityCommon_Nested(a:block, 'OperationTestInBlock', a:included)
 						" }}}
-
+					" }}}
+					" , {{{
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockContentNext add=sqlError'
 						" Values Separator: {{{
 	execute 'syntax match sql'.a:block.'OperationTestInBlockContentComma nextgroup=@sqlCl'.a:block.'OperationTestInBlockContent skipwhite skipempty contained display /,/'
 
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockContentNext add=sql'.a:block.'OperationTestInBlockContentComma'
 
-	execute 'highlight link sql'.a:block.'OperationTestInBlockContentComma sqlComma'
+	execute 'highlight default link sql'.a:block.'OperationTestInBlockContentComma sqlOperationTestInComma'
 						" }}}
-					" }}}
 				" }}}
 endfunction
 function! s:DefineEntity_OperationTestIn(block)
 	call s:DefineEntity_OperationTestIn_real(a:block, 0)
 endfunction
 				" }}}
-			" BETWEEN...AND {{{
+			" }}}
+			" BETWEEN ... AND ... {{{
 function! s:DefineEntity_OperationTestBetween_real(block, included)
-		" BETWEEN: {{{
+				" BETWEEN: {{{
 	execute 'syntax keyword sql'.a:block.'OperationTestBetween nextgroup=@sqlCl'.a:block.'OperationTestBetweenContent skipwhite skipempty contained BETWEEN'
+
 	execute 'syntax cluster sqlCl'.a:block.'OperationTest add=sql'.a:block.'OperationTestBetween'
-	execute 'highlight link sql'.a:block.'OperationTestIs sqlOperationTestIs'
-		" }}}
-		" Values: 1 {{{
+
+	execute 'highlight default link sql'.a:block.'OperationTestBetween sqlOperationTestBetween'
+				" }}}
+				" ... [1] {{{
+					" Values: {{{
 	call s:DefineEntityCommon_Root  (a:block, 'OperationTestBetween')
 	call s:DefineEntityCommon_Nested(a:block, 'OperationTestBetween', a:included)
+					" }}}
 	
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestBetweenContentNext add=@sqlCl'.a:block.'Operation,sqlError'
-		" }}}
-		" AND: {{{
+				" }}}
+				" AND: {{{
 	execute 'syntax keyword sql'.a:block.'OperationTestBetweenAnd nextgroup=@sqlCl'.a:block.'OperationTestBetweenAndContent skipwhite skipempty contained AND'
+
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestBetweenContentNext add=sql'.a:block.'OperationTestBetweenAnd'
-	execute 'highlight link sql'.a:block.'OperationTestBetweenAnd sqlOperationTestBetweenAnd'
-		" }}}
-		" Values: 2 {{{
+
+	execute 'highlight default link sql'.a:block.'OperationTestBetweenAnd sqlOperationTestBetweenAnd'
+				" }}}
+				" ... [2] {{{
+					" Values: {{{
 	call s:DefineEntityCommon_Root  (a:block, 'OperationTestBetweenAnd')
 	call s:DefineEntityCommon_Nested(a:block, 'OperationTestBetweenAnd', a:included)
+					" }}}
 	
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestBetweenAndContentNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext,sqlError'
-		" }}}
+				" }}}
 endfunction
 function! s:DefineEntity_OperationTestBetween(block)
 	call s:DefineEntity_OperationTestBetween_real(a:block, 0)
@@ -463,22 +495,28 @@ syntax match sqlError /\S.*/
 " }}}
 
 " SELECT: {{{
+	" SELECT: {{{
 syntax keyword sqlSelect nextgroup=@sqlClSelectContentStart skipwhite skipempty SELECT
 
-	" DISTINCT: {{{
+syntax cluster sqlClSelectContentNext  add=@sqlClSelectNext
+syntax cluster sqlClSelectContentStart add=@sqlClSelectContent
+	" }}}
+	" __CONTENT__ {{{
+		" DISTINCT: {{{
 syntax keyword sqlSelectDistinct nextgroup=@sqlClSelectContent skipwhite skipempty contained DISTINCT
+
 syntax cluster sqlClSelectContentStart add=sqlSelectDistinct
 
-highlight link sqlSelectDistinct sqlFunction
-	" }}}
+highlight default link sqlSelectDistinct sqlDistinct
+		" }}}
 
-	" Star: * {{{
+		" Star: * {{{
 syntax match sqlSelectStar nextgroup=@sqlClSelectContentNext skipwhite skipempty contained display /\*/
 syntax cluster sqlClSelectContent add=sqlSelectStar
 
-highlight link sqlSelectStar sqlStar
-	" }}}
-	" Values: {{{
+highlight default link sqlSelectStar sqlStar
+		" }}}
+		" Values: {{{
 call s:DefineEntityCommon_Root('', 'Select')
 
 call s:DefineEntity_Function ('Select')
@@ -486,60 +524,64 @@ call s:DefineEntity_Group    ('Select')
 call s:DefineEntity_Operation('Select')
 
 call s:DefineFunctionNames   ('Select', 0, 'concat group_concat')
-	" }}}
-	" Alias AS: {{{
+		" }}}
+		
+		" Alias AS: {{{
 call s:DefineEntity_Alias('Select')
-	" }}}
-	" Values Separator: {{{
+		" }}}
+		
+		" Values Separator: {{{
 syntax match sqlSelectContentComma nextgroup=@sqlClSelectContent skipwhite skipempty contained display /,/
+
 syntax cluster sqlClSelectContentNext add=sqlSelectContentComma
 syntax cluster sqlClSelectAliasNext   add=sqlSelectContentComma
 
-highlight link sqlSelectContentComma sqlComma
+highlight default link sqlSelectContentComma sqlContentComma
+		" }}}
 	" }}}
-
-syntax cluster sqlClSelectContentNext  add=@sqlClSelectNext
-syntax cluster sqlClSelectContentStart add=@sqlClSelectContent
-
-highlight link sqlSelect sqlStructure
 " }}}
 " INTO: {{{
+	" INTO: {{{
 syntax keyword sqlInto nextgroup=@sqlClIntoContent skipwhite skipempty INTO
 
-	" Variable: {{{
+syntax cluster sqlClSelectNext add=sqlInto
+	" }}}
+	" __CONTENT__ {{{
+		" Variable: {{{
 syntax match sqlIntoVarName nextgroup=@sqlClIntoContentNext skipwhite skipempty contained display /\h\w*/
 syntax cluster sqlClIntoContent add=sqlIntoVarName
-	" }}}
-	" Variable Separator: {{{
+		" }}}
+
+		" Variable Separator: {{{
 syntax match sqlIntoContentComma nextgroup=@sqlClIntoContent skipwhite skipempty contained display /,/
 syntax cluster sqlClIntoContentNext add=sqlIntoContentComma
 
-highlight link sqlIntoContentComma sqlComma
-	" }}}
-
-syntax cluster sqlClSelectNext add=sqlInto
-
-highlight link sqlInto sqlStructure
-" }}}
-" FROM: {{{
-syntax keyword sqlFrom nextgroup=@sqlClFromContent skipwhite skipempty FROM
-
-	" Table: {{{
-call s:DefineEntity_Table('From')
-
-		" Alias: AS {{{
-call s:DefineEntity_Alias('From')
+highlight default link sqlIntoContentComma sqlComma
 		" }}}
 	" }}}
+" }}}
+" FROM: {{{
+	" FROM: {{{
+syntax keyword sqlFrom nextgroup=@sqlClFromContent skipwhite skipempty FROM
+
+syntax cluster sqlClSelectNext add=sqlFrom
+	" }}}
+	" __CONTENT__ {{{
+		" Table: {{{
+call s:DefineEntity_Table('From')
+			" Alias: AS {{{
+call s:DefineEntity_Alias('From')
+			" }}}
+		" }}}
 	
-	"" Jointure: norme 87 : , {{{
+		"" Jointure: norme 87 : , {{{
 "syntax match sqlFromJoin87 nextgroup=@sqlClFromJoinContent skipwhite skipempty /,/
 "syntax cluster sqlClFromContentNext add=sqlFromJoin87
 
-"highlight link sqlFromJoin87 sqlOperator
-	"" }}}
-	" Jointure: norme 92 : JOIN {{{
-		" JOIN: {{{
+"highlight default link sqlFromJoin87 sqlOperator
+		"" }}}
+		" Jointure: norme 92 : JOIN {{{
+			" JOIN: {{{
 syntax keyword sqlFromJoin92Common     nextgroup=sqlFromJoin92Join                         skipwhite skipempty contained INNER CROSS NATURAL
 syntax keyword sqlFromJoin92Outer      nextgroup=sqlFromJoin92OuterOuter,sqlFromJoin92Join skipwhite skipempty contained LEFT RIGHT FULL
 syntax keyword sqlFromJoin92OuterOuter nextgroup=sqlFromJoin92Join                         skipwhite skipempty contained OUTER
@@ -547,37 +589,29 @@ syntax keyword sqlFromJoin92Join       nextgroup=@sqlClFromJoin92Content        
 
 syntax cluster sqlClFromJoin92 add=sqlFromJoin92Common,sqlFromJoin92Outer,sqlFromJoin92OuterOuter,sqlFromJoin92Join
 
-highlight link sqlFromJoin92Common     sqlFromJoin92
-highlight link sqlFromJoin92Outer      sqlFromJoin92
-highlight link sqlFromJoin92OuterOuter sqlFromJoin92
-highlight link sqlFromJoin92Join       sqlFromJoin92
+highlight default link sqlFromJoin92Common     sqlFromJoin92
+highlight default link sqlFromJoin92Outer      sqlFromJoin92
+highlight default link sqlFromJoin92OuterOuter sqlFromJoin92
+highlight default link sqlFromJoin92Join       sqlFromJoin92
 
 syntax cluster sqlClFromContentNext add=@sqlClFromJoin92
 syntax cluster sqlClFromAliasNext   add=@sqlClFromJoin92
-
-highlight link sqlFromJoin92           sqlStructure
-		" }}}
-		" Table: {{{
+			" }}}
+			" Table: {{{
 call s:DefineEntity_Table('FromJoin92')
-
-			" Alias: AS {{{
+				" Alias: AS {{{
 call s:DefineEntity_Alias('FromJoin92')
 syntax clear @sqlClFromJoin92AliasNext
+				" }}}
 			" }}}
-		" }}}
-		" ON: {{{
+			" ON: {{{
 syntax keyword sqlFromJoin92On nextgroup=@sqlClFromContentNext skipwhite skipempty contained ON
 
 syntax cluster sqlClFromJoin92ContentNext add=sqlFromJoin92On
 syntax cluster sqlClFromJoin92AliasNext   add=sqlFromJoin92On
-
-highlight link sqlFromJoin92On sqlStatement
+			" }}}
 		" }}}
 	" }}}
-
-syntax cluster sqlClSelectNext add=sqlFrom
-
-highlight link sqlFrom sqlStructure
 " }}}
 
 " Cleaning: {{{
@@ -641,43 +675,43 @@ delfunction s:DefineEntityCommon_Nested
 " }}}
 
 " COLORS: {{{
-highlight link sqlAliasAs									sqlStructure
-highlight link sqlAliasName									sqlNone
-highlight link sqlAliasDelimiter							Delimiter
-highlight link sqlComma										Operator
-highlight link sqlColumn									sqlNone
-highlight link sqlColumnDelimiter							Delimiter
-highlight link sqlError										Error
-highlight link sqlEscape									Special
-highlight link sqlFunction									Function
-highlight link sqlFunctionUser								Operator
-highlight link sqlFunctionCallDelimiter						Operator
-highlight link sqlGroupDelimiter							Operator
-highlight link sqlNull										Statement
-highlight link sqlNumber									Number
-highlight link sqlOperationCalculation						Operator
-highlight link sqlOperationComparisonOperator				Operator
-highlight link sqlOperationComparisonMultiple				Statement
-highlight link sqlOperationTestInBlockDelimiter				Operator
-highlight link sqlOperationCombination						Statement
-highlight link sqlOperationTest								Statement
-highlight link sqlStar										Operator
-highlight link sqlStatement									Statement
-highlight link sqlString									String
-highlight link sqlStringDelimiter							sqlString
-highlight link sqlStructure									Structure
-highlight link sqlTable										sqlNone
-highlight link sqlTableDelimiter							Delimiter
-highlight link sqlTableSeparator							Operator
+"highlight default link sqlAliasAs									sqlStructure
+"highlight default link sqlAliasName									sqlNone
+"highlight default link sqlAliasDelimiter							Delimiter
+"highlight default link sqlComma										Operator
+"highlight default link sqlColumn									sqlNone
+"highlight default link sqlColumnDelimiter							Delimiter
+"highlight default link sqlError										Error
+"highlight default link sqlEscape									Special
+"highlight default link sqlFunction									Function
+"highlight default link sqlFunctionUser								Operator
+"highlight default link sqlFunctionCallDelimiter						Operator
+"highlight default link sqlGroupDelimiter							Operator
+"highlight default link sqlNull										Statement
+"highlight default link sqlNumber									Number
+"highlight default link sqlOperationCalculation						Operator
+"highlight default link sqlOperationComparisonOperator				Operator
+"highlight default link sqlOperationComparisonMultiple				Statement
+"highlight default link sqlOperationTestInBlockDelimiter				Operator
+"highlight default link sqlOperationCombination						Statement
+"highlight default link sqlOperationTest								Statement
+"highlight default link sqlStar										Operator
+"highlight default link sqlStatement									Statement
+"highlight default link sqlString									String
+"highlight default link sqlStringDelimiter							sqlString
+"highlight default link sqlStructure									Structure
+"highlight default link sqlTable										sqlNone
+"highlight default link sqlTableDelimiter							Delimiter
+"highlight default link sqlTableSeparator							Operator
 
-highlight link sqlNone						Todo
-highlight link sqlIntoVarName				sqlNone
-highlight link sqlFromTable					sqlNone
+"highlight default link sqlNone						Todo
+"highlight default link sqlIntoVarName				sqlNone
+"highlight default link sqlFromTable					sqlNone
 
-highlight link sqlOperationTestIs			sqlOperationTest
-highlight link sqlOperationTestIn			sqlOperationTest
-highlight link sqlOperationTestBetween		sqlOperationTest
-highlight link sqlOperationTestBetweenAnd	sqlOperationTest
+"highlight default link sqlOperationTestIs			sqlOperationTest
+"highlight default link sqlOperationTestIn			sqlOperationTest
+"highlight default link sqlOperationTestBetween		sqlOperationTest
+"highlight default link sqlOperationTestBetweenAnd	sqlOperationTest
 " }}}
 
 let b:current_syntax = "sql"
