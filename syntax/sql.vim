@@ -475,6 +475,14 @@ function! s:DefineEntity_OperationTestLike_real(block, included)
 						" Values: {{{
 	call s:DefineEntityCommon_Root  (a:block, 'OperationTestLike')
 	call s:DefineEntityCommon_Nested(a:block, 'OperationTestLike', a:included)
+
+							" String : % {{{
+	execute 'syntax match sql'.a:block.'OperationTestLikeStringPercent contained display /%/'
+
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestLikeStringContent add=sql'.a:block.'OperationTestLikeStringPercent'
+
+	execute 'highlight default link sql'.a:block.'OperationTestLikeStringPercent sqlOperationTestLikeStringPercent'
+							" }}}
 						" }}}
 				" }}}
 endfunction
@@ -719,56 +727,57 @@ delfunction s:DefineEntityCommon_Nested
 
 " COLORS: {{{
 	" Internal: {{{
-highlight default link sqlSelect                        sqlStructure
-highlight default link sqlInto                          sqlStructure
-highlight default link sqlFrom                          sqlStructure
+highlight default link sqlSelect                         sqlStructure
+highlight default link sqlInto                           sqlStructure
+highlight default link sqlFrom                           sqlStructure
 
-highlight default link sqlDistinct                      sqlStructureSecondary
+highlight default link sqlDistinct                       sqlStructureSecondary
 
-highlight default link sqlAliasAs                       sqlLink
-highlight default link sqlAliasName                     sqlName
+highlight default link sqlAliasAs                        sqlLink
+highlight default link sqlAliasName                      sqlName
 
-highlight default link sqlStringDelimiter               sqlString
-highlight default link sqlColumnDelimiter               sqlDelimiter
-highlight default link sqlTableDelimiter                sqlDelimiter
-highlight default link sqlColumnTableDelimiter          sqlDelimiter
-highlight default link sqlAliasNameDelimiter            sqlDelimiter
+highlight default link sqlStringDelimiter                sqlString
+highlight default link sqlColumnDelimiter                sqlDelimiter
+highlight default link sqlTableDelimiter                 sqlDelimiter
+highlight default link sqlColumnTableDelimiter           sqlDelimiter
+highlight default link sqlAliasNameDelimiter             sqlDelimiter
 
-highlight default link sqlColumn                        sqlName
-highlight default link sqlTable                         sqlName
-highlight default link sqlColumnTable                   sqlName
+highlight default link sqlColumn                         sqlName
+highlight default link sqlTable                          sqlName
+highlight default link sqlColumnTable                    sqlName
 
-highlight default link sqlFunctionCallDelimiter         sqlOperator
-highlight default link sqlGroupDelimiter                sqlOperator
+highlight default link sqlFunctionCallDelimiter          sqlOperator
+highlight default link sqlGroupDelimiter                 sqlOperator
 
-highlight default link sqlOperationCalculation          sqlOperator
-highlight default link sqlOperationComparisonOperator   sqlOperator
+highlight default link sqlOperationCalculation           sqlOperator
+highlight default link sqlOperationComparisonOperator    sqlOperator
 
-highlight default link sqlOperationTestNot				sqlTest
+highlight default link sqlOperationTestNot				 sqlTest
 
-highlight default link sqlOperationTestIn               sqlTest
-highlight default link sqlOperationTestInBlockDelimiter sqlOperator
-highlight default link sqlOperationTestInComma          sqlComma
+highlight default link sqlOperationTestIn                sqlTest
+highlight default link sqlOperationTestInBlockDelimiter  sqlOperator
+highlight default link sqlOperationTestInComma           sqlComma
 
-highlight default link sqlOperationTestIs               sqlTest
-highlight default link sqlOperationTestIsNot            sqlTest
-highlight default link sqlOperationTestIsNull           sqlTest
+highlight default link sqlOperationTestIs                sqlTest
+highlight default link sqlOperationTestIsNot             sqlTest
+highlight default link sqlOperationTestIsNull            sqlTest
 
-highlight default link sqlOperationTestBetween          sqlTest
-highlight default link sqlOperationTestBetweenAnd       sqlTest
+highlight default link sqlOperationTestBetween           sqlTest
+highlight default link sqlOperationTestBetweenAnd        sqlTest
 
-highlight default link sqlOperationTestLike             sqlTest
+highlight default link sqlOperationTestLike              sqlTest
+highlight default link sqlOperationTestLikeStringPercent sqlCharSpecial
 
-highlight default link sqlOperationCombination          sqlLink
+highlight default link sqlOperationCombination           sqlLink
 
-highlight default link sqlFunctionContentStar           sqlStar
+highlight default link sqlFunctionContentStar            sqlStar
 
-highlight default link sqlComma                         sqlOperator
-highlight default link sqlStar                          sqlOperator
+highlight default link sqlComma                          sqlOperator
+highlight default link sqlStar                           sqlOperator
 
-highlight default link sqlFromJoin87                    sqlOperator
-highlight default link sqlFromJoin92                    sqlLink
-highlight default link sqlFromJoin92On                  sqlLinkSecondary
+highlight default link sqlFromJoin87                     sqlOperator
+highlight default link sqlFromJoin92                     sqlLink
+highlight default link sqlFromJoin92On                   sqlLinkSecondary
 	" }}}
 	" External: {{{
 highlight default link sqlError              Error
@@ -791,6 +800,8 @@ highlight default link sqlFunctionUser       Operator
 highlight default link sqlOperator           Operator
 
 highlight default link sqlTest               Conditional
+
+highlight default link sqlCharSpecial        SpecialChar
 	" }}}
 " }}}
 
