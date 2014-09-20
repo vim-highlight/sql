@@ -121,20 +121,20 @@ function! s:DefineEntity_Column (block)
 		" }}}
 		" table. {{{
 			" table {{{
-	execute 'syntax region sql'.a:block.'TableEscaped nextgroup=sql'.a:block.'TableSeparator contained display transparent oneline contains=sql'.a:block.'TableSingle matchgroup=sql'.a:block.'TableDelimiter start=/`/ end=/`\(\.\)\@=/'
-	execute 'syntax match  sql'.a:block.'TableSingle  nextgroup=sql'.a:block.'TableSeparator contained display /\h\w*/'
-	execute 'syntax match  sql'.a:block.'Table        nextgroup=sql'.a:block.'TableSeparator contained display /\h\w*\(\.\)\@=/'
+	execute 'syntax region sql'.a:block.'ColumnTableEscaped nextgroup=sql'.a:block.'ColumnTableSeparator contained display transparent oneline contains=sql'.a:block.'ColumnTableSingle matchgroup=sql'.a:block.'ColumnTableDelimiter start=/`/ end=/`\(\.\)\@=/'
+	execute 'syntax match  sql'.a:block.'ColumnTableSingle  nextgroup=sql'.a:block.'ColumnTableSeparator contained display /\h\w*/'
+	execute 'syntax match  sql'.a:block.'ColumnTable        nextgroup=sql'.a:block.'ColumnTableSeparator contained display /\h\w*\(\.\)\@=/'
 
-	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'TableEscaped,sql'.a:block.'Table'
+	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'ColumnTableEscaped,sql'.a:block.'ColumnTable'
 
-	execute 'highlight default link sql'.a:block.'TableSingle    sql'.a:block.'Table'
+	execute 'highlight default link sql'.a:block.'ColumnTableSingle    sql'.a:block.'ColumnTable'
 
-	execute 'highlight default link sql'.a:block.'TableDelimiter sqlTableDelimiter'
-	execute 'highlight default link sql'.a:block.'Table          sqlTable'
+	execute 'highlight default link sql'.a:block.'ColumnTableDelimiter sqlColumnTableDelimiter'
+	execute 'highlight default link sql'.a:block.'ColumnTable          sqlColumnTable'
 			" }}}
 			" . {{{
-	execute 'syntax match sql'.a:block.'TableSeparator nextgroup=@sqlCl'.a:block.'Column contained display /\./'
-	execute 'highlight default link sql'.a:block.'TableSeparator sqlTableSeparator'
+	execute 'syntax match sql'.a:block.'ColumnTableSeparator nextgroup=@sqlCl'.a:block.'Column contained display /\./'
+	execute 'highlight default link sql'.a:block.'ColumnTableSeparator sqlColumnTableSeparator'
 			" }}}
 		" }}}
 endfunction
@@ -296,7 +296,7 @@ function! s:DefineEntity_OperationComparisonOperator(block)
 	execute 'highlight default link sql'.a:block.'OperationComparisonOperator sqlOperationComparisonOperator'
 endfunction
 			" }}}
-			" Multiple: IN ANY ALL {{{
+			" Multiple: ANY ALL {{{
 				" Operator: ANY ALL {{{
 function! s:DefineEntity_OperationComparisonMultipleOperator(block)
 	execute 'syntax keyword sql'.a:block.'OperationComparisonMultipleOperator nextgroup=@sqlCl'.a:block.'OperationComparisonMultipleOperatorBlock skipwhite skipempty contained display ANY ALL'
@@ -371,7 +371,6 @@ function! s:DefineEntity_OperationTestIn_real(block, included)
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestInNext add=sqlError'
 	
 	execute 'highlight default link sql'.a:block.'OperationTestIn sqlOperationTestIn'
-	execute 'highlight default link sqlOperationTestIn            sqlOperationTest'
 				" }}}
 				" (... ,) {{{
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlock add=sqlError'
@@ -536,7 +535,7 @@ syntax match sqlSelectContentComma nextgroup=@sqlClSelectContent skipwhite skipe
 syntax cluster sqlClSelectContentNext add=sqlSelectContentComma
 syntax cluster sqlClSelectAliasNext   add=sqlSelectContentComma
 
-highlight default link sqlSelectContentComma sqlContentComma
+highlight default link sqlSelectContentComma sqlComma
 		" }}}
 	" }}}
 " }}}
@@ -675,43 +674,75 @@ delfunction s:DefineEntityCommon_Nested
 " }}}
 
 " COLORS: {{{
-"highlight default link sqlAliasAs									sqlStructure
-"highlight default link sqlAliasName									sqlNone
-"highlight default link sqlAliasDelimiter							Delimiter
-"highlight default link sqlComma										Operator
-"highlight default link sqlColumn									sqlNone
-"highlight default link sqlColumnDelimiter							Delimiter
-"highlight default link sqlError										Error
-"highlight default link sqlEscape									Special
-"highlight default link sqlFunction									Function
-"highlight default link sqlFunctionUser								Operator
-"highlight default link sqlFunctionCallDelimiter						Operator
-"highlight default link sqlGroupDelimiter							Operator
-"highlight default link sqlNull										Statement
-"highlight default link sqlNumber									Number
-"highlight default link sqlOperationCalculation						Operator
-"highlight default link sqlOperationComparisonOperator				Operator
-"highlight default link sqlOperationComparisonMultiple				Statement
-"highlight default link sqlOperationTestInBlockDelimiter				Operator
-"highlight default link sqlOperationCombination						Statement
-"highlight default link sqlOperationTest								Statement
-"highlight default link sqlStar										Operator
-"highlight default link sqlStatement									Statement
-"highlight default link sqlString									String
-"highlight default link sqlStringDelimiter							sqlString
-"highlight default link sqlStructure									Structure
-"highlight default link sqlTable										sqlNone
-"highlight default link sqlTableDelimiter							Delimiter
-"highlight default link sqlTableSeparator							Operator
+	" Internal: {{{
+highlight default link sqlSelect                        sqlStructure
+highlight default link sqlInto                          sqlStructure
+highlight default link sqlFrom                          sqlStructure
 
-"highlight default link sqlNone						Todo
-"highlight default link sqlIntoVarName				sqlNone
-"highlight default link sqlFromTable					sqlNone
+highlight default link sqlDistinct                      sqlStructureSecondary
 
-"highlight default link sqlOperationTestIs			sqlOperationTest
-"highlight default link sqlOperationTestIn			sqlOperationTest
-"highlight default link sqlOperationTestBetween		sqlOperationTest
-"highlight default link sqlOperationTestBetweenAnd	sqlOperationTest
+highlight default link sqlAliasAs                       sqlLink
+highlight default link sqlAliasName                     sqlName
+
+highlight default link sqlStringDelimiter               sqlString
+highlight default link sqlColumnDelimiter               sqlDelimiter
+highlight default link sqlTableDelimiter                sqlDelimiter
+highlight default link sqlColumnTableDelimiter          sqlDelimiter
+highlight default link sqlAliasNameDelimiter            sqlDelimiter
+
+highlight default link sqlColumn                        sqlName
+highlight default link sqlTable                         sqlName
+highlight default link sqlColumnTable                   sqlName
+
+highlight default link sqlFunctionCallDelimiter         sqlOperator
+highlight default link sqlGroupDelimiter                sqlOperator
+
+highlight default link sqlOperationCalculation          sqlOperator
+highlight default link sqlOperationComparisonOperator   sqlOperator
+
+highlight default link sqlOperationTestIn               sqlTest
+highlight default link sqlOperationTestInBlockDelimiter sqlOperator
+highlight default link sqlOperationTestInComma          sqlComma
+
+highlight default link sqlOperationTestIs               sqlTest
+highlight default link sqlOperationTestIsNot            sqlTest
+highlight default link sqlOperationTestIsNull           sqlTest
+
+highlight default link sqlOperationTestBetween          sqlTest
+highlight default link sqlOperationTestBetweenAnd       sqlTest
+
+highlight default link sqlOperationCombination          sqlLink
+
+highlight default link sqlFunctionContentStar           sqlStar
+
+highlight default link sqlComma                         sqlOperator
+highlight default link sqlStar                          sqlOperator
+
+highlight default link sqlFromJoin92                    sqlLink
+highlight default link sqlFromJoin92On                  sqlLinkSecondary
+	" }}}
+	" External: {{{
+highlight default link sqlError              Error
+highlight default link sqlStructure          Structure
+highlight default link sqlStructureSecondary StorageClass
+
+highlight default link sqlLink               Statement
+highlight default link sqlLinkSecondary      Special
+
+highlight default link sqlNull				 Keyword
+highlight default link sqlNumber			 Number
+highlight default link sqlString             String
+
+highlight default link sqlName               None
+highlight default link sqlDelimiter          Delimiter
+
+highlight default link sqlFunction           Function
+highlight default link sqlFunctionUser       Operator
+
+highlight default link sqlOperator           Operator
+
+highlight default link sqlTest               Conditional
+	" }}}
 " }}}
 
 let b:current_syntax = "sql"
