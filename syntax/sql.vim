@@ -47,6 +47,27 @@ endif
 " }}}
 
 " Entities: {{{
+	" NOT: {{{
+function! s:DefineEntity_Not_real (block, included)
+		" NOT: {{{
+	execute 'syntax keyword sql'.a:block.'Not nextgroup=@sqlCl'.a:block.'NotContent skipwhite skipempty contained display NOT'
+
+	execute 'syntax cluster sqlCl'.a:block.'Content           add=sql'.a:block.'Not'
+
+	execute 'highlight default link sql'.a:block.'Not sqlNot'
+		" }}}
+		" ... {{{
+	execute 'syntax cluster sqlCl'.a:block.'NotContent add=sqlError'
+			" Values: {{{
+	call s:DefineEntityCommon_Root  (a:block, 'Not')
+	call s:DefineEntityCommon_Nested(a:block, 'Not', a:included)
+			" }}}
+		" }}}
+endfunction
+function! s:DefineEntity_Not (block)
+	call s:DefineEntity_Not_real(a:block, 0)
+endfunction
+	" }}}
 	" Null: {{{
 function! s:DefineEntity_Null (block)
 	execute 'syntax keyword sql'.a:block.'Null nextgroup=@sqlCl'.a:block.'NullNext skipwhite skipempty contained display NULL'
@@ -489,7 +510,6 @@ endfunction
 function! s:DefineEntity_OperationTestLike(block)
 	call s:DefineEntity_OperationTestLike_real(a:block, 0)
 endfunction
-				" }}}
 			" }}}
 
 function! s:DefineEntity_OperationTest_real(block, included)
@@ -526,9 +546,10 @@ function! s:DefineEntityCommon_Root(block, section)
 endfunction
 function! s:DefineEntityCommon_Nested(block, section, included)
 	if a:included
-		execute 'syntax cluster sqlCl'.a:block.a:section.'Content   add=@sqlCl'.a:block.'Function,sql'.a:block.'Group'
+		execute 'syntax cluster sqlCl'.a:block.a:section.'Content   add=@sqlCl'.a:block.'Function,sql'.a:block.'Group,sql'.a:block.'Not'
 		execute 'syntax cluster sqlCl'.a:block.a:section.'Operation add=@sqlCl'.a:block.'Operation'
 	else
+		call s:DefineEntity_Not_real      (a:block.a:section, 1)
 		call s:DefineEntity_Function_real (a:block.a:section, 1)
 		call s:DefineEntity_Group_real    (a:block.a:section, 1)
 		call s:DefineEntity_Operation_real(a:block.a:section, 1)
@@ -564,11 +585,8 @@ syntax cluster sqlClSelectContent add=sqlSelectStar
 highlight default link sqlSelectStar sqlStar
 		" }}}
 		" Values: {{{
-call s:DefineEntityCommon_Root('', 'Select')
-
-call s:DefineEntity_Function ('Select')
-call s:DefineEntity_Group    ('Select')
-call s:DefineEntity_Operation('Select')
+call s:DefineEntityCommon_Root  ('', 'Select')
+call s:DefineEntityCommon_Nested('', 'Select', 0)
 
 call s:DefineFunctionNames   ('Select', 0, 'concat group_concat')
 		" }}}
@@ -774,6 +792,7 @@ highlight default link sqlFunctionContentStar            sqlStar
 
 highlight default link sqlComma                          sqlOperator
 highlight default link sqlStar                           sqlOperator
+highlight default link sqlNot                            sqlTest
 
 highlight default link sqlFromJoin87                     sqlOperator
 highlight default link sqlFromJoin92                     sqlLink
