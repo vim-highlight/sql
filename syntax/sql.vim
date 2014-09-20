@@ -573,12 +573,11 @@ call s:DefineEntity_Alias('From')
 			" }}}
 		" }}}
 	
-		"" Jointure: norme 87 : , {{{
-"syntax match sqlFromJoin87 nextgroup=@sqlClFromJoinContent skipwhite skipempty /,/
-"syntax cluster sqlClFromContentNext add=sqlFromJoin87
+		" Jointure: norme 87 : , {{{
+syntax match sqlFromJoin87 nextgroup=@sqlClFromContent skipwhite skipempty /,/
 
-"highlight default link sqlFromJoin87 sqlOperator
-		"" }}}
+syntax cluster sqlClFromContentNext add=sqlFromJoin87
+		" }}}
 		" Jointure: norme 92 : JOIN {{{
 			" JOIN: {{{
 syntax keyword sqlFromJoin92Common     nextgroup=sqlFromJoin92Join                         skipwhite skipempty contained INNER CROSS NATURAL
@@ -718,6 +717,7 @@ highlight default link sqlFunctionContentStar           sqlStar
 highlight default link sqlComma                         sqlOperator
 highlight default link sqlStar                          sqlOperator
 
+highlight default link sqlFromJoin87                    sqlOperator
 highlight default link sqlFromJoin92                    sqlLink
 highlight default link sqlFromJoin92On                  sqlLinkSecondary
 	" }}}
