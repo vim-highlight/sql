@@ -88,8 +88,8 @@ function! s:DefineEntity_String (block)
 	execute 'highlight link sql'.a:block.'StringSingle sql'.a:block.'String'
 	execute 'highlight link sql'.a:block.'StringDouble sql'.a:block.'String'
 
-	execute 'highlight link sql'.a:block.'Delimiter sqlStringDelimiter'
-	execute 'highlight link sql'.a:block.'String    sqlString'
+	execute 'highlight link sql'.a:block.'StringDelimiter sqlStringDelimiter'
+	execute 'highlight link sql'.a:block.'String          sqlString'
 endfunction
 	" }}}
 	" Table: {{{
@@ -344,31 +344,41 @@ function! s:DefineEntity_OperationTestIn_real(block, included)
 				" IN: {{{
 	execute 'syntax keyword sql'.a:block.'OperationTestIn nextgroup=@sqlCl'.a:block.'OperationTestInNext skipwhite skipempty contained display IN'
 	
-	execute 'syntax cluster sqlCl'.a:block.'OperationTest add=sql'.a:block.'OperationTestIn'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTest       add=sql'.a:block.'OperationTestIn'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestInNext add=sqlError'
 	
 	execute 'highlight link sql'.a:block.'OperationTestIn sqlOperationTestIn'
 	execute 'highlight link sqlOperationTestIn            sqlOperationTest'
 				" }}}
 				" (...) {{{
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlock add=sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestInNext  add=@sqlCl'.a:block.'OperationTestInBlock'
+
+					" () {{{
 	execute 'syntax region sql'.a:block.'OperationTestInBlock nextgroup=@sqlCl'.a:block.'OperationTestInBlockNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'OperationTestInBlockContent matchgroup=sql'.a:block.'OperationTestInBlockDelimiter start=/(/ end=/)/'
 
-					" Values: {{{
-	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockContent add=sqlError'
-	
-	call s:DefineEntityCommon_Root  (a:block, 'OperationTestInBlock')
-	call s:DefineEntityCommon_Nested(a:block, 'OperationTestInBlock', a:included)
-					" }}}
-					" Values Separator: {{{
-	execute 'syntax match sql'.a:block.'OperationTestInBlockContentComma nextgroup=@sqlCl'.a:block.'OperationTestInBlockContent skipwhite skipempty contained display /,/'
-	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockContentNext add=sql'.a:block.'OperationTestInBlockContentComma'
-	execute 'highlight link sql'.a:block.'OperationTestInBlockContentComma sqlComma'
-					" }}}
-	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockContentNext add=sqlError'
-	
-	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlock     add=sql'.a:block.'OperationTestInBlock,sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestInNext      add=sql'.a:block.'OperationTestInBlock'
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
 
 	execute 'highlight link sql'.a:block.'OperationTestInBlockDelimiter sqlOperationTestInBlockDelimiter'
+					" }}}
+					" ... {{{
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockContent add=sqlError'
+
+						" Values: {{{
+	call s:DefineEntityCommon_Root  (a:block, 'OperationTestInBlock')
+	call s:DefineEntityCommon_Nested(a:block, 'OperationTestInBlock', a:included)
+						" }}}
+
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockContentNext add=sqlError'
+						" Values Separator: {{{
+	execute 'syntax match sql'.a:block.'OperationTestInBlockContentComma nextgroup=@sqlCl'.a:block.'OperationTestInBlockContent skipwhite skipempty contained display /,/'
+
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestInBlockContentNext add=sql'.a:block.'OperationTestInBlockContentComma'
+
+	execute 'highlight link sql'.a:block.'OperationTestInBlockContentComma sqlComma'
+						" }}}
+					" }}}
 				" }}}
 endfunction
 function! s:DefineEntity_OperationTestIn(block)
@@ -648,7 +658,7 @@ highlight link sqlNumber									Number
 highlight link sqlOperationCalculation						Operator
 highlight link sqlOperationComparisonOperator				Operator
 highlight link sqlOperationComparisonMultiple				Statement
-highlight link sqlOperationComparisonMultipleBlockDelimiter	Operator
+highlight link sqlOperationTestInBlockDelimiter				Operator
 highlight link sqlOperationCombination						Statement
 highlight link sqlOperationTest								Statement
 highlight link sqlStar										Operator
