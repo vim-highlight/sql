@@ -71,12 +71,15 @@ endfunction
 	" }}}
 	" String: {{{
 function! s:DefineEntity_String (block)
-	execute 'syntax region sql'.a:block.'StringSingle nextgroup=@sqlCl'.a:block.'StringSingleNext skipwhite skipempty contained matchgroup=sql'.a:block.'StringSingleDelimiter start=/''/ skip=/\\''/ end=/''/'
-	execute 'syntax region sql'.a:block.'StringDouble nextgroup=@sqlCl'.a:block.'StringDoubleNext skipwhite skipempty contained matchgroup=sql'.a:block.'StringDoubleDelimiter start=/"/  skip=/\\"/  end=/"/ '
+	execute 'syntax region sql'.a:block.'StringSingle nextgroup=@sqlCl'.a:block.'StringSingleNext skipwhite skipempty contained contains=@sqlCl'.a:block.'StringSingleContent matchgroup=sql'.a:block.'StringSingleDelimiter start=/''/ skip=/\\''/ end=/''/'
+	execute 'syntax region sql'.a:block.'StringDouble nextgroup=@sqlCl'.a:block.'StringDoubleNext skipwhite skipempty contained contains=@sqlCl'.a:block.'StringDoubleContent matchgroup=sql'.a:block.'StringDoubleDelimiter start=/"/  skip=/\\"/  end=/"/ '
 
 	execute 'syntax cluster sqlCl'.a:block.'StringSingleNext add=@sqlCl'.a:block.'StringNext'
 	execute 'syntax cluster sqlCl'.a:block.'StringDoubleNext add=@sqlCl'.a:block.'StringNext'
 	execute 'syntax cluster sqlCl'.a:block.'StringNext       add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
+
+	execute 'syntax cluster sqlCl'.a:block.'StringSingleContent add=@sqlCl'.a:block.'StringContent'
+	execute 'syntax cluster sqlCl'.a:block.'StringDoubleContent add=@sqlCl'.a:block.'StringContent'
 
 	execute 'syntax cluster sqlCl'.a:block.'String            add=sql'.a:block.'StringSingle,sql'.a:block.'StringDouble'
 	execute 'syntax cluster sqlCl'.a:block.'Content           add=@sqlCl'.a:block.'String'
@@ -335,7 +338,17 @@ function! s:DefineEntity_OperationCombination(block)
 	execute 'highlight default link sql'.a:block.'OperationCombination sqlOperationCombination'
 endfunction
 		" }}}
-		" Test: [NOT] IS, IN, BETWEEN {{{
+		" Test: [NOT] IS, IN, BETWEEN, LIKE {{{
+			" NOT: {{{
+function! s:DefineEntity_OperationTestNot(block)
+	execute 'syntax keyword sql'.a:block.'OperationTestNot nextgroup=@sqlCl'.a:block.'OperationTestNotNext skipwhite skipempty contained display NOT'
+	
+	execute 'syntax cluster sqlCl'.a:block.'OperationTest        add=sql'.a:block.'OperationTestNot'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestNotNext add=sqlError'
+	
+	execute 'highlight default link sql'.a:block.'OperationTestNot sqlOperationTestNot'
+endfunction
+			" }}}
 			" IS [NOT] NULL {{{
 function! s:DefineEntity_OperationTestIs(block)
 				" IS: {{{
@@ -447,22 +460,36 @@ function! s:DefineEntity_OperationTestBetween(block)
 	call s:DefineEntity_OperationTestBetween_real(a:block, 0)
 endfunction
 			" }}}
-			" NOT: {{{
-function! s:DefineEntity_OperationTestNot(block)
-	execute 'syntax keyword sql'.a:block.'OperationTestNot nextgroup=@sqlCl'.a:block.'OperationTestNotNext skipwhite skipempty contained display NOT'
+			" LIKE ... {{{
+function! s:DefineEntity_OperationTestLike_real(block, included)
+				" LIKE: {{{
+	execute 'syntax keyword sql'.a:block.'OperationTestLike nextgroup=@sqlCl'.a:block.'OperationTestLikeContent skipwhite skipempty contained display LIKE'
 	
-	execute 'syntax cluster sqlCl'.a:block.'OperationTest        add=sql'.a:block.'OperationTestNot'
-	execute 'syntax cluster sqlCl'.a:block.'OperationTestNotNext add=sqlError'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTest         add=sql'.a:block.'OperationTestLike'
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestNotNext  add=sql'.a:block.'OperationTestLike'
 	
-	execute 'highlight default link sql'.a:block.'OperationTestNot sqlOperationTestNot'
+	execute 'highlight default link sql'.a:block.'OperationTestLike sqlOperationTestLike'
+				" }}}
+				" ... {{{
+	execute 'syntax cluster sqlCl'.a:block.'OperationTestLikeContent add=sqlError'
+						" Values: {{{
+	call s:DefineEntityCommon_Root  (a:block, 'OperationTestLike')
+	call s:DefineEntityCommon_Nested(a:block, 'OperationTestLike', a:included)
+						" }}}
+				" }}}
 endfunction
+function! s:DefineEntity_OperationTestLike(block)
+	call s:DefineEntity_OperationTestLike_real(a:block, 0)
+endfunction
+				" }}}
 			" }}}
 
 function! s:DefineEntity_OperationTest_real(block, included)
+	call s:DefineEntity_OperationTestNot         (a:block)
 	call s:DefineEntity_OperationTestIs          (a:block)
 	call s:DefineEntity_OperationTestIn_real     (a:block, a:included)
 	call s:DefineEntity_OperationTestBetween_real(a:block, a:included)
-	call s:DefineEntity_OperationTestNot         (a:block)
+	call s:DefineEntity_OperationTestLike_real   (a:block, a:included)
 
 	execute 'syntax cluster sqlCl'.a:block.'Operation add=@sqlCl'.a:block.'OperationTest'
 endfunction
@@ -660,8 +687,9 @@ delfunction s:DefineEntity_OperationComparison_real
 			" }}}
 delfunction s:DefineEntity_OperationCombination
 			" Test: {{{
+delfunction s:DefineEntity_OperationTestNot
 delfunction s:DefineEntity_OperationTestIs
-				" In {{{
+				" IN {{{
 delfunction s:DefineEntity_OperationTestIn
 delfunction s:DefineEntity_OperationTestIn_real
 				" }}}
@@ -669,7 +697,10 @@ delfunction s:DefineEntity_OperationTestIn_real
 delfunction s:DefineEntity_OperationTestBetween
 delfunction s:DefineEntity_OperationTestBetween_real
 				" }}}
-delfunction s:DefineEntity_OperationTestNot
+				" LIKE {{{
+delfunction s:DefineEntity_OperationTestLike
+delfunction s:DefineEntity_OperationTestLike_real
+				" }}}
 
 delfunction s:DefineEntity_OperationTest
 delfunction s:DefineEntity_OperationTest_real
@@ -713,6 +744,8 @@ highlight default link sqlGroupDelimiter                sqlOperator
 highlight default link sqlOperationCalculation          sqlOperator
 highlight default link sqlOperationComparisonOperator   sqlOperator
 
+highlight default link sqlOperationTestNot				sqlTest
+
 highlight default link sqlOperationTestIn               sqlTest
 highlight default link sqlOperationTestInBlockDelimiter sqlOperator
 highlight default link sqlOperationTestInComma          sqlComma
@@ -724,7 +757,7 @@ highlight default link sqlOperationTestIsNull           sqlTest
 highlight default link sqlOperationTestBetween          sqlTest
 highlight default link sqlOperationTestBetweenAnd       sqlTest
 
-highlight default link sqlOperationTestNot				sqlTest
+highlight default link sqlOperationTestLike             sqlTest
 
 highlight default link sqlOperationCombination          sqlLink
 
