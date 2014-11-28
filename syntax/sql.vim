@@ -68,123 +68,6 @@ function! s:DefineEntity_Not (block)
 	call s:DefineEntity_Not_real(a:block, 0)
 endfunction
 	" }}}
-	" Null: {{{
-function! s:DefineEntity_Null (block)
-	execute 'syntax keyword sql'.a:block.'Null nextgroup=@sqlCl'.a:block.'NullNext skipwhite skipempty contained display NULL'
-
-	execute 'syntax cluster sqlCl'.a:block.'NullNext          add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
-	execute 'syntax cluster sqlCl'.a:block.'Content           add=sql'.a:block.'Null'
-	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=sql'.a:block.'Null'
-
-	execute 'highlight default link sql'.a:block.'Null sqlNull'
-endfunction
-	" }}}
-	" Number: {{{
-function! s:DefineEntity_Number (block)
-	execute 'syntax match sql'.a:block.'Number nextgroup=@sqlCl'.a:block.'NumberNext skipwhite skipempty contained display /[+-]\?[0-9]\+\(\.[0-9]\+\)\?/'
-
-	execute 'syntax cluster sqlCl'.a:block.'NumberNext        add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
-	execute 'syntax cluster sqlCl'.a:block.'Content           add=sql'.a:block.'Number'
-	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=sql'.a:block.'Number'
-
-	execute 'highlight default link sql'.a:block.'Number sqlNumber'
-endfunction
-	" }}}
-	" String: {{{
-function! s:DefineEntity_String (block)
-	execute 'syntax region sql'.a:block.'StringSingle nextgroup=@sqlCl'.a:block.'StringSingleNext skipwhite skipempty contained contains=@sqlCl'.a:block.'StringSingleContent matchgroup=sql'.a:block.'StringSingleDelimiter start=/''/ skip=/\\''/ end=/''/'
-	execute 'syntax region sql'.a:block.'StringDouble nextgroup=@sqlCl'.a:block.'StringDoubleNext skipwhite skipempty contained contains=@sqlCl'.a:block.'StringDoubleContent matchgroup=sql'.a:block.'StringDoubleDelimiter start=/"/  skip=/\\"/  end=/"/ '
-
-	execute 'syntax cluster sqlCl'.a:block.'StringSingleNext add=@sqlCl'.a:block.'StringNext'
-	execute 'syntax cluster sqlCl'.a:block.'StringDoubleNext add=@sqlCl'.a:block.'StringNext'
-	execute 'syntax cluster sqlCl'.a:block.'StringNext       add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
-
-	execute 'syntax cluster sqlCl'.a:block.'StringSingleContent add=@sqlCl'.a:block.'StringContent'
-	execute 'syntax cluster sqlCl'.a:block.'StringDoubleContent add=@sqlCl'.a:block.'StringContent'
-
-	execute 'syntax cluster sqlCl'.a:block.'String            add=sql'.a:block.'StringSingle,sql'.a:block.'StringDouble'
-	execute 'syntax cluster sqlCl'.a:block.'Content           add=@sqlCl'.a:block.'String'
-	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=@sqlCl'.a:block.'String'
-
-	execute 'highlight default link sql'.a:block.'StringSingleDelimiter sql'.a:block.'StringDelimiter'
-	execute 'highlight default link sql'.a:block.'StringDoubleDelimiter sql'.a:block.'StringDelimiter'
-
-	execute 'highlight default link sql'.a:block.'StringSingle sql'.a:block.'String'
-	execute 'highlight default link sql'.a:block.'StringDouble sql'.a:block.'String'
-
-	execute 'highlight default link sql'.a:block.'StringDelimiter sqlStringDelimiter'
-	execute 'highlight default link sql'.a:block.'String          sqlString'
-endfunction
-	" }}}
-	" Table: {{{
-function! s:DefineEntity_Table (block)
-	execute 'syntax region sql'.a:block.'TableEscaped nextgroup=@sqlCl'.a:block.'TableNext skipwhite skipempty contained display transparent oneline contains=sql'.a:block.'Table matchgroup=sql'.a:block.'TableDelimiter start=/`/ end=/`/'
-	execute 'syntax match  sql'.a:block.'Table        nextgroup=@sqlCl'.a:block.'TableNext skipwhite skipempty contained display /\h\w*/'
-
-	execute 'syntax cluster sqlCl'.a:block.'TableNext add=@sqlCl'.a:block.'ContentNext'
-	execute 'syntax cluster sqlCl'.a:block.'Content   add=sql'.a:block.'TableEscaped,sql'.a:block.'Table'
-
-	execute 'highlight default link sql'.a:block.'TableDelimiter sqlTableDelimiter'
-	execute 'highlight default link sql'.a:block.'Table          sqlTable'
-endfunction
-	" }}}
-	" Column: {{{
-function! s:DefineEntity_Column (block)
-		" column {{{
-	execute 'syntax region sql'.a:block.'ColumnEscaped nextgroup=@sqlCl'.a:block.'ColumnNext skipwhite skipempty contained display transparent oneline contains=sql'.a:block.'Column matchgroup=sql'.a:block.'ColumnDelimiter start=/`/ end=/`/'
-	execute 'syntax match  sql'.a:block.'Column        nextgroup=@sqlCl'.a:block.'ColumnNext skipwhite skipempty contained /\h\w*/'
-
-	execute 'syntax cluster sqlCl'.a:block.'Column     add=sql'.a:block.'ColumnEscaped,sql'.a:block.'Column'
-	execute 'syntax cluster sqlCl'.a:block.'ColumnNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
-
-	execute 'syntax cluster sqlCl'.a:block.'Content           add=@sqlCl'.a:block.'Column'
-	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=@sqlCl'.a:block.'Column'
-
-	execute 'highlight default link sql'.a:block.'ColumnDelimiter sqlColumnDelimiter'
-	execute 'highlight default link sql'.a:block.'Column          sqlColumn'
-		" }}}
-		" table. {{{
-			" table {{{
-	execute 'syntax region sql'.a:block.'ColumnTableEscaped nextgroup=sql'.a:block.'ColumnTableSeparator contained display transparent oneline contains=sql'.a:block.'ColumnTableSingle matchgroup=sql'.a:block.'ColumnTableDelimiter start=/`/ end=/`\(\.\)\@=/'
-	execute 'syntax match  sql'.a:block.'ColumnTableSingle  nextgroup=sql'.a:block.'ColumnTableSeparator contained display /\h\w*/'
-	execute 'syntax match  sql'.a:block.'ColumnTable        nextgroup=sql'.a:block.'ColumnTableSeparator contained display /\h\w*\(\.\)\@=/'
-
-	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'ColumnTableEscaped,sql'.a:block.'ColumnTable'
-
-	execute 'highlight default link sql'.a:block.'ColumnTableSingle    sql'.a:block.'ColumnTable'
-
-	execute 'highlight default link sql'.a:block.'ColumnTableDelimiter sqlColumnTableDelimiter'
-	execute 'highlight default link sql'.a:block.'ColumnTable          sqlColumnTable'
-			" }}}
-			" . {{{
-	execute 'syntax match sql'.a:block.'ColumnTableSeparator nextgroup=@sqlCl'.a:block.'Column contained display /\./'
-	execute 'highlight default link sql'.a:block.'ColumnTableSeparator sqlColumnTableSeparator'
-			" }}}
-		" }}}
-endfunction
-	" }}}
-	" Alias: AS {{{
-function! s:DefineEntity_Alias (block)
-		" AS: {{{
-	execute 'syntax keyword sql'.a:block.'AliasAs nextgroup=@sqlCl'.a:block.'AliasName skipwhite skipempty contained AS'
-
-	execute 'syntax cluster sqlCl'.a:block.'ContentNext add=sql'.a:block.'AliasAs'
-	execute 'syntax cluster sqlCl'.a:block.'AliasNext   add=@sqlCl'.a:block.'Next'
-
-	execute 'highlight default link sql'.a:block.'AliasAs sqlAliasAs'
-		" }}}
-		" Name: {{{
-	execute 'syntax region sql'.a:block.'AliasEscaped nextgroup=@sqlCl'.a:block.'AliasNext skipwhite skipempty contained display transparent oneline contains=sql'.a:block.'AliasName matchgroup=sql'.a:block.'AliasNameDelimiter start=/`/ end=/`/'
-	execute 'syntax match  sql'.a:block.'AliasName    nextgroup=@sqlCl'.a:block.'AliasNext skipwhite skipempty contained display /\h\w*/'
-
-	execute 'syntax cluster sqlCl'.a:block.'AliasName add=sql'.a:block.'AliasEscaped,sql'.a:block.'AliasName'
-
-	execute 'highlight default link sql'.a:block.'AliasNameDelimiter sqlAliasNameDelimiter'
-	execute 'highlight default link sql'.a:block.'AliasName          sqlAliasName'
-		" }}}
-endfunction
-	" }}}
-
 	" Function: {{{
 		" DefineFunctionNames {{{
 function! s:DefineFunctionNames (blocks, star, names)
@@ -455,8 +338,8 @@ function! s:DefineEntity_OperationTestBetween_real(block, included)
 				" }}}
 				" ... [1] {{{
 					" Values: {{{
-	call s:DefineEntityCommon_Root  (a:block, 'OperationTestBetween')
 	call s:DefineEntityCommon_Nested(a:block, 'OperationTestBetween', a:included)
+	call s:DefineEntityCommon_Root  (a:block, 'OperationTestBetween')
 					" }}}
 	
 	execute 'syntax cluster sqlCl'.a:block.'OperationTestBetweenContentNext add=@sqlCl'.a:block.'Operation,sqlError'
@@ -534,6 +417,123 @@ function! s:DefineEntity_Operation_real (block, included)
 endfunction
 function! s:DefineEntity_Operation (block)
 	call s:DefineEntity_Operation_real(a:block, 0)
+endfunction
+	" }}}
+
+	" Null: {{{
+function! s:DefineEntity_Null (block)
+	execute 'syntax keyword sql'.a:block.'Null nextgroup=@sqlCl'.a:block.'NullNext skipwhite skipempty contained display NULL'
+
+	execute 'syntax cluster sqlCl'.a:block.'NullNext          add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'Content           add=sql'.a:block.'Null'
+	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=sql'.a:block.'Null'
+
+	execute 'highlight default link sql'.a:block.'Null sqlNull'
+endfunction
+	" }}}
+	" Number: {{{
+function! s:DefineEntity_Number (block)
+	execute 'syntax match sql'.a:block.'Number nextgroup=@sqlCl'.a:block.'NumberNext skipwhite skipempty contained display /[+-]\?[0-9]\+\(\.[0-9]\+\)\?/'
+
+	execute 'syntax cluster sqlCl'.a:block.'NumberNext        add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'Content           add=sql'.a:block.'Number'
+	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=sql'.a:block.'Number'
+
+	execute 'highlight default link sql'.a:block.'Number sqlNumber'
+endfunction
+	" }}}
+	" String: {{{
+function! s:DefineEntity_String (block)
+	execute 'syntax region sql'.a:block.'StringSingle nextgroup=@sqlCl'.a:block.'StringSingleNext skipwhite skipempty contained contains=@sqlCl'.a:block.'StringSingleContent matchgroup=sql'.a:block.'StringSingleDelimiter start=/''/ skip=/\\''/ end=/''/'
+	execute 'syntax region sql'.a:block.'StringDouble nextgroup=@sqlCl'.a:block.'StringDoubleNext skipwhite skipempty contained contains=@sqlCl'.a:block.'StringDoubleContent matchgroup=sql'.a:block.'StringDoubleDelimiter start=/"/  skip=/\\"/  end=/"/ '
+
+	execute 'syntax cluster sqlCl'.a:block.'StringSingleNext add=@sqlCl'.a:block.'StringNext'
+	execute 'syntax cluster sqlCl'.a:block.'StringDoubleNext add=@sqlCl'.a:block.'StringNext'
+	execute 'syntax cluster sqlCl'.a:block.'StringNext       add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
+
+	execute 'syntax cluster sqlCl'.a:block.'StringSingleContent add=@sqlCl'.a:block.'StringContent'
+	execute 'syntax cluster sqlCl'.a:block.'StringDoubleContent add=@sqlCl'.a:block.'StringContent'
+
+	execute 'syntax cluster sqlCl'.a:block.'String            add=sql'.a:block.'StringSingle,sql'.a:block.'StringDouble'
+	execute 'syntax cluster sqlCl'.a:block.'Content           add=@sqlCl'.a:block.'String'
+	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=@sqlCl'.a:block.'String'
+
+	execute 'highlight default link sql'.a:block.'StringSingleDelimiter sql'.a:block.'StringDelimiter'
+	execute 'highlight default link sql'.a:block.'StringDoubleDelimiter sql'.a:block.'StringDelimiter'
+
+	execute 'highlight default link sql'.a:block.'StringSingle sql'.a:block.'String'
+	execute 'highlight default link sql'.a:block.'StringDouble sql'.a:block.'String'
+
+	execute 'highlight default link sql'.a:block.'StringDelimiter sqlStringDelimiter'
+	execute 'highlight default link sql'.a:block.'String          sqlString'
+endfunction
+	" }}}
+	" Table: {{{
+function! s:DefineEntity_Table (block)
+	execute 'syntax region sql'.a:block.'TableEscaped nextgroup=@sqlCl'.a:block.'TableNext skipwhite skipempty contained display transparent oneline contains=sql'.a:block.'Table matchgroup=sql'.a:block.'TableDelimiter start=/`/ end=/`/'
+	execute 'syntax match  sql'.a:block.'Table        nextgroup=@sqlCl'.a:block.'TableNext skipwhite skipempty contained display /\h\w*/'
+
+	execute 'syntax cluster sqlCl'.a:block.'TableNext add=@sqlCl'.a:block.'ContentNext'
+	execute 'syntax cluster sqlCl'.a:block.'Content   add=sql'.a:block.'TableEscaped,sql'.a:block.'Table'
+
+	execute 'highlight default link sql'.a:block.'TableDelimiter sqlTableDelimiter'
+	execute 'highlight default link sql'.a:block.'Table          sqlTable'
+endfunction
+	" }}}
+	" Column: {{{
+function! s:DefineEntity_Column (block)
+		" column {{{
+	execute 'syntax region sql'.a:block.'ColumnEscaped nextgroup=@sqlCl'.a:block.'ColumnNext skipwhite skipempty contained display transparent oneline contains=sql'.a:block.'Column matchgroup=sql'.a:block.'ColumnDelimiter start=/`/ end=/`/'
+	execute 'syntax match  sql'.a:block.'Column        nextgroup=@sqlCl'.a:block.'ColumnNext skipwhite skipempty contained /\h\w*/'
+
+	execute 'syntax cluster sqlCl'.a:block.'Column     add=sql'.a:block.'ColumnEscaped,sql'.a:block.'Column'
+	execute 'syntax cluster sqlCl'.a:block.'ColumnNext add=@sqlCl'.a:block.'Operation,@sqlCl'.a:block.'ContentNext'
+
+	execute 'syntax cluster sqlCl'.a:block.'Content           add=@sqlCl'.a:block.'Column'
+	execute 'syntax cluster sqlCl'.a:block.'OperationPartNext add=@sqlCl'.a:block.'Column'
+
+	execute 'highlight default link sql'.a:block.'ColumnDelimiter sqlColumnDelimiter'
+	execute 'highlight default link sql'.a:block.'Column          sqlColumn'
+		" }}}
+		" table. {{{
+			" table {{{
+	execute 'syntax region sql'.a:block.'ColumnTableEscaped nextgroup=sql'.a:block.'ColumnTableSeparator contained display transparent oneline contains=sql'.a:block.'ColumnTableSingle matchgroup=sql'.a:block.'ColumnTableDelimiter start=/`/ end=/`\(\.\)\@=/'
+	execute 'syntax match  sql'.a:block.'ColumnTableSingle  nextgroup=sql'.a:block.'ColumnTableSeparator contained display /\h\w*/'
+	execute 'syntax match  sql'.a:block.'ColumnTable        nextgroup=sql'.a:block.'ColumnTableSeparator contained display /\h\w*\(\.\)\@=/'
+
+	execute 'syntax cluster sqlCl'.a:block.'Content add=sql'.a:block.'ColumnTableEscaped,sql'.a:block.'ColumnTable'
+
+	execute 'highlight default link sql'.a:block.'ColumnTableSingle    sql'.a:block.'ColumnTable'
+
+	execute 'highlight default link sql'.a:block.'ColumnTableDelimiter sqlColumnTableDelimiter'
+	execute 'highlight default link sql'.a:block.'ColumnTable          sqlColumnTable'
+			" }}}
+			" . {{{
+	execute 'syntax match sql'.a:block.'ColumnTableSeparator nextgroup=@sqlCl'.a:block.'Column contained display /\./'
+	execute 'highlight default link sql'.a:block.'ColumnTableSeparator sqlColumnTableSeparator'
+			" }}}
+		" }}}
+endfunction
+	" }}}
+	" Alias: AS {{{
+function! s:DefineEntity_Alias (block)
+		" AS: {{{
+	execute 'syntax keyword sql'.a:block.'AliasAs nextgroup=@sqlCl'.a:block.'AliasName skipwhite skipempty contained AS'
+
+	execute 'syntax cluster sqlCl'.a:block.'ContentNext add=sql'.a:block.'AliasAs'
+	execute 'syntax cluster sqlCl'.a:block.'AliasNext   add=@sqlCl'.a:block.'Next'
+
+	execute 'highlight default link sql'.a:block.'AliasAs sqlAliasAs'
+		" }}}
+		" Name: {{{
+	execute 'syntax region sql'.a:block.'AliasEscaped nextgroup=@sqlCl'.a:block.'AliasNext skipwhite skipempty contained display transparent oneline contains=sql'.a:block.'AliasName matchgroup=sql'.a:block.'AliasNameDelimiter start=/`/ end=/`/'
+	execute 'syntax match  sql'.a:block.'AliasName    nextgroup=@sqlCl'.a:block.'AliasNext skipwhite skipempty contained display /\h\w*/'
+
+	execute 'syntax cluster sqlCl'.a:block.'AliasName add=sql'.a:block.'AliasEscaped,sql'.a:block.'AliasName'
+
+	execute 'highlight default link sql'.a:block.'AliasNameDelimiter sqlAliasNameDelimiter'
+	execute 'highlight default link sql'.a:block.'AliasName          sqlAliasName'
+		" }}}
 endfunction
 	" }}}
 
