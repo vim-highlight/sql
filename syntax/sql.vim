@@ -46,11 +46,8 @@ endif
 "endif
 " }}}
 
-" Entities: define {{{
-    " Number: {{{
-function DefineEntity_Number (block, options)
-    execute 'syntax match sql'.a:block.'Number nextgroup=@sqlCl'.a:block.'NumberNext skipwhite skipempty contained display /[+-]\?[0-9]\+\(\.[0-9]\+\)\?/'
-
+" Tools: define {{{
+function Tool_addToContainerGroups (block, entity, options)
 	let in_groups = []
 	if has_key(a:options, 'in')
 		if has_key(a:options.in, 'root')
@@ -61,9 +58,10 @@ function DefineEntity_Number (block, options)
 		endif
 	endif
 	for group in in_groups
-		execute 'syntax cluster sqlCl'.group.' add=sql'.a:block.'Number'
+		execute 'syntax cluster sqlCl'.group.' add=sql'.a:block.a:entity
 	endfor
-
+endfunction
+function Tool_addNextGroupsTo (block, entity, options)
 	let next_groups = []
 	if has_key(a:options, 'next')
 		if has_key(a:options.next, 'common')
@@ -91,8 +89,27 @@ function DefineEntity_Number (block, options)
 		endif
 	endif
 	if !empty(next_groups)
-		execute 'syntax cluster sqlCl'.a:block.'NumberNext add='.join(next_groups, ',')
+		execute 'syntax cluster sqlCl'.a:block.a:entity.'Next add='.join(next_groups, ',')
 	endif
+endfunction
+" }}}
+" Entities: define {{{
+    " NULL: {{{
+function DefineEntity_Null (block, options)
+    execute 'syntax keyword sql'.a:block.'Null nextgroup=@sqlCl'.a:block.'NullNext skipwhite skipempty contained display NULL'
+
+	call Tool_addToContainerGroups(a:block, 'Null', a:options)
+	call Tool_addNextGroupsTo     (a:block, 'Null', a:options)
+
+    execute 'highlight default link sql'.a:block.'Null sqlNull'
+endfunction
+    " }}}
+    " Number: {{{
+function DefineEntity_Number (block, options)
+    execute 'syntax match sql'.a:block.'Number nextgroup=@sqlCl'.a:block.'NumberNext skipwhite skipempty contained display /[+-]\?[0-9]\+\(\.[0-9]\+\)\?/'
+
+	call Tool_addToContainerGroups(a:block, 'Number', a:options)
+	call Tool_addNextGroupsTo     (a:block, 'Number', a:options)
 
     execute 'highlight default link sql'.a:block.'Number sqlNumber'
 endfunction
@@ -131,13 +148,19 @@ syntax cluster sqlClSelectContentMid add=sqlSelectStar
 highlight default link sqlSelectStar sqlStar
 			" }}}
 			" Values: {{{
+call DefineEntity_Null  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
 call DefineEntity_Number('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
 			" }}}
 		" }}}
     " }}}
 " }}}
 
+" Tools: {{{
+delfunction Tool_addToContainerGroups
+delfunction Tool_addNextGroupsTo
+" }}}
 " Entities: delete {{{
+delfunction DefineEntity_Null
 delfunction DefineEntity_Number
 " }}}
 
@@ -149,6 +172,7 @@ highlight default link sqlStar     sqlOperator
     " }}}
     " External: {{{
 highlight default link sqlError              Error
+highlight default link sqlNull               Keyword
 highlight default link sqlNumber			 Number
 highlight default link sqlOperator           Operator
 highlight default link sqlStructure          Structure
