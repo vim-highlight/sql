@@ -54,7 +54,7 @@ function Tool_addToContainerGroups (block, entity, options, cluster)
             call extend(in_groups, a:options.in.root)
         endif
         if has_key(a:options.in, 'sub')
-            call extend(in_groups, map(a:options.in.sub, '"'.a:block.'".v:val'))
+            call extend(in_groups, map(copy(a:options.in.sub), '"'.a:block.'".v:val'))
         endif
     endif
 
@@ -78,19 +78,19 @@ function Tool_addNextGroupsTo (block, entity, options)
 
         if has_key(a:options.next, 'group')
             if has_key(a:options.next.group, 'root')
-                call extend(next_groups, map(a:options.next.group.root, '"@sqlCl".v:val'))
+                call extend(next_groups, map(copy(a:options.next.group.root), '"@sqlCl".v:val'))
             endif
             if has_key(a:options.next.group, 'sub')
-                call extend(next_groups, map(a:options.next.group.sub, '"@sqlCl'.a:block.'".v:val'))
+                call extend(next_groups, map(copy(a:options.next.group.sub), '"@sqlCl'.a:block.'".v:val'))
             endif
         endif
 
         if has_key(a:options.next, 'element')
             if has_key(a:options.next.element, 'root')
-                call extend(next_groups, map(a:options.next.element.root, '"sql".v:val'))
+                call extend(next_groups, map(copy(a:options.next.element.root), '"sql".v:val'))
             endif
             if has_key(a:options.next.element, 'sub')
-                call extend(next_groups, map(a:options.next.element.sub, '"sql'.a:block.'".v:val'))
+                call extend(next_groups, map(copy(a:options.next.element.sub), '"sql'.a:block.'".v:val'))
             endif
         endif
     endif
@@ -146,6 +146,42 @@ function DefineEntity_String (block, options)
     execute 'highlight default link sql'.a:block.'String          sqlString'
 endfunction
     " }}}
+    " Column: {{{
+function DefineEntity_Column (block, options)
+        " column {{{
+	execute 'syntax region sql'.a:block.'ColumnEscaped nextgroup=@sqlCl'.a:block.'ColumnNext skipwhite skipempty contained display transparent oneline contains=sql'.a:block.'Column matchgroup=sql'.a:block.'ColumnDelimiter start=/`/ end=/`/'
+	execute 'syntax match  sql'.a:block.'Column        nextgroup=@sqlCl'.a:block.'ColumnNext skipwhite skipempty contained /\h\w*/'
+
+    execute 'syntax cluster sqlCl'.a:block.'Column     add=sql'.a:block.'ColumnEscaped,sql'.a:block.'Column'
+
+    call Tool_addToContainerGroups(a:block, 'Column', a:options, 1)
+    call Tool_addNextGroupsTo     (a:block, 'Column', a:options   )
+
+    execute 'highlight default link sql'.a:block.'ColumnDelimiter sqlColumnDelimiter'
+    execute 'highlight default link sql'.a:block.'Column          sqlColumn'
+        " }}}
+        " table. {{{
+            " table {{{
+    execute 'syntax region sql'.a:block.'ColumnTableEscaped nextgroup=sql'.a:block.'ColumnTableSeparator contained display transparent oneline contains=sql'.a:block.'ColumnTableSingle matchgroup=sql'.a:block.'ColumnTableDelimiter start=/`/ end=/`\(\.\)\@=/'
+    execute 'syntax match  sql'.a:block.'ColumnTableSingle  nextgroup=sql'.a:block.'ColumnTableSeparator contained display /\h\w*/'
+    execute 'syntax match  sql'.a:block.'ColumnTable        nextgroup=sql'.a:block.'ColumnTableSeparator contained display /\h\w*\(\.\)\@=/'
+
+    execute 'syntax cluster sqlCl'.a:block.'ColumnTable     add=sql'.a:block.'ColumnTableEscaped,sql'.a:block.'ColumnTable'
+
+    call Tool_addToContainerGroups(a:block, 'ColumnTable', a:options, 1)
+
+    execute 'highlight default link sql'.a:block.'ColumnTableSingle    sql'.a:block.'ColumnTable'
+
+    execute 'highlight default link sql'.a:block.'ColumnTableDelimiter sqlColumnTableDelimiter'
+    execute 'highlight default link sql'.a:block.'ColumnTable          sqlColumnTable'
+            " }}}
+            " . {{{
+    execute 'syntax match sql'.a:block.'ColumnTableSeparator nextgroup=@sqlCl'.a:block.'Column contained display /\./'
+    execute 'highlight default link sql'.a:block.'ColumnTableSeparator sqlColumnTableSeparator'
+            " }}}
+        " }}}
+endfunction
+    " }}}
 " }}}
 
 " ERROR: {{{
@@ -183,6 +219,7 @@ highlight default link sqlSelectStar sqlStar
 call DefineEntity_Null  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
 call DefineEntity_Number('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
 call DefineEntity_String('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
+call DefineEntity_Column('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
             " }}}
         " }}}
     " }}}
@@ -196,17 +233,25 @@ delfunction Tool_addNextGroupsTo
 delfunction DefineEntity_Null
 delfunction DefineEntity_Number
 delfunction DefineEntity_String
+delfunction DefineEntity_Column
 " }}}
 
 " COLORS: {{{
     " Internal: {{{
-highlight default link sqlDistinct        sqlStructureSecondary
-highlight default link sqlSelect          sqlStructure
-highlight default link sqlStar            sqlOperator
-highlight default link sqlStringDelimiter sqlString
+highlight default link sqlColumn               sqlName
+highlight default link sqlColumnDelimiter      sqlDelimiter
+highlight default link sqlColumnTable          sqlName
+highlight default link sqlColumnTableDelimiter sqlDelimiter
+highlight default link sqlColumnTableSeparator sqlOperator
+highlight default link sqlDistinct             sqlStructureSecondary
+highlight default link sqlSelect               sqlStructure
+highlight default link sqlStar                 sqlOperator
+highlight default link sqlStringDelimiter      sqlString
     " }}}
     " External: {{{
+highlight default link sqlDelimiter			 Delimiter
 highlight default link sqlError              Error
+highlight default link sqlName               None
 highlight default link sqlNull               Keyword
 highlight default link sqlNumber             Number
 highlight default link sqlOperator           Operator
