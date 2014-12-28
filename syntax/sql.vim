@@ -47,7 +47,7 @@ endif
 " }}}
 
 " Tools: define {{{
-function Tool_addToContainerGroups (block, entity, options, cluster)
+function SQL_Tool_addToContainerGroups (block, entity, options, cluster)
     let in_groups = []
     if has_key(a:options, 'in')
         if has_key(a:options.in, 'root')
@@ -67,7 +67,7 @@ function Tool_addToContainerGroups (block, entity, options, cluster)
         execute 'syntax cluster sqlCl'.group.' add='.begin.a:block.a:entity
     endfor
 endfunction
-function Tool_addNextGroupsTo (block, entity, options)
+function SQL_Tool_addNextGroupsTo (block, entity, options)
     let next_groups = []
     if has_key(a:options, 'next')
         if has_key(a:options.next, 'common')
@@ -101,37 +101,37 @@ endfunction
 " }}}
 " Entities: define {{{
     " NULL: {{{
-function sql_DefineEntity_Null (block, options)
+function SQL_DefineEntity_Null (block, options)
     execute 'syntax keyword sql'.a:block.'Null nextgroup=@sqlCl'.a:block.'NullNext skipwhite skipempty contained display NULL'
 
-    call Tool_addToContainerGroups(a:block, 'Null', a:options, 0)
-    call Tool_addNextGroupsTo     (a:block, 'Null', a:options   )
+    call SQL_Tool_addToContainerGroups(a:block, 'Null', a:options, 0)
+    call SQL_Tool_addNextGroupsTo     (a:block, 'Null', a:options   )
 
     execute 'highlight default link sql'.a:block.'Null sqlNull'
 endfunction
     " }}}
     " *: {{{
-function sql_DefineEntity_Star (block, options)
+function SQL_DefineEntity_Star (block, options)
     execute 'syntax match sql'.a:block.'Star nextgroup=@sqlCl'.a:block.'StarNext skipwhite skipempty contained display /*/'
 
-    call Tool_addToContainerGroups(a:block, 'Star', a:options, 0)
-    call Tool_addNextGroupsTo     (a:block, 'Star', a:options   )
+    call SQL_Tool_addToContainerGroups(a:block, 'Star', a:options, 0)
+    call SQL_Tool_addNextGroupsTo     (a:block, 'Star', a:options   )
 
     execute 'highlight default link sql'.a:block.'Star sqlStar'
 endfunction
     " }}}
     " Number: {{{
-function sql_DefineEntity_Number (block, options)
+function SQL_DefineEntity_Number (block, options)
     execute 'syntax match sql'.a:block.'Number nextgroup=@sqlCl'.a:block.'NumberNext skipwhite skipempty contained display /[+-]\?[0-9]\+\(\.[0-9]\+\)\?/'
 
-    call Tool_addToContainerGroups(a:block, 'Number', a:options, 0)
-    call Tool_addNextGroupsTo     (a:block, 'Number', a:options   )
+    call SQL_Tool_addToContainerGroups(a:block, 'Number', a:options, 0)
+    call SQL_Tool_addNextGroupsTo     (a:block, 'Number', a:options   )
 
     execute 'highlight default link sql'.a:block.'Number sqlNumber'
 endfunction
     " }}}
     " String: {{{
-function sql_DefineEntity_String (block, options)
+function SQL_DefineEntity_String (block, options)
     execute 'syntax region sql'.a:block.'StringSingle nextgroup=@sqlCl'.a:block.'StringSingleNext skipwhite skipempty contained contains=@sqlCl'.a:block.'StringSingleContent matchgroup=sql'.a:block.'StringSingleDelimiter start=/''/ skip=/\\''/ end=/''/'
     execute 'syntax region sql'.a:block.'StringDouble nextgroup=@sqlCl'.a:block.'StringDoubleNext skipwhite skipempty contained contains=@sqlCl'.a:block.'StringDoubleContent matchgroup=sql'.a:block.'StringDoubleDelimiter start=/"/  skip=/\\"/  end=/"/ '
 
@@ -143,8 +143,8 @@ function sql_DefineEntity_String (block, options)
 
     execute 'syntax cluster sqlCl'.a:block.'String            add=sql'.a:block.'StringSingle,sql'.a:block.'StringDouble'
     
-    call Tool_addToContainerGroups(a:block, 'String', a:options, 1)
-    call Tool_addNextGroupsTo     (a:block, 'String', a:options   )
+    call SQL_Tool_addToContainerGroups(a:block, 'String', a:options, 1)
+    call SQL_Tool_addNextGroupsTo     (a:block, 'String', a:options   )
 
     execute 'highlight default link sql'.a:block.'StringSingleDelimiter sql'.a:block.'StringDelimiter'
     execute 'highlight default link sql'.a:block.'StringDoubleDelimiter sql'.a:block.'StringDelimiter'
@@ -157,15 +157,15 @@ function sql_DefineEntity_String (block, options)
 endfunction
     " }}}
     " Column: {{{
-function sql_DefineEntity_Column (block, options)
+function SQL_DefineEntity_Column (block, options)
         " column {{{
     execute 'syntax region sql'.a:block.'ColumnEscaped nextgroup=@sqlCl'.a:block.'ColumnNext skipwhite skipempty contained display transparent oneline contains=sql'.a:block.'Column matchgroup=sql'.a:block.'ColumnDelimiter start=/`/ end=/`/'
     execute 'syntax match  sql'.a:block.'Column        nextgroup=@sqlCl'.a:block.'ColumnNext skipwhite skipempty contained /\h\w*/'
 
     execute 'syntax cluster sqlCl'.a:block.'Column     add=sql'.a:block.'ColumnEscaped,sql'.a:block.'Column'
 
-    call Tool_addToContainerGroups(a:block, 'Column', a:options, 1)
-    call Tool_addNextGroupsTo     (a:block, 'Column', a:options   )
+    call SQL_Tool_addToContainerGroups(a:block, 'Column', a:options, 1)
+    call SQL_Tool_addNextGroupsTo     (a:block, 'Column', a:options   )
 
     execute 'highlight default link sql'.a:block.'ColumnDelimiter sqlColumnDelimiter'
     execute 'highlight default link sql'.a:block.'Column          sqlColumn'
@@ -178,7 +178,7 @@ function sql_DefineEntity_Column (block, options)
 
     execute 'syntax cluster sqlCl'.a:block.'ColumnTable     add=sql'.a:block.'ColumnTableEscaped,sql'.a:block.'ColumnTable'
 
-    call Tool_addToContainerGroups(a:block, 'ColumnTable', a:options, 1)
+    call SQL_Tool_addToContainerGroups(a:block, 'ColumnTable', a:options, 1)
 
     execute 'highlight default link sql'.a:block.'ColumnTableSingle    sql'.a:block.'ColumnTable'
 
@@ -198,7 +198,7 @@ let b:sql_functions_common  = ['sum', 'min', 'max']
 let b:sql_functions_star    = ['count']
 let b:sql_functions_special = ['substring']
 
-function sql_DefineEntity_Function (block, options)
+function SQL_DefineEntity_Function (block, options)
         " function name {{{
     execute 'syntax keyword sql'.a:block.'FunctionCommon nextgroup=sql'.a:block.'FunctionCommonCall skipwhite skipempty contained '.join(b:sql_functions_common, ' ')
     execute 'syntax keyword sql'.a:block.'FunctionStar   nextgroup=sql'.a:block.'FunctionStarCall   skipwhite skipempty contained '.join(b:sql_functions_star  , ' ')
@@ -217,8 +217,8 @@ function sql_DefineEntity_Function (block, options)
         endfor
     endif
 
-    call Tool_addToContainerGroups(a:block, 'Function', a:options, 1)
-    call Tool_addNextGroupsTo(a:block, 'Function', a:options)
+    call SQL_Tool_addToContainerGroups(a:block, 'Function', a:options, 1)
+    call SQL_Tool_addNextGroupsTo(a:block, 'Function', a:options)
     
     execute 'highlight default link sql'.a:block.'FunctionCommon sqlFunctionCommon'
     execute 'highlight default link sql'.a:block.'FunctionStar   sqlFunctionStar'
@@ -283,31 +283,31 @@ syntax cluster sqlClSelectContent          add=@sqlClSelectContentMid
 syntax cluster sqlClSelectContentFirstNext add=@sqlClSelectContentMid
 
             " Star: * {{{
-call sql_DefineEntity_Star    ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
+call SQL_DefineEntity_Star    ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
             " }}}
             " Values: {{{
-call sql_DefineEntity_Null    ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
-call sql_DefineEntity_Number  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
-call sql_DefineEntity_String  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
-call sql_DefineEntity_Column  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
-call sql_DefineEntity_Function('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
+call SQL_DefineEntity_Null    ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
+call SQL_DefineEntity_Number  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
+call SQL_DefineEntity_String  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
+call SQL_DefineEntity_Column  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
+call SQL_DefineEntity_Function('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
             " }}}
         " }}}
     " }}}
 " }}}
 
 " Tools: delete {{{
-delfunction Tool_addToContainerGroups
-delfunction Tool_addNextGroupsTo
+delfunction SQL_Tool_addToContainerGroups
+delfunction SQL_Tool_addNextGroupsTo
 " }}}
 " Entities: delete {{{
-delfunction sql_DefineEntity_Null
-delfunction sql_DefineEntity_Star
-delfunction sql_DefineEntity_Number
-delfunction sql_DefineEntity_String
-delfunction sql_DefineEntity_Column
+delfunction SQL_DefineEntity_Null
+delfunction SQL_DefineEntity_Star
+delfunction SQL_DefineEntity_Number
+delfunction SQL_DefineEntity_String
+delfunction SQL_DefineEntity_Column
 
-delfunction sql_DefineEntity_Function
+delfunction SQL_DefineEntity_Function
 " }}}
 
 " COLORS: {{{
