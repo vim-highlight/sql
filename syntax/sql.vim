@@ -112,7 +112,7 @@ endfunction
     " }}}
     " *: {{{
 function SQL_DefineEntity_Star (block, options)
-    execute 'syntax match sql'.a:block.'Star nextgroup=@sqlCl'.a:block.'StarNext skipwhite skipempty contained display /*/'
+    execute 'syntax match sql'.a:block.'Star nextgroup=@sqlCl'.a:block.'StarNext skipwhite skipempty contained display /\*/'
 
     call SQL_Tool_addToContainerGroups(a:block, 'Star', a:options, 0)
     call SQL_Tool_addNextGroupsTo     (a:block, 'Star', a:options   )
@@ -198,7 +198,7 @@ let b:sql_functions_common  = ['sum', 'min', 'max']
 let b:sql_functions_star    = ['count']
 let b:sql_functions_special = ['substring']
 
-function SQL_DefineEntity_Function (block, options)
+function SQL_DefineEntity_Function (block, options, sub)
         " function name {{{
     execute 'syntax keyword sql'.a:block.'FunctionCommon nextgroup=sql'.a:block.'FunctionCommonCall skipwhite skipempty contained '.join(b:sql_functions_common, ' ')
     execute 'syntax keyword sql'.a:block.'FunctionStar   nextgroup=sql'.a:block.'FunctionStarCall   skipwhite skipempty contained '.join(b:sql_functions_star  , ' ')
@@ -229,19 +229,28 @@ function SQL_DefineEntity_Function (block, options)
     execute 'highlight default link sqlFunctionSpecial sqlFunction'
         " }}}
         " () {{{
-    execute 'syntax region sql'.a:block.'FunctionCommonCall nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionCommonContent matchgroup=sql'.a:block.'FunctionCommonCallDelimiter start=/(/ end=/)/'
-    execute 'syntax region sql'.a:block.'FunctionStarCall   nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionStarContent   matchgroup=sql'.a:block.'FunctionStarCallDelimiter start=/(/ end=/)/'
-    execute 'syntax region sql'.a:block.'FunctionUserCall   nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionUserContent   matchgroup=sql'.a:block.'FunctionUserCallDelimiter start=/(/ end=/)/'
+    execute 'syntax region sql'.a:block.'FunctionCommonCall nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionCommonContent matchgroup=sql'.a:block.'FunctionCommonCallDelimiter keepend extend start=/(/ end=/)/'
+    execute 'syntax region sql'.a:block.'FunctionStarCall   nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionStarContent   matchgroup=sql'.a:block.'FunctionStarCallDelimiter keepend extend start=/(/ end=/)/'
+    execute 'syntax region sql'.a:block.'FunctionUserCall   nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionUserContent   matchgroup=sql'.a:block.'FunctionUserCallDelimiter keepend extend start=/(/ end=/)/'
     
     if !empty(b:sql_functions_special)
         for name in b:sql_functions_special
-            execute 'syntax region sql'.a:block.'FunctionSpecialCall_'.name.' nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionSpecialContent_'.name.' matchgroup=sql'.a:block.'FunctionSpecialCallDelimiter_'.name.' start=/(/ end=/)/'
+            execute 'syntax region sql'.a:block.'FunctionSpecialCall_'.name.' nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionSpecialContent_'.name.' matchgroup=sql'.a:block.'FunctionSpecialCallDelimiter_'.name.' keepend extend start=/(/ end=/)/'
+
+            execute 'syntax cluster sqlCl'.a:block.'FunctionSpecialContent_'.name.' add=@sqlCl'.a:block.'FunctionSpecialContent'
 
             execute 'highlight default link sql'.a:block.'FunctionSpecialCallDelimiter_'.name.' sqlFunctionSpecialCallDelimiter_'.name
             execute 'highlight default link sqlFunctionSpecialCallDelimiter_'.name.'            sqlFunctionSpecialCallDelimiter'
         endfor
     endif
 
+    execute 'syntax cluster sqlCl'.a:block.'FunctionCommonContent add=@sqlCl'.a:block.'FunctionContent'
+    execute 'syntax cluster sqlCl'.a:block.'FunctionStarContent   add=@sqlCl'.a:block.'FunctionContent'
+    execute 'syntax cluster sqlCl'.a:block.'FunctionUserContent   add=@sqlCl'.a:block.'FunctionContent'
+
+    execute 'syntax cluster sqlCl'.a:block.'FunctionContent        add=sqlError'
+    execute 'syntax cluster sqlCl'.a:block.'FunctionSpecialContent add=sqlError'
+    
     execute 'highlight default link sql'.a:block.'FunctionCommonCallDelimiter sqlFunctionCommonCallDelimiter'
     execute 'highlight default link sql'.a:block.'FunctionStarCallDelimiter   sqlFunctionStarCallDelimiter'
     execute 'highlight default link sql'.a:block.'FunctionUserCallDelimiter   sqlFunctionUserCallDelimiter'
@@ -253,6 +262,21 @@ function SQL_DefineEntity_Function (block, options)
         " }}}
         
         " __CONTENT__ {{{
+            " __COMMON__ {{{
+    call SQL_DefineEntity_Null  (a:block.'FunctionContent', {'in': {'sub': ['']}, 'next': {'group': {'sub': ['Next']} } })
+    call SQL_DefineEntity_Number(a:block.'FunctionContent', {'in': {'sub': ['']}, 'next': {'group': {'sub': ['Next']} } })
+    call SQL_DefineEntity_String(a:block.'FunctionContent', {'in': {'sub': ['']}, 'next': {'group': {'sub': ['Next']} } })
+    call SQL_DefineEntity_Column(a:block.'FunctionContent', {'in': {'sub': ['']}, 'next': {'group': {'sub': ['Next']} } })
+
+    if a:sub == 0
+        call SQL_DefineEntity_Function (a:block.'FunctionContent', {'in': {'sub': ['']}, 'next': {'group': {'sub': ['Next']} } }, 1)
+    else
+        execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=@sqlCl'.a:block.'Function'
+    endif
+            " }}}
+            " Star: {{{
+    call SQL_DefineEntity_Star(a:block.'FunctionStarContent', {'in': {'sub': ['']}, 'next': {'group': {'sub': ['Next']} } })
+            " }}}
         " }}}
 endfunction
     " }}}
@@ -286,11 +310,11 @@ syntax cluster sqlClSelectContentFirstNext add=@sqlClSelectContentMid
 call SQL_DefineEntity_Star    ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
             " }}}
             " Values: {{{
-call SQL_DefineEntity_Null    ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
-call SQL_DefineEntity_Number  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
-call SQL_DefineEntity_String  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
-call SQL_DefineEntity_Column  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
-call SQL_DefineEntity_Function('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
+call SQL_DefineEntity_Null    ('Select', {'in': {'sub': ['ContentMid']}, 'next': {'common':'Mid'} })
+call SQL_DefineEntity_Number  ('Select', {'in': {'sub': ['ContentMid']}, 'next': {'common':'Mid'} })
+call SQL_DefineEntity_String  ('Select', {'in': {'sub': ['ContentMid']}, 'next': {'common':'Mid'} })
+call SQL_DefineEntity_Column  ('Select', {'in': {'sub': ['ContentMid']}, 'next': {'common':'Mid'} })
+call SQL_DefineEntity_Function('Select', {'in': {'sub': ['ContentMid']}, 'next': {'common':'Mid'} }, 0)
             " }}}
         " }}}
     " }}}
