@@ -110,6 +110,16 @@ function DefineEntity_Null (block, options)
     execute 'highlight default link sql'.a:block.'Null sqlNull'
 endfunction
     " }}}
+    " *: {{{
+function DefineEntity_Star (block, options)
+    execute 'syntax match sql'.a:block.'Star nextgroup=@sqlCl'.a:block.'StarNext skipwhite skipempty contained display /*/'
+
+    call Tool_addToContainerGroups(a:block, 'Star', a:options, 0)
+    call Tool_addNextGroupsTo     (a:block, 'Star', a:options   )
+
+    execute 'highlight default link sql'.a:block.'Star sqlStar'
+endfunction
+    " }}}
     " Number: {{{
 function DefineEntity_Number (block, options)
     execute 'syntax match sql'.a:block.'Number nextgroup=@sqlCl'.a:block.'NumberNext skipwhite skipempty contained display /[+-]\?[0-9]\+\(\.[0-9]\+\)\?/'
@@ -241,6 +251,9 @@ function DefineEntity_Function (block, options)
     execute 'highlight default link sqlFunctionUserCallDelimiter    sqlFunctionCallDelimiter'
     execute 'highlight default link sqlFunctionSpecialCallDelimiter sqlFunctionCallDelimiter'
         " }}}
+        
+        " __CONTENT__ {{{
+        " }}}
 endfunction
     " }}}
 " }}}
@@ -270,11 +283,7 @@ syntax cluster sqlClSelectContent          add=@sqlClSelectContentMid
 syntax cluster sqlClSelectContentFirstNext add=@sqlClSelectContentMid
 
             " Star: * {{{
-syntax match sqlSelectStar nextgroup=@sqlClSelectContentMidNextSeparator skipwhite skipempty contained display /\*/
-
-syntax cluster sqlClSelectContentMid add=sqlSelectStar
-
-highlight default link sqlSelectStar sqlStar
+call DefineEntity_Star    ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
             " }}}
             " Values: {{{
 call DefineEntity_Null    ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
@@ -287,12 +296,13 @@ call DefineEntity_Function('Select', {'in':{'sub':['ContentMid']}, 'next':{'comm
     " }}}
 " }}}
 
-" Tools: {{{
+" Tools: delete {{{
 delfunction Tool_addToContainerGroups
 delfunction Tool_addNextGroupsTo
 " }}}
 " Entities: delete {{{
 delfunction DefineEntity_Null
+delfunction DefineEntity_Star
 delfunction DefineEntity_Number
 delfunction DefineEntity_String
 delfunction DefineEntity_Column
