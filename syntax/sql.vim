@@ -182,6 +182,67 @@ function DefineEntity_Column (block, options)
         " }}}
 endfunction
     " }}}
+
+	" Function: {{{
+let b:sql_functions_common  = ['sum', 'min', 'max']
+let b:sql_functions_star    = ['count']
+let b:sql_functions_special = ['substring']
+
+function DefineEntity_Function (block, options)
+		" function name {{{
+	execute 'syntax keyword sql'.a:block.'FunctionCommon nextgroup=sql'.a:block.'FunctionCommonCall skipwhite skipempty contained '.join(b:sql_functions_common, ' ')
+	execute 'syntax keyword sql'.a:block.'FunctionStar   nextgroup=sql'.a:block.'FunctionStarCall   skipwhite skipempty contained '.join(b:sql_functions_star  , ' ')
+    execute 'syntax match   sql'.a:block.'FunctionUser   nextgroup=sql'.a:block.'FunctionUserCall   skipwhite skipempty contained /\h\w*\(\s*(\)\@=/'
+
+	execute 'syntax cluster sqlCl'.a:block.'Function add=sql'.a:block.'FunctionCommon,sql'.a:block.'FunctionStar,sql'.a:block.'FunctionUser'
+
+	if !empty(b:sql_functions_special)
+		for name in b:sql_functions_special
+			execute 'syntax keyword sql'.a:block.'FunctionSpecial_'.name.' nextgroup=sql'.a:block.'FunctionSpecialCall_'.name.' skipwhite skipempty contained '.name
+
+			execute 'syntax cluster sqlCl'.a:block.'Function add=sql'.a:block.'FunctionSpecial_'.name
+			
+			execute 'highlight default link sql'.a:block.'FunctionSpecial_'.name.' sqlFunctionSpecial_'.name
+			execute 'highlight default link sqlFunctionSpecial_'.name.'            sqlFunctionSpecial'
+		endfor
+	endif
+
+	call Tool_addToContainerGroups(a:block, 'Function', a:options, 1)
+	call Tool_addNextGroupsTo(a:block, 'Function', a:options)
+    
+	execute 'highlight default link sql'.a:block.'FunctionCommon sqlFunctionCommon'
+	execute 'highlight default link sql'.a:block.'FunctionStar   sqlFunctionStar'
+	execute 'highlight default link sql'.a:block.'FunctionUser   sqlFunctionUser'
+
+	execute 'highlight default link sqlFunctionCommon  sqlFunction'
+	execute 'highlight default link sqlFunctionStar    sqlFunction'
+	execute 'highlight default link sqlFunctionSpecial sqlFunction'
+		" }}}
+		" () {{{
+	execute 'syntax region sql'.a:block.'FunctionCommonCall nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionCommonContent matchgroup=sql'.a:block.'FunctionCommonCallDelimiter start=/(/ end=/)/'
+	execute 'syntax region sql'.a:block.'FunctionStarCall   nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionStarContent   matchgroup=sql'.a:block.'FunctionStarCallDelimiter start=/(/ end=/)/'
+	execute 'syntax region sql'.a:block.'FunctionUserCall   nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionUserContent   matchgroup=sql'.a:block.'FunctionUserCallDelimiter start=/(/ end=/)/'
+	
+	if !empty(b:sql_functions_special)
+		for name in b:sql_functions_special
+			execute 'syntax region sql'.a:block.'FunctionSpecialCall_'.name.' nextgroup=@sqlCl'.a:block.'FunctionNext skipwhite skipempty contained transparent contains=@sqlCl'.a:block.'FunctionSpecialContent_'.name.' matchgroup=sql'.a:block.'FunctionSpecialCallDelimiter_'.name.' start=/(/ end=/)/'
+
+			execute 'highlight default link sql'.a:block.'FunctionSpecialCallDelimiter_'.name.' sqlFunctionSpecialCallDelimiter_'.name
+			execute 'highlight default link sqlFunctionSpecialCallDelimiter_'.name.'            sqlFunctionSpecialCallDelimiter'
+		endfor
+	endif
+
+	execute 'highlight default link sql'.a:block.'FunctionCommonCallDelimiter sqlFunctionCommonCallDelimiter'
+	execute 'highlight default link sql'.a:block.'FunctionStarCallDelimiter   sqlFunctionStarCallDelimiter'
+	execute 'highlight default link sql'.a:block.'FunctionUserCallDelimiter   sqlFunctionUserCallDelimiter'
+
+	execute 'highlight default link sqlFunctionCommonCallDelimiter  sqlFunctionCallDelimiter'
+	execute 'highlight default link sqlFunctionStarCallDelimiter    sqlFunctionCallDelimiter'
+	execute 'highlight default link sqlFunctionUserCallDelimiter    sqlFunctionCallDelimiter'
+	execute 'highlight default link sqlFunctionSpecialCallDelimiter sqlFunctionCallDelimiter'
+		" }}}
+endfunction
+	" }}}
 " }}}
 
 " ERROR: {{{
@@ -216,10 +277,11 @@ syntax cluster sqlClSelectContentMid add=sqlSelectStar
 highlight default link sqlSelectStar sqlStar
             " }}}
             " Values: {{{
-call DefineEntity_Null  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
-call DefineEntity_Number('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
-call DefineEntity_String('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
-call DefineEntity_Column('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
+call DefineEntity_Null    ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
+call DefineEntity_Number  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
+call DefineEntity_String  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
+call DefineEntity_Column  ('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
+call DefineEntity_Function('Select', {'in':{'sub':['ContentMid']}, 'next':{'common':'Mid'}})
             " }}}
         " }}}
     " }}}
@@ -234,23 +296,28 @@ delfunction DefineEntity_Null
 delfunction DefineEntity_Number
 delfunction DefineEntity_String
 delfunction DefineEntity_Column
+
+delfunction DefineEntity_Function
 " }}}
 
 " COLORS: {{{
     " Internal: {{{
-highlight default link sqlColumn               sqlName
-highlight default link sqlColumnDelimiter      sqlDelimiter
-highlight default link sqlColumnTable          sqlName
-highlight default link sqlColumnTableDelimiter sqlDelimiter
-highlight default link sqlColumnTableSeparator sqlOperator
-highlight default link sqlDistinct             sqlStructureSecondary
-highlight default link sqlSelect               sqlStructure
-highlight default link sqlStar                 sqlOperator
-highlight default link sqlStringDelimiter      sqlString
+highlight default link sqlColumn                sqlName
+highlight default link sqlColumnDelimiter       sqlDelimiter
+highlight default link sqlColumnTable           sqlName
+highlight default link sqlColumnTableDelimiter  sqlDelimiter
+highlight default link sqlColumnTableSeparator  sqlOperator
+highlight default link sqlDistinct              sqlStructureSecondary
+highlight default link sqlFunctionCallDelimiter sqlOperator
+highlight default link sqlSelect                sqlStructure
+highlight default link sqlStar                  sqlOperator
+highlight default link sqlStringDelimiter       sqlString
     " }}}
     " External: {{{
 highlight default link sqlDelimiter			 Delimiter
 highlight default link sqlError              Error
+highlight default link sqlFunction           Function
+highlight default link sqlFunctionUser       None
 highlight default link sqlName               None
 highlight default link sqlNull               Keyword
 highlight default link sqlNumber             Number
