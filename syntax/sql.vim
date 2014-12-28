@@ -260,7 +260,6 @@ function SQL_DefineEntity_Function (block, options, sub)
     execute 'highlight default link sqlFunctionUserCallDelimiter    sqlFunctionCallDelimiter'
     execute 'highlight default link sqlFunctionSpecialCallDelimiter sqlFunctionCallDelimiter'
         " }}}
-        
         " __CONTENT__ {{{
             " __COMMON__ {{{
     call SQL_DefineEntity_Null  (a:block.'FunctionContent', {'in': {'sub': ['']}, 'next': {'group': {'sub': ['Next']} } })
@@ -274,8 +273,21 @@ function SQL_DefineEntity_Function (block, options, sub)
         execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=@sqlCl'.a:block.'Function'
     endif
             " }}}
+
             " Star: {{{
+    execute 'syntax cluster sqlCl'.a:block.'FunctionStarContentNext add=@sqlCl'.a:block.'FunctionContentNext'
+
     call SQL_DefineEntity_Star(a:block.'FunctionStarContent', {'in': {'sub': ['']}, 'next': {'group': {'sub': ['Next']} } })
+            " }}}
+        " }}}
+        " __NEXT__ {{{
+            " , {{{
+    execute 'syntax match sql'.a:block.'FunctionContentNextComma nextgroup=@sqlCl'.a:block.'FunctionContent skipwhite skipempty contained display /,/'
+
+    execute 'syntax cluster sqlCl'.a:block.'FunctionContentNext add=sql'.a:block.'FunctionContentNextComma'
+
+    execute 'highlight default link sql'.a:block.'FunctionContentNextComma sqlFunctionContentNextComma'
+    execute 'highlight default link sqlFunctionContentNextComma sqlComma'
             " }}}
         " }}}
 endfunction
@@ -343,6 +355,7 @@ highlight default link sqlColumnTableDelimiter  sqlDelimiter
 highlight default link sqlColumnTableSeparator  sqlOperator
 highlight default link sqlDistinct              sqlStructureSecondary
 highlight default link sqlFunctionCallDelimiter sqlOperator
+highlight default link sqlComma                 sqlOperator
 highlight default link sqlSelect                sqlStructure
 highlight default link sqlStar                  sqlOperator
 highlight default link sqlStringDelimiter       sqlString
