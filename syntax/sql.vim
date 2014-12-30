@@ -47,6 +47,8 @@ endif
 " }}}
 
 " Tools: define {{{
+	" Groups {{{
+		" Add entity to groups {{{
 function SQL_Tool_addToContainerGroups (block, entity, options, cluster)
     let in_groups = []
     if has_key(a:options, 'in')
@@ -67,6 +69,8 @@ function SQL_Tool_addToContainerGroups (block, entity, options, cluster)
         execute 'syntax cluster sqlCl'.group.' add='.begin.a:block.a:entity
     endfor
 endfunction
+		" }}}
+		" Add groups to entity following group {{{
 function SQL_Tool_addNextGroupsTo (block, entity, options)
     let next_groups = []
     if has_key(a:options, 'next')
@@ -98,6 +102,8 @@ function SQL_Tool_addNextGroupsTo (block, entity, options)
         execute 'syntax cluster sqlCl'.a:block.a:entity.'Next add='.join(next_groups, ',')
     endif
 endfunction
+		" }}}
+	" }}}
 " }}}
 " Entities: define {{{
     " NULL: {{{
@@ -198,7 +204,7 @@ let b:sql_functions_common  = ['sum', 'min', 'max']
 let b:sql_functions_star    = ['count']
 let b:sql_functions_special = ['substring']
 
-function SQL_DefineEntity_Function (block, options, sub)
+function SQL_DefineEntity_Function (block, options)
         " function name {{{
     execute 'syntax keyword sql'.a:block.'FunctionCommon nextgroup=sql'.a:block.'FunctionCommonCall skipwhite skipempty contained '.join(b:sql_functions_common, ' ')
     execute 'syntax keyword sql'.a:block.'FunctionStar   nextgroup=sql'.a:block.'FunctionStarCall   skipwhite skipempty contained '.join(b:sql_functions_star  , ' ')
@@ -267,10 +273,18 @@ function SQL_DefineEntity_Function (block, options, sub)
     call SQL_DefineEntity_String(a:block.'FunctionContent', {'in': {'sub': ['']}, 'next': {'group': {'sub': ['Next']} } })
     call SQL_DefineEntity_Column(a:block.'FunctionContent', {'in': {'sub': ['']}, 'next': {'group': {'sub': ['Next']} } })
 
-    if a:sub == 0
-        call SQL_DefineEntity_Function (a:block.'FunctionContent', {'in': {'sub': ['']}, 'next': {'group': {'sub': ['Next']} } }, 1)
-    else
+	if has_key(a:options, 'sub')
+		let sub = a:options.sub
+	else
+		let sub = 'declare'
+	endif
+
+	if sub == 'declare'
+        call SQL_DefineEntity_Function (a:block.'FunctionContent', {'sub': 'use', 'in': {'sub': ['']}, 'next': {'group': {'sub': ['Next']} } })
+	elseif sub == 'use'
         execute 'syntax cluster sqlCl'.a:block.'FunctionContent add=@sqlCl'.a:block.'Function'
+	else
+		throw 'SQL|Invalid value "'.sub.'" for "sub" option'
     endif
             " }}}
 
@@ -326,7 +340,7 @@ call SQL_DefineEntity_Null    ('Select', {'in': {'sub': ['ContentMid']}, 'next':
 call SQL_DefineEntity_Number  ('Select', {'in': {'sub': ['ContentMid']}, 'next': {'common':'Mid'} })
 call SQL_DefineEntity_String  ('Select', {'in': {'sub': ['ContentMid']}, 'next': {'common':'Mid'} })
 call SQL_DefineEntity_Column  ('Select', {'in': {'sub': ['ContentMid']}, 'next': {'common':'Mid'} })
-call SQL_DefineEntity_Function('Select', {'in': {'sub': ['ContentMid']}, 'next': {'common':'Mid'} }, 0)
+call SQL_DefineEntity_Function('Select', {'in': {'sub': ['ContentMid']}, 'next': {'common':'Mid'} })
             " }}}
         " }}}
     " }}}
