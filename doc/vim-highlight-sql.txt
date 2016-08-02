@@ -1,4 +1,4 @@
-*vim-sql.txt*	Syntax highlight for SQL standards & drivers-specifics
+*vim-sql.txt*    Syntax highlight for SQL standards & drivers-specifics
 *vim-sql*
 
 ===============================================================================
@@ -6,9 +6,9 @@ CONTENTS                                                     *vim-sql-contents*
 
     1.Introduction..................................|vim-sql-introduction|
     2.Options.......................................|vim-sql-options|
-		2.1.General options.........................|vim-sql-options-general|
-		2.2.Case match options......................|vim-sql-options-caseMatch|
-		2.3.Standards options.......................|vim-sql-options-standards|
+        2.1.General options.........................|vim-sql-options-general|
+        2.2.Case match options......................|vim-sql-options-caseMatch|
+        2.3.Standards options.......................|vim-sql-options-standards|
 
 ===============================================================================
 1. Introduction                                          *vim-sql-introduction*
@@ -48,10 +48,4 @@ Is SQL keywords case sensitive ? >
 
 -------------------------------------------------------------------------------
 2.3. Standards options                              *vim-sql-options-standards*
-
-                                                            *'vim_sql_join_92'*
-Default: 1
-can SQL use the 'INNER/OUTER JOIN' form (standard of 1992) ? >
-    let g:vim_sql_join_92 = 1
-<
 
