@@ -33,7 +33,9 @@ This section will describe all options to customize the SQL operating
 
                                                              *'vim_sql_driver'*
 Default: ''
-SQL sub-highlight to use. Must be `syntax/sql/XXX.vim` file >
+The SQL driver concerned. Driver file must be `syntax/sql/XXX.vim` where XXX is
+driver name. Used to highlight driver-specific query and functions.
+Let empty to use only standard SQL. >
     let g:vim_sql_driver = 'MySQL'
 <
 

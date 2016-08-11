@@ -1,22 +1,20 @@
-" Vim syntax file for SQL
-" Language:     SQL standard / Support for drivers specifics
+" Vim-highlight core functions
+" Language:     -
 " Maintainer:   Julien Rosset <jul.rosset@gmail.com>
 "
 " URL:          https://github.com/vim-highlight/sql/
 " Version:      0.0.1
 
-" For version 5.x: Clear all syntax items
-" For version 6.x: Quit when a syntax file was already loaded
-if version < 600
-  syntax clear
-elseif exists("b:current_syntax")
+if exists("b:vim_highlight")
   finish
 endif
 
 let s:vim_highlight = {}
+" OPTIONS: {{{
 let s:vim_highlight.options {}
+    " CORE: {{{
 let s:vim_highlight.options.core = {}
-
+        " getOption : get value for an option {{{
 function s:vim_highlight.options.core.getOption (name, defaultValue)
     if exists('b:sql_'.a:name)
         return b:{'sql_'.a:name}
@@ -26,7 +24,9 @@ function s:vim_highlight.options.core.getOption (name, defaultValue)
         return a:defaultValue
     endif
 endfunction
-
+        " }}}
+        " options type functions {{{
+            " boolOption : get bool option {{{
 function s:vim_highligt.options.core.boolOption (options, name)
     let l:str = ''
 
@@ -40,6 +40,8 @@ function s:vim_highligt.options.core.boolOption (options, name)
 
     return l:str
 endfunction
+            " }}}
+            " listOption : get list option {{{
 function s:vim_highligt.options.core.listOption (options, name)
     let l:str = ''
 
@@ -57,7 +59,10 @@ function s:vim_highligt.options.core.listOption (options, name)
 
     return l:str
 endfunction
-
+            " }}}
+        " }}}
+        " options functions {{{
+            " commonToString : common options {{{
 function s:vim_highlight.options.core.commonToString (options)
     let l:str = ''
 
@@ -71,6 +76,8 @@ function s:vim_highlight.options.core.commonToString (options)
 
     return l:str
 endfunction
+            " }}}
+            " keywordToString : keyword options {{{
 function s:vim_highlight.options.core.keywordToString (options)
     let l:str = ''
 
@@ -78,6 +85,8 @@ function s:vim_highlight.options.core.keywordToString (options)
 
     return l:str
 endfunction
+            " }}}
+            " matchToString : match options {{{
 function s:vim_highlight.options.core.matchToString (options)
     let l:str = ''
 
@@ -91,6 +100,8 @@ function s:vim_highlight.options.core.matchToString (options)
 
     return l:str
 endfunction
+            " }}}
+            " regionToString : region options {{{
 function s:vim_highlight.options.core.regionToString (options)
     let l:str = ''
 
@@ -108,86 +119,7 @@ function s:vim_highlight.options.core.regionToString (options)
 
     return l:str
 endfunction
-
-
-
-" Initialize options {{{
-let s:driver         = s:DefineOption('driver'        , '')
-let s:case_sensitive = s:DefineOption('case_sensitive',  0)
+            " }}}
+        " }}} 
+    " }}}
 " }}}
-
-" Case matching {{{
-if s:case_sensitive
-    syntax case match
-else
-    syntax case ignore
-endif
-" }}}
-
-
-let s:core = { prefix: '' }
-
-function core.matchOptions (options)
-    let l:str = ''
-
-    if has_key(a:options, 'contains') && len(a:options.contains) > 0
-        let l:str = l:str.' contains='.a:options.contains
-    endif
-
-    return l:str
-endfunction
-
-function core.match (name, regex, options) dict
-    execute 'syntax match '.self.prefix.a:name.' '.a:regex
-endfunction
-
-let s:core.prefix = 'sql'
-
-syntax match sqlTableName /\c[a-z][a-z0-9_-]*/
-highlight default link sqlTableName sqlIdentifier
-
-syntax match sqlColumnName /\c[a-z][a-z0-9_-]*/
-highlight default link sqlTableName sqlIdentifier
-
-" FUNCTIONS: {{{
-function s:common_table_expression ()
-    syntax cluster sqlCommonTableExpression contains=
-
-
-endfunction
-
-function s:select_stmt ()
-    syntax keyword sqlSelectStmtWith nextgroup=@sqlSelectStmtFollow skipwhite skipempty contained WITH
-    highlight default link sqlSelectStmtWith sqlKeyword
-
-    syntax keyword sqlSelectStmtRecursive nextgroup=@sqlSelectStmtCommonTableExpressionBloc skipwhite skipempty contained RECURSIVE
-    highlight default link sqlSelectWithRecursive sqlKeyword
-
-    syntax cluster sqlSelectWithCommonTableExpressionBloc contains=
-
-    syntax cluster sqlSelectWithFollow contains=sqlSelectWithRecursive
-endfunction
-" }}}
-
-" ERROR: {{{
-syntax match sqlError /\S.*/
-" }}}
-    
-" COMMENTS: {{{
-syntax region sqlCommentOneline oneline start=#//# end=#$#
-syntax region sqlCommentMultiline start=#/*# end=#*/#
-
-syntax cluster sqlComment contains=sqlCommentOneline,sqlCommentMultiline
-" }}}
-
-" CLEAN: {{{
-delfunction s:selectStmt
-" }}}
-
-" HIGHLIGHT: {{{
-highlight default link sqlIdentifier    Identifier
-highlight default link sqlError         Error
-highlight default link sqlComment       Comment
-" }}}
-
-let b:current_syntax = "sql"
