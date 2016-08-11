@@ -9,13 +9,13 @@ if exists("b:vim_highlight")
   finish
 endif
 
-let s:vim_highlight = {}
+let b:vim_highlight = {}
 " OPTIONS: {{{
-let s:vim_highlight.options {}
+let b:vim_highlight.options {}
     " CORE: {{{
-let s:vim_highlight.options.core = {}
+let b:vim_highlight.options.core = {}
         " getOption : get value for an option {{{
-function s:vim_highlight.options.core.getOption (name, defaultValue)
+function b:vim_highlight.options.core.getOption (name, defaultValue)
     if exists('b:sql_'.a:name)
         return b:{'sql_'.a:name}
     elseif exists('g:sql_'.a:name)
@@ -63,7 +63,7 @@ endfunction
         " }}}
         " options functions {{{
             " commonToString : common options {{{
-function s:vim_highlight.options.core.commonToString (options)
+function b:vim_highlight.options.core.commonToString (options)
     let l:str = ''
 
     let l:str = l:str.boolOption(a:options, 'contained')
@@ -78,7 +78,7 @@ function s:vim_highlight.options.core.commonToString (options)
 endfunction
             " }}}
             " keywordToString : keyword options {{{
-function s:vim_highlight.options.core.keywordToString (options)
+function b:vim_highlight.options.core.keywordToString (options)
     let l:str = ''
 
     let l:str = l:str.commonToString(a:options)
@@ -87,7 +87,7 @@ function s:vim_highlight.options.core.keywordToString (options)
 endfunction
             " }}}
             " matchToString : match options {{{
-function s:vim_highlight.options.core.matchToString (options)
+function b:vim_highlight.options.core.matchToString (options)
     let l:str = ''
 
     let l:str = l:str.commonToString(a:options)
@@ -102,7 +102,7 @@ function s:vim_highlight.options.core.matchToString (options)
 endfunction
             " }}}
             " regionToString : region options {{{
-function s:vim_highlight.options.core.regionToString (options)
+function b:vim_highlight.options.core.regionToString (options)
     let l:str = ''
 
     let l:str = l:str.commonToString(a:options)
