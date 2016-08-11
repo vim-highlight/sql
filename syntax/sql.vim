@@ -14,16 +14,16 @@ elseif exists("b:current_syntax")
 endif
 
 " Initialize options {{{
-"let s:driver         = s:DefineOption('driver'        , '')
-"let s:case_sensitive = s:DefineOption('case_sensitive',  0)
+let s:driver         = vim_highlight#options#core#getOption('driver'        , '')
+let s:case_sensitive = vim_highlight#options#core#getOption('case_sensitive',  0)
 " }}}
 
 " Case matching {{{
-"if s:case_sensitive
+if s:case_sensitive
     syntax case match
-"else
-    "syntax case ignore
-"endif
+else
+    syntax case ignore
+endif
 " }}}
 
 " HIGHLIGHT: {{{
