@@ -14,8 +14,8 @@ elseif exists("b:current_syntax")
 endif
 
 " Initialize options {{{
-let s:driver         = vim_highlight#options#core#getOption('driver'        , '')
-let s:case_sensitive = vim_highlight#options#core#getOption('case_sensitive',  0)
+let s:driver         = vim_highlight#core#options#getValue('driver'        , '')
+let s:case_sensitive = vim_highlight#core#options#getValue('case_sensitive',  0)
 " }}}
 
 " Case matching {{{
@@ -26,16 +26,22 @@ else
 endif
 " }}}
 
-function s:SelectStmt ()
-    "syntax cluster sqlSelectSTMT
+" Predicats: {{{
+    " select-stmt: {{{
+function s:SelectStmt (prefix)
+    let l:predicat = a:prefix.'SelectStmt'
 
-    call vim_highlight#options#core#keyword('sqlSelectStmtWith', 'sqlIdentifier', [ 'WITH' ], { 'nexgroup': [ 'sqlSelectStmtRecursive' ], 'skipempty': 1, 'skipnl': 1, 'skipwhite': 1 })
-    syntax cluster sqlSelectSTMT add=sqlSelectStmtWith
+    call vim_highlight#core#syntax#keyword(l:predicat.'With', 'sqlIdentifier', [ 'WITH' ], { 'nexgroup': [ l:predicat.'Recursive' ], 'skipempty': 1, 'skipnl': 1, 'skipwhite': 1 })
+    syntax cluster sqlSelectStmt add=sqlSelectStmtWith
 endfunction
+    " }}}
+" }}}
 
-call s:SelectStmt()
+call s:SelectStmt('sql')
 
+" Suppression: {{{
 delfunction s:SelectStmt
+" }}}
 
 " HIGHLIGHT: {{{
 highlight default link sqlIdentifier    Identifier
