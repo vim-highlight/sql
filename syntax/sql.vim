@@ -26,6 +26,17 @@ else
 endif
 " }}}
 
+function s:SelectStmt ()
+    "syntax cluster sqlSelectSTMT
+
+    call vim_highlight#options#core#keyword('sqlSelectStmtWith', 'sqlIdentifier', [ 'WITH' ], { 'nexgroup': [ 'sqlSelectStmtRecursive' ], 'skipempty': 1, 'skipnl': 1, 'skipwhite': 1 })
+    syntax cluster sqlSelectSTMT add=sqlSelectStmtWith
+endfunction
+
+call s:SelectStmt()
+
+delfunction s:SelectStmt
+
 " HIGHLIGHT: {{{
 highlight default link sqlIdentifier    Identifier
 highlight default link sqlError         Error

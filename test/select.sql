@@ -1,3 +1,5 @@
+WITH dfc
+
 SELECT *
 FROM log_sor
 WHERE sor_etat = 'V'

@@ -20,8 +20,8 @@ function! vim_highlight#options#core#boolOption (options, name)
     let l:str = ''
 
     if has_key(a:options, a:name)
-        if type(a:options.a:name) == type(0)
-            if a:options.a:name == 1
+        if type(get(a:options, a:name)) == type(0)
+            if get(a:options, a:name) == 1
                 let l:str = l:str.' '.a:name
             endif
         endif
@@ -35,13 +35,13 @@ function! vim_highlight#options#core#listOption (options, name)
     let l:str = ''
 
     if has_key(a:options, a:name)
-        if type(a:options.a:name) == type('')
-            if len(a:options.a:name) > 0
-                let l:str = l:str.' '.a:name.'='.a:options.a:name
+        if type(get(a:options, a:name)) == type('')
+            if len(get(a:options, a:name)) > 0
+                let l:str = l:str.' '.a:name.'='.get(a:options, a:name)
             endif
-        elseif type(a:options.a:name == type([]))
-            if count(a:options.a:name) > 0
-                let l:str = l:str.' '.a:name.'='.join(a:options.a:name, ',')
+        elseif type(get(a:options, a:name)) == type([])
+            if len(get(a:options, a:name)) > 0
+                let l:str = l:str.' '.a:name.'='.join(get(a:options, a:name), ',')
             endif
         endif
     endif
@@ -54,13 +54,13 @@ endfunction
 function! vim_highlight#options#core#commonToString (options)
     let l:str = ''
 
-    let l:str = l:str.boolOption(a:options, 'contained')
-    let l:str = l:str.listOption(a:options, 'containedin')
-    let l:str = l:str.listOption(a:options, 'nextgroup')
-    let l:str = l:str.boolOption(a:options, 'transparent')
-    let l:str = l:str.boolOption(a:options, 'skipwhite')
-    let l:str = l:str.boolOption(a:options, 'skipnl')
-    let l:str = l:str.boolOption(a:options, 'skipempty')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'contained')
+    let l:str = l:str.vim_highlight#options#core#listOption(a:options, 'containedin')
+    let l:str = l:str.vim_highlight#options#core#listOption(a:options, 'nextgroup')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'transparent')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'skipwhite')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'skipnl')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'skipempty')
 
     return l:str
 endfunction
@@ -69,7 +69,7 @@ endfunction
 function! vim_highlight#options#core#keywordToString (options)
     let l:str = ''
 
-    let l:str = l:str.commonToString(a:options)
+    let l:str = l:str.vim_highlight#options#core#commonToString(a:options)
 
     return l:str
 endfunction
@@ -78,13 +78,13 @@ endfunction
 function! vim_highlight#options#core#matchToString (options)
     let l:str = ''
 
-    let l:str = l:str.commonToString(a:options)
-    let l:str = l:str.listOption(a:options, 'contains')
-    let l:str = l:str.boolOption(a:options, 'fold')
-    let l:str = l:str.boolOption(a:options, 'display')
-    let l:str = l:str.boolOption(a:options, 'extend')
+    let l:str = l:str.vim_highlight#options#core#commonToString(a:options)
+    let l:str = l:str.vim_highlight#options#core#listOption(a:options, 'contains')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'fold')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'display')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'extend')
     
-    let l:str = l:str.boolOption(a:options, 'excludenl')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'excludenl')
 
     return l:str
 endfunction
@@ -93,18 +93,37 @@ endfunction
 function! vim_highlight#options#core#regionToString (options)
     let l:str = ''
 
-    let l:str = l:str.commonToString(a:options)
-    let l:str = l:str.listOption(a:options, 'contains')
-    let l:str = l:str.boolOption(a:options, 'oneline')
-    let l:str = l:str.boolOption(a:options, 'fold')
-    let l:str = l:str.boolOption(a:options, 'display')
-    let l:str = l:str.boolOption(a:options, 'extend')
+    let l:str = l:str.vim_highlight#options#core#commonToString(a:options)
+    let l:str = l:str.vim_highlight#options#core#listOption(a:options, 'contains')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'oneline')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'fold')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'display')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'extend')
     
-    let l:str = l:str.listOption(a:options, 'matchgroup')
-    let l:str = l:str.boolOption(a:options, 'keepend')
-    let l:str = l:str.boolOption(a:options, 'extend')
-    let l:str = l:str.boolOption(a:options, 'excludenl')
+    let l:str = l:str.vim_highlight#options#core#listOption(a:options, 'matchgroup')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'keepend')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'extend')
+    let l:str = l:str.vim_highlight#options#core#boolOption(a:options, 'excludenl')
 
     return l:str
+endfunction
+" }}}
+
+" keyword : declare keyword {{{
+function! vim_highlight#options#core#keyword (name, highlight, keywords, options)
+    let l:str = ''
+
+    if type(a:keywords) == type('')
+        if len(a:keywords) > 0
+            let l:str = a:keywords
+        endif
+    elseif type(a:keywords) == type([])
+        if len(a:keywords) > 0
+            let l:str = join(a:keywords, ' ')
+        endif
+    endif
+
+    execute 'syntax keyword '.a:name.' '.vim_highlight#options#core#keywordToString(a:options).' '.l:str
+    execute 'highlight default link '.a:name.' '.a:highlight
 endfunction
 " }}}
