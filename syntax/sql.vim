@@ -26,27 +26,34 @@ else
 endif
 " }}}
 
+let s:predicat = 'sql'
+
+" Error: {{{
+call vim_highlight#core#syntax#match(s:predicat.'Error', 'sqlHiError', '/\S.*/', {})
+" }}}
+
 " Predicats: {{{
     " select-stmt: {{{
 function s:SelectStmt (prefix)
     let l:predicat = a:prefix.'SelectStmt'
 
-    let l:with      = vim_highlight#core#syntax#keyword(l:predicat.'With'     , 'sqlIdentifier', [ 'WITH'      ], {'skipempty': 1, 'skipnl': 1, 'skipwhite': 1 })
-    let l:recursive = vim_highlight#core#syntax#keyword(l:predicat.'Recursive', 'sqlIdentifier', [ 'RECURSIVE' ], {'skipempty': 1, 'skipnl': 1, 'skipwhite': 1, 'contained': 1, 'follow': l:with })
+    let l:with      = vim_highlight#core#syntax#keyword(l:predicat.'With'     , 'sqlHiIdentifier', [ 'WITH'      ], {'skipempty': 1, 'skipnl': 1, 'skipwhite': 1 })
+    let l:recursive = vim_highlight#core#syntax#keyword(l:predicat.'Recursive', 'sqlHiStatement' , [ 'RECURSIVE' ], {'skipempty': 1, 'skipnl': 1, 'skipwhite': 1, 'contained': 1, 'follow': l:with })
 endfunction
     " }}}
 " }}}
 
-call s:SelectStmt('sql')
+call s:SelectStmt(s:predicat)
 
 " Suppression: {{{
 delfunction s:SelectStmt
 " }}}
 
 " HIGHLIGHT: {{{
-highlight default link sqlIdentifier    Identifier
-highlight default link sqlError         Error
-highlight default link sqlComment       Comment
+highlight default link sqlHiIdentifier    Identifier
+highlight default link sqlHiStatement     Statement
+highlight default link sqlHiError         Keyword
+highlight default link sqlHiComment       Comment
 " }}}
 
 let b:current_syntax = "sql"

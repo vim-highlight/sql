@@ -29,3 +29,27 @@ function! vim_highlight#core#syntax#keyword (name, highlight, keywords, options)
     return a:name
 endfunction
 " }}}
+" match : declare match {{{
+function! vim_highlight#core#syntax#match (name, highlight, pattern, options)
+    let l:options = a:options
+    let l:options.nextgroup = '@'.a:name.'Next'
+
+    let l:follow = []
+    if has_key(l:options, 'follow')
+        if type(get(l:options, 'follow')) == type('')
+            let l:follow = [ get(l:options, 'follow') ]
+        elseif type(get(l:options, 'follow')) == type([])
+            let l:follow = get(l:options, 'follow')
+        endif
+    endif
+
+    execute 'syntax match '.a:name.' '.vim_highlight#core#options#getForMatch(l:options).' '.a:pattern
+    execute 'highlight default link '.a:name.' '.a:highlight
+
+    for l:curr in l:follow
+        execute 'syntax cluster '.l:curr.'Next add='.a:name
+    endfor
+
+    return a:name
+endfunction
+" }}}
