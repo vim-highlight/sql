@@ -44,18 +44,22 @@ function! vim_highlight#core#options#listToString (options, name)
     return l:str
 endfunction
 " }}}
-    
+
+
 " commonToString : common options {{{
 function! vim_highlight#core#options#getForCommon (options)
     let l:str = ''
 
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'contained'  )
-    let l:str = l:str.vim_highlight#core#options#listToString(a:options, 'containedin')
-    let l:str = l:str.vim_highlight#core#options#listToString(a:options, 'nextgroup'  )
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'transparent')
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'skipwhite'  )
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'skipnl'     )
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'skipempty'  )
+    let l:options = deepcopy(g:vim_highlight#core#options#default#common)
+    call extend(l:options, a:options, 'force')
+
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'contained'  )
+    let l:str = l:str.vim_highlight#core#options#listToString(l:options, 'containedin')
+    let l:str = l:str.vim_highlight#core#options#listToString(l:options, 'nextgroup'  )
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'transparent')
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'skipwhite'  )
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'skipnl'     )
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'skipempty'  )
 
     return l:str
 endfunction
@@ -63,8 +67,11 @@ endfunction
 " keywordToString : keyword options {{{
 function! vim_highlight#core#options#getForKeyword (options)
     let l:str = ''
+    
+    let l:options = deepcopy(g:vim_highlight#core#options#default#keyword)
+    call extend(l:options, a:options, 'force')
 
-    let l:str = l:str.vim_highlight#core#options#getForCommon(a:options)
+    let l:str = l:str.vim_highlight#core#options#getForCommon(l:options)
 
     return l:str
 endfunction
@@ -73,14 +80,17 @@ endfunction
 function! vim_highlight#core#options#getForMatch (options)
     let l:str = ''
 
-    let l:str = l:str.vim_highlight#core#options#getForCommon(a:options)
+    let l:options = deepcopy(g:vim_highlight#core#options#default#match)
+    call extend(l:options, a:options, 'force')
 
-    let l:str = l:str.vim_highlight#core#options#listToString(a:options, 'contains')
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'fold'    )
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'display' )
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'extend'  )
+    let l:str = l:str.vim_highlight#core#options#getForCommon(l:options)
+
+    let l:str = l:str.vim_highlight#core#options#listToString(l:options, 'contains')
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'fold'    )
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'display' )
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'extend'  )
     
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'excludenl')
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'excludenl')
 
     return l:str
 endfunction
@@ -89,18 +99,20 @@ endfunction
 function! vim_highlight#core#options#getForRegion (options)
     let l:str = ''
 
-    let l:str = l:str.vim_highlight#core#options#getForCommon(a:options)
+    let l:options = deepcopy(g:vim_highlight#core#options#default#region)
+    call extend(l:options, a:options, 'force')
 
-    let l:str = l:str.vim_highlight#core#options#listToString(a:options, 'contains')
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'oneline' )
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'fold'    )
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'display' )
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'extend'  )
+    let l:str = l:str.vim_highlight#core#options#getForCommon(l:options)
+
+    let l:str = l:str.vim_highlight#core#options#listToString(l:options, 'contains')
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'oneline' )
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'fold'    )
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'display' )
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'extend'  )
     
-    let l:str = l:str.vim_highlight#core#options#listToString(a:options, 'matchgroup')
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'keepend'   )
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'extend'    )
-    let l:str = l:str.vim_highlight#core#options#boolToString(a:options, 'excludenl' )
+    let l:str = l:str.vim_highlight#core#options#listToString(l:options, 'matchgroup')
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'keepend'   )
+    let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'excludenl' )
 
     return l:str
 endfunction
