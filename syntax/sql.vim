@@ -31,8 +31,8 @@ endif
 function s:SelectStmt (prefix)
     let l:predicat = a:prefix.'SelectStmt'
 
-    call vim_highlight#core#syntax#keyword(l:predicat.'With', 'sqlIdentifier', [ 'WITH' ], { 'nexgroup': [ l:predicat.'Recursive' ], 'skipempty': 1, 'skipnl': 1, 'skipwhite': 1 })
-    syntax cluster sqlSelectStmt add=sqlSelectStmtWith
+    let l:with      = vim_highlight#core#syntax#keyword(l:predicat.'With'     , 'sqlIdentifier', [ 'WITH'      ], {'skipempty': 1, 'skipnl': 1, 'skipwhite': 1 })
+    let l:recursive = vim_highlight#core#syntax#keyword(l:predicat.'Recursive', 'sqlIdentifier', [ 'RECURSIVE' ], {'skipempty': 1, 'skipnl': 1, 'skipwhite': 1, 'contained': 1, 'follow': l:with })
 endfunction
     " }}}
 " }}}

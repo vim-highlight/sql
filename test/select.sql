@@ -1,4 +1,6 @@
-WITH dfc
+WITH RECURSIVE dfc
+
+RECURSIVE
 
 SELECT *
 FROM log_sor

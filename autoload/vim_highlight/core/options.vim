@@ -35,7 +35,10 @@ function! vim_highlight#core#options#listToString (options, name)
     let l:str = ''
 
     if has_key(a:options, a:name)
-        let l:str = l:str.' '.vim_highlight#core#utils#listToString(get(a:options, a:name), ',')
+        let l:option = vim_highlight#core#utils#listToString(get(a:options, a:name), ',')
+        if len(l:option) > 0
+            let l:str = l:str.' '.a:name.'='.vim_highlight#core#utils#listToString(get(a:options, a:name), ',')
+        endif
     endif
 
     return l:str
