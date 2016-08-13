@@ -65,6 +65,16 @@ function! s:Comma (prefix, options)
     return vim_highlight#core#syntax#match(a:prefix.'Comma', 'sqlHiOperator', '/,/', a:options)
 endfunction
         " }}}
+        " dot : . {{{
+function! s:Dot (prefix, options)
+    return vim_highlight#core#syntax#match(a:prefix.'Dot', 'sqlHiOperator', '/\./', a:options)
+endfunction
+        " }}}
+        " star : * {{{
+function! s:Star (prefix, options)
+    return vim_highlight#core#syntax#match(a:prefix.'Star', 'sqlHiOperator', '/\*/', a:options)
+endfunction
+        " }}}
     " }}}
     " Variable: {{{
         " table-name {{{
@@ -95,8 +105,19 @@ function! s:CommonTableExpression (prefix, follow)
     let l:selectBracket = s:BracketRound(l:predicat.root.'Select', s:predicats.selectStmt, { 'follow': l:as })
     call vim_highlight#core#syntax#follow(l:predicat.end, { 'follow': l:selectBracket })
     
-    " TODO à supprimer quand SelectStmt aura une fin 'normale'
-    call vim_highlight#core#syntax#follow(l:selectBracket, { 'follow': l:predicat.root.'SelectBracketRoundOpen' })
+    return l:predicat
+endfunction
+    " }}}
+    " result-column {{{
+function! s:ResultColumn (prefix, follow)
+    let l:predicat = vim_highlight#core#syntax#predicat(a:prefix.'ResultColumn', a:follow)
+
+    let l:tableName = s:TableName(l:predicat.root, { 'follow': l:predicat.start })
+    let l:dot       = s:Dot      (l:predicat.root, { 'follow': l:tableName      })
+
+    let l:star = s:Star(l:predicat.root, { 'follow': [ l:predicat.start, l:dot ] })
+
+    call vim_highlight#core#syntax#follow(l:predicat.end, { 'follow': [ l:star ] })
 
     return l:predicat
 endfunction
@@ -107,19 +128,25 @@ function! s:SelectStmt (prefix, follow)
     let s:predicats.selectStmt = l:predicat
 
     " with {{{
-    let l:with      = vim_highlight#core#syntax#keyword(l:predicat.root.'With'     , 'sqlHiKeywordMain'  , [ 'WITH'      ], { 'follow': l:predicat.start, 'contained': 0 })
+    let l:with      = vim_highlight#core#syntax#keyword(l:predicat.root.'With'     , 'sqlHiKeywordFirst' , [ 'WITH'      ], { 'follow': l:predicat.start, 'contained': 0 })
     let l:recursive = vim_highlight#core#syntax#keyword(l:predicat.root.'Recursive', 'sqlHiKeywordSecond', [ 'RECURSIVE' ], { 'follow': l:with                           })
 
     let l:commonTableExpression = s:CommonTableExpression(l:predicat.root, [ l:with, l:recursive ])
     
-    " TODO à supprimer quand SelectStmt aura une fin 'normale'
-    call vim_highlight#core#syntax#follow(l:predicat.end, { 'follow': l:commonTableExpression.end })
-
     let l:cteComma = s:Comma(l:predicat.root.'Cte', { 'follow': l:commonTableExpression.end })
     call vim_highlight#core#syntax#follow(l:commonTableExpression.start, { 'follow': l:cteComma })
     " }}}
 
+    " select {{{
+    let l:select       = vim_highlight#core#syntax#keyword(l:predicat.root.'Select'     , 'sqlHiKeywordFirst' , [ 'SELECT'          ], { 'follow': [ l:predicat.start, l:commonTableExpression.end ], 'contained': 0 })
+    let l:distinct_all = vim_highlight#core#syntax#keyword(l:predicat.root.'DistinctAll', 'sqlHiKeywordSecond', [ 'DISTINCT', 'ALL' ], { 'follow': [ l:select                                      ]                 })
 
+    let l:resultColumn = s:ResultColumn(l:predicat.root, [ l:select, l:distinct_all ])
+    call vim_highlight#core#syntax#follow(l:predicat.end, { 'follow': l:resultColumn.end })
+    
+    let l:resultColumnComma = s:Comma(l:predicat.root.'ResultColumn', { 'follow': l:resultColumn.end })
+    call vim_highlight#core#syntax#follow(l:resultColumn.start, { 'follow': l:resultColumnComma })
+    " }}}
 
     return l:predicat
 endfunction
@@ -131,8 +158,8 @@ call s:SelectStmt(s:predicats.root, [])
 " HIGHLIGHT: {{{
 highlight default link sqlHiComment         Comment
 highlight default link sqlHiError           Error
-highlight default link sqlHiKeywordMain     Identifier
-highlight default link sqlHiKeywordSecond   Statement
+highlight default link sqlHiKeywordFirst    Statement
+highlight default link sqlHiKeywordSecond   Identifier
 highlight default link sqlHiOperator        Operator
 highlight default link sqlHiVariable        Ignore
 " }}}
