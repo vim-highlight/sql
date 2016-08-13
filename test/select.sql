@@ -5,7 +5,7 @@
 
 
 
-WITH RECURSIVE table ( column ) AS (WITH table AS () )
+WITH RECURSIVE table ( column ) AS (WITH table AS (), table2 (column2) AS () )
 
 SELECT *
 FROM log_sor

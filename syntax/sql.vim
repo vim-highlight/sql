@@ -37,7 +37,7 @@ let s:predicats.error = vim_highlight#core#syntax#match(s:predicats.root.'Error'
 
 " Common: {{{
     " Operator: {{{
-        " bracket-round : ( {{{
+        " bracket-round : ( ) {{{
 function! s:BracketRound (prefix, middle, options)
     let l:predicat = a:prefix.'BracketRound'
 
@@ -57,6 +57,12 @@ function! s:BracketRound (prefix, middle, options)
     let l:close = vim_highlight#core#syntax#match(l:predicat.'Close', 'sqlHiOperator', '/)/', a:options)
 
     return l:close
+endfunction
+        " }}}
+        
+        " comma : , {{{
+function! s:Comma (prefix, options)
+    return vim_highlight#core#syntax#match(a:prefix.'Comma', 'sqlHiOperator', '/,/', a:options)
 endfunction
         " }}}
     " }}}
@@ -100,11 +106,20 @@ function! s:SelectStmt (prefix, follow)
     let l:predicat = vim_highlight#core#syntax#predicat(a:prefix.'SelectStmt', a:follow)
     let s:predicats.selectStmt = l:predicat
 
+    " with {{{
     let l:with      = vim_highlight#core#syntax#keyword(l:predicat.root.'With'     , 'sqlHiKeywordMain'  , [ 'WITH'      ], { 'follow': l:predicat.start, 'contained': 0 })
     let l:recursive = vim_highlight#core#syntax#keyword(l:predicat.root.'Recursive', 'sqlHiKeywordSecond', [ 'RECURSIVE' ], { 'follow': l:with                           })
 
     let l:commonTableExpression = s:CommonTableExpression(l:predicat.root, [ l:with, l:recursive ])
+    
+    " TODO à supprimer quand SelectStmt aura une fin 'normale'
     call vim_highlight#core#syntax#follow(l:predicat.end, { 'follow': l:commonTableExpression.end })
+
+    let l:cteComma = s:Comma(l:predicat.root.'Cte', { 'follow': l:commonTableExpression.end })
+    call vim_highlight#core#syntax#follow(l:commonTableExpression.start, { 'follow': l:cteComma })
+    " }}}
+
+
 
     return l:predicat
 endfunction
