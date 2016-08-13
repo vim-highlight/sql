@@ -27,23 +27,36 @@ endif
 " }}}
 
 call extend(g:vim_highlight#core#options#default#common, { 'skipempty': 1, 'skipnl': 1, 'skipwhite': 1, 'contained': 1 })
+call extend(g:vim_highlight#core#options#default#region, { 'keepend': 1 })
 
-let s:predicat = 'sql'
+let s:predicats = { 'root': 'sql' }
 
 " Error: {{{
-call vim_highlight#core#syntax#match(s:predicat.'Error', 'sqlHiError', '/\S.*/', {})
+let s:predicats.error = vim_highlight#core#syntax#match(s:predicats.root.'Error', 'sqlHiError', '/\S.*/', { 'contained': 0 })
 " }}}
 
 " Common: {{{
     " Operator: {{{
-        " parenthesis-open {{{
-function! s:ParenthesisOpen (prefix, options)
-    return vim_highlight#core#syntax#match(a:prefix.'ParenthesisOpen', 'sqlHiOperator', '/(/', a:options)
-endfunction
-        " }}}
-        " parenthesis-close {{{
-function! s:ParenthesisClose (prefix, options)
-    return vim_highlight#core#syntax#match(a:prefix.'ParenthesisClose', 'sqlHiOperator', '/)/', a:options)
+        " bracket-round : ( {{{
+function! s:BracketRound (prefix, middle, options)
+    let l:predicat = a:prefix.'BracketRound'
+
+    let l:open  = vim_highlight#core#syntax#match(l:predicat.'Open', 'sqlHiOperator', '/(/', a:options)
+
+    if type(a:middle) == type({})
+        let l:middleStart = a:middle.start
+        let l:middleEnd   = a:middle.end
+    else
+        let l:middleStart = a:middle
+        let l:middleEnd   = a:middle
+    endif
+
+    call vim_highlight#core#syntax#follow(l:middleStart, { 'follow': l:open })
+
+    let a:options.follow = l:middleEnd
+    let l:close = vim_highlight#core#syntax#match(l:predicat.'Close', 'sqlHiOperator', '/)/', a:options)
+
+    return l:close
 endfunction
         " }}}
     " }}}
@@ -64,35 +77,41 @@ endfunction
 " Predicats: {{{
     " common-table-expression {{{
 function! s:CommonTableExpression (prefix, follow)
-    let l:predicat = a:prefix.'CommonTableExpression'
+    let l:predicat = vim_highlight#core#syntax#predicat(a:prefix.'CommonTableExpression', a:follow)
 
-    let l:tableName = s:TableName(l:predicat, { 'follow': a:follow })
+    let l:tableName = s:TableName(l:predicat.root, { 'follow': l:predicat.start })
 
-    let l:columnParenthesisOpen  = s:ParenthesisOpen (l:predicat, { 'follow': l:tableName             })
-    let l:columnName             = s:ColumnName      (l:predicat, { 'follow': l:columnParenthesisOpen })
-    let l:columnParenthesisClose = s:ParenthesisClose(l:predicat, { 'follow': l:columnName            })
+    let l:columnName    = s:ColumnName  (l:predicat.root                          , {                       })
+    let l:columnBracket = s:BracketRound(l:predicat.root.'Column', l:columnName   , { 'follow': l:tableName })
 
-    let l:as = vim_highlight#core#syntax#keyword(l:predicat.'As', 'sqlHiKeywordSecond', [ 'AS' ], { 'follow': [ l:tableName, l:columnParenthesisClose ] })
+    let l:as = vim_highlight#core#syntax#keyword(l:predicat.root.'As', 'sqlHiKeywordSecond', [ 'AS' ], { 'follow': [ l:tableName, l:columnBracket ] })
+
+    let l:selectBracket = s:BracketRound(l:predicat.root.'Select', s:predicats.selectStmt, { 'follow': l:as })
+    call vim_highlight#core#syntax#follow(l:predicat.end, { 'follow': l:selectBracket })
     
-    "let l:columnParenthesisOpen  = s:ParenthesisOpen (l:predicat, { 'follow': l:tableName             })
-    "let l:columnName             = s:ColumnName      (l:predicat, { 'follow': l:columnParenthesisOpen })
-    "let l:columnParenthesisClose = s:ParenthesisClose(l:predicat, { 'follow': l:columnName            })
+    " TODO à supprimer quand SelectStmt aura une fin 'normale'
+    call vim_highlight#core#syntax#follow(l:selectBracket, { 'follow': l:predicat.root.'SelectBracketRoundOpen' })
+
+    return l:predicat
 endfunction
     " }}}
     " select-stmt: {{{
 function! s:SelectStmt (prefix, follow)
-    let l:predicat = a:prefix.'SelectStmt'
+    let l:predicat = vim_highlight#core#syntax#predicat(a:prefix.'SelectStmt', a:follow)
+    let s:predicats.selectStmt = l:predicat
 
-    let l:with      = vim_highlight#core#syntax#keyword(l:predicat.'With'     , 'sqlHiKeywordMain'  , [ 'WITH'      ], { 'follow': l:predicat, 'contained': 0 })
-    let l:recursive = vim_highlight#core#syntax#keyword(l:predicat.'Recursive', 'sqlHiKeywordSecond', [ 'RECURSIVE' ], { 'follow': l:with                     })
-    call s:CommonTableExpression(l:predicat, [ l:with, l:recursive ])
+    let l:with      = vim_highlight#core#syntax#keyword(l:predicat.root.'With'     , 'sqlHiKeywordMain'  , [ 'WITH'      ], { 'follow': l:predicat.start, 'contained': 0 })
+    let l:recursive = vim_highlight#core#syntax#keyword(l:predicat.root.'Recursive', 'sqlHiKeywordSecond', [ 'RECURSIVE' ], { 'follow': l:with                           })
 
-    call vim_highlight#core#syntax#follow('@'.l:predicat, { 'follow': a:follow })
+    let l:commonTableExpression = s:CommonTableExpression(l:predicat.root, [ l:with, l:recursive ])
+    call vim_highlight#core#syntax#follow(l:predicat.end, { 'follow': l:commonTableExpression.end })
+
+    return l:predicat
 endfunction
     " }}}
 " }}}
 
-call s:SelectStmt(s:predicat, '')
+call s:SelectStmt(s:predicats.root, [])
 
 " HIGHLIGHT: {{{
 highlight default link sqlHiComment         Comment

@@ -30,6 +30,21 @@ function! vim_highlight#core#options#boolToString (options, name)
     return l:str
 endfunction
 " }}}
+" stringToString : concert string option in string {{{
+function! vim_highlight#core#options#stringToString (options, name)
+    let l:str = ''
+
+    if has_key(a:options, a:name)
+        if type(get(a:options, a:name)) == type('')
+            if len(get(a:options, a:name)) > 1
+                let l:str = l:str.' '.a:name.'='.get(a:options, a:name)
+            endif
+        endif
+    endif
+
+    return l:str
+endfunction
+" }}}
 " listToString : convert list option in string {{{
 function! vim_highlight#core#options#listToString (options, name)
     let l:str = ''
@@ -113,6 +128,8 @@ function! vim_highlight#core#options#getForRegion (options)
     let l:str = l:str.vim_highlight#core#options#listToString(l:options, 'matchgroup')
     let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'keepend'   )
     let l:str = l:str.vim_highlight#core#options#boolToString(l:options, 'excludenl' )
+
+    let l:str = l:str.vim_highlight#core#options#stringToString(l:options, 'skip')
 
     return l:str
 endfunction

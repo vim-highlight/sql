@@ -1,5 +1,11 @@
-WITH table1 AS
-WITH RECURSIVE _table2 ( column1 ) AS
+
+
+
+
+
+
+
+WITH RECURSIVE table ( column ) AS (WITH table AS () )
 
 SELECT *
 FROM log_sor
